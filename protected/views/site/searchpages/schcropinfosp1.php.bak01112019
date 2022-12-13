@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Search CropInfo</title>
+<script>
+	$(document).ready(function() {
+		$('#scropinfo2 tfoot th').each( function () {
+			var title = $(this).text();
+			$(this).html( '<input type="text" placeholder="'+title+'" style="width:100%; padding-left:3px;" />' );
+		} );
+	 
+		// DataTable
+		var table = $('#scropinfo2').DataTable({
+			"scrollX": true,
+			"searching": false,
+			"paging":   false,
+        	"ordering": false,
+        	"info":     false	
+		});
+	});
+</script>
+</head>
+
+<body>
+<table id="scropinfo2" class="display row-border responsive nowrap" style="width:100%; height:auto; color:#003;">
+	<thead>
+        <tr>
+            <th>ชื่อนิติบุคคล</th>
+            <th>เลขนิติบุคคล 13 หลัก</th>
+            <th>เลขประกันสังคม 10 หลัก</th>
+            <th>วันที่จดทะเบียน</th>
+            <th>สถานะ</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php
+	  
+	  	$now = date_create('now')->format('Y-m-d H:i:s');
+		$tomorrow = date_create('+1 day')->format('Y-m-d H:i:s');
+		$datedbd2 = date_create('2019-02-04T23:59:59+07:00')->format('Y-m-d H:i:s');
+		$daten1 = date('Y-m-d H:i:s');
+	  
+	  	$rowno = 1;
+		$model = CropinfoTmpTb::model()->findAllByAttributes(array('registernumber'=>$regisnum));
+		foreach ($model as $rows){
+			$crop_id = $rows->crop_id;
+			$registername = $rows->registername;
+			$registernumber = $rows->registernumber;
+			$acc_no = $rows->acc_no;
+			$acc_bran = $rows->acc_bran;
+			$registerdate = $rows->registerdate;
+			$crop_remark = $rows->crop_remark;
+			$crop_status = $rows->crop_status;
+			
+			$registerdatef = date_create($registerdate)->format('d-m-Y');
+	  	
+	  ?>
+    	<tr>
+        	<td><?=$registername?></td>
+            <td style="text-align:left;"><?=$registernumber?></td>
+            <td style="text-align:left;"><?=$acc_no?></td>
+            <td style="text-align:left;"><?=$registerdatef?></td>
+            <td style="color:#FF0; text-align:left;"><span class="badge thfont3" style="color:<?php  if($crop_remark!='P'){ ?> #FF0 <?php }else{ ?> #FF0 <?php } ?>;"><?=$crop_remark?></span></td>
+        </tr>
+     <?php
+      	    $rowno += 1;
+		}//foreach ($model as $rows){
+	  ?>     
+    </tbody>  
+</table>
+</body>
+</html>

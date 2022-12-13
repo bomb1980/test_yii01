@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="shortcut icon" href="<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/ssol2.png">
+<title>Sub Report 33</title>
+<script>
+
+</script>
+<style>
+@import url("<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/webfonts/thcharmau/stylesheet.css");
+@import url("<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/webfonts/vivak/stylesheet.css");
+@import url("<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/webfonts/thsarabun/stylesheet.css");
+
+.thfont1{
+	font-family: thcharmau;
+	font-size: 21px;
+}		
+	
+.thfont2{
+	font-family: vivak;
+	font-size: 21px;
+}	
+	
+.thfont3{
+	font-family: THSarabun;
+	font-size: 21px;
+}
+
+.thfont3min{
+	font-family: THSarabun;
+	font-size: 16px;
+}
+
+.thfont4{
+	font-family: THSarabun;
+	font-size: 26px;
+	color:#666;
+}
+
+.thfont5{
+	font-family: THSarabun;
+	font-size: 24px;
+	line-height:normal; 
+	/*font-weight:bold;*/
+}
+
+.thfont6{
+	font-family: THSarabun;
+	font-size: 18px;
+	line-height:normal; 
+	/*font-weight:bold;*/
+}
+</style>
+<style>
+
+body {
+  background: rgb(204,204,204); 
+}
+
+
+page[size="A4"] {  
+  background: white;
+  width: 21cm;
+  height: 29.7cm;
+  display: block;
+  border-radius: 5px;
+  margin: 0 auto;
+  margin-top: 0.5cm;
+  margin-bottom: 0.5cm;
+  padding-left: 0.5cm;
+  padding-top: 0.5cm;
+  box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+}
+
+page[size="A4"][layout="landscape"] {
+  background: white;	
+  width: 29.7cm;
+  height: 21cm;
+  display: block;
+  border-radius: 5px;
+  margin: 0 auto;
+  margin-top: 0.5cm;
+  margin-bottom: 0.5cm;
+  padding-left: 0.5cm;
+  padding-top: 0.5cm;
+  box-shadow: 0 0 0.5cm rgba(0,0,0,0.5);
+}
+
+page[size="A2"] {
+  background: white;
+  width: 21cm;
+  height: 16cm;
+  display: block;
+  border-radius: 5px;
+  margin: 0 auto;
+  margin-top: 0.5cm;
+  margin-bottom: 0.5cm;
+  padding-left: 0.5cm;
+  padding-top: 0.5cm;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+@media all
+{
+    .page-break { display:none; }
+    .page-break-no{ display:none; }
+}
+
+@media print {
+  body, page[size="A4"] {
+    margin-bottom: 0;
+	margin-top: 0;
+	margin-left: 0;
+	margin-right: 0;
+	background: white;
+	border: initial;
+  }
+  
+  .page-break { /* ขึ้นหน้าใหม่ แบบหน้า ถัดไป */ 
+	  display:block;
+	  height:1px; 
+	  page-break-before:always; 
+  }
+  .page-break-no{ /* ขึ้นหน้าใหม่ แบบหน้า หน้าแรก */
+	  display:block;
+	  height:1px; 
+	  page-break-after:avoid; 
+  } 
+  
+  @page {
+  	size: A4 portrait;
+  	margin: 0;
+  }
+  
+  #bp1, #s1, #menup1{
+    display:none;
+  }	 
+}
+</style>
+<style>
+#menup1 {
+  position: fixed;
+  right: 0;
+  top: 10%;
+  width: auto;
+  height: auto;
+  background-color:rgba(0,255,0,0.3);
+  padding-top:5px;
+  padding-bottom:5px;
+  padding-left:5px;
+  padding-right:5px;
+  border-radius:70px;
+  margin-right:25px;
+  box-shadow: 5px 5px 15px 5px rgba(50, 50, 50, .5);
+}
+</style>
+</head>
+
+<body>
+<?php
+  $now = date_create('now')->format('m/d/Y H:i:s');
+  $tomorrow = date_create('+1 day')->format('Y-m-d H:i:s');
+  $datedbd2 = date_create('2019-02-04T23:59:59+07:00')->format('Y-m-d H:i:s');
+  $daten1 = date('Y-m-d H:i:s');
+  //$startdate = $bgdatep . "T00:00:00+07:00";
+  //$enddate = $eddatep . "T23:59:59+07:00";
+  //echo "{$now},{$tomorrow}";
+?>
+
+<div class=Section1></div>
+<!--<page size="A4" layout="portrait">A4 portrait</page>-->
+<page size="A4">
+	<table id="tbp1" width="750" border="0" align="center" cellpadding="0" cellspacing="0" >
+    	<tr>
+    		<td align="right" style="text-align:right;" class="thfont3min">วันที่ออกรายงาน <?php echo " {$now} "; ?></td>
+ 		</tr>
+        <tr>
+        	<td align="center" class="headTitle thfont3">
+            	<img src="<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/ssol2.png" width="50" height="45"><br />
+                สำนักงานประกันสังคม <br />
+                รายงานนิติบุคคล ที่เคยถูกศาลมีคำสั่งพิทักษ์ทรัพย์ <br />
+            </td>
+        </tr>
+        <tr>
+        	<td align="center" class="thfont3">
+            	<div>
+                	<div></div><div></div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</page>
+
+<div id="menup1">
+    <a href="javascript:;" onClick="print();" title="Print Preview">
+        <img src="<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/print-icon.png" width="59" height="59">
+    </a>
+</div>
+    
+</body>
+</html>

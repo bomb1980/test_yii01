@@ -1,0 +1,21 @@
+{
+    "name": "dwthai/dw-upload",
+    "type": "library",
+    "description": "The simple file uploads for Dreamweaver user.",
+    "keywords": ["upload", "dwupload","upload file"],
+    "homepage": "https://www.dwthai.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "DwThai.Com",
+            "email": "dwthai@gmail.com",
+            "homepage": "https://www.dwthai.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.1.0"
+    },
+    "autoload": {
+        "psr-4": { "DwThai\\": "src/" }
+    }
+}

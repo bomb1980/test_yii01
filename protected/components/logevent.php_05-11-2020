@@ -1,0 +1,139 @@
+<?php
+class logevent extends CApplicationComponent{
+	
+	
+ 	
+ 
+ 	public function createlogevent($laction, $lpage, $lcause, $ldata, $lremark){
+		
+		//$this->log_id;
+		$LogeventTb = new LogeventTb();
+		
+		if(isset(Yii::app()->user->username)){
+			$username = Yii::app()->user->username;
+		}else{
+			$username = "sys";
+		}
+		
+		if(isset(Yii::app()->user->address)){
+ 			$brachcode = Yii::app()->user->address;
+		}else{
+			$brachcode = "-";
+		}
+		
+		$LogeventTb->log_user = $username;
+		$LogeventTb->log_action = $laction;
+		$LogeventTb->log_page = $lpage;
+		$LogeventTb->log_cause = $lcause;
+		$LogeventTb->log_date = date('Y-m-d H:i:s');
+		$LogeventTb->log_data = $ldata;
+		$LogeventTb->log_ip = $brachcode;
+		$LogeventTb->log_remark = $lremark;
+		$LogeventTb->log_status = 1;
+		
+		if($LogeventTb->save()){
+			$msg = "add data is success";
+		}else{
+			$msg = $LogeventTb->getErrors();
+		}
+		
+		return $msg;
+	}
+	
+	
+	public function createlogeventauto($laction, $lpage, $lcause, $ldata, $lremark){
+		
+		//$this->log_id;
+		$LogeventTb = new LogeventTb();
+		
+		
+			$username = "sys";
+			$brachcode = "-";
+		
+		$LogeventTb->log_user = $username;
+		$LogeventTb->log_action = $laction;
+		$LogeventTb->log_page = $lpage;
+		$LogeventTb->log_cause = $lcause;
+		$LogeventTb->log_date = date('Y-m-d H:i:s');
+		$LogeventTb->log_data = $ldata;
+		$LogeventTb->log_ip = $brachcode;
+		$LogeventTb->log_remark = $lremark;
+		$LogeventTb->log_status = 1;
+		
+		if($LogeventTb->save()){
+			$msg = "add data is success";
+		}else{
+			$msg = $LogeventTb->getErrors();
+		}
+		
+		return $msg;
+	}
+	
+	public function sendmail($ema, $accno, $brnno, $cropname){
+		
+		$txtsubject = "แจ้งผลการขี้นทะเบียนนายจ้างประกันสังคม";
+		$txtbody = "สำนักงานประกันสังคม ได้กำหนดเลขที่บัญชีนายจ้างให้ท่านคือ {$accno} สถานประกอบการชื่อ  {$cropname} เมื่อท่านมีการจ้างลูกจ้าง ให้ท่านใช้เลขที่บัญชีนายจ้างตามที่แจ้ง ติดต่อขึ้นทะเบียนลูกจ้าง/ผู้ประกันตน ภายใน 30 วันนับจากวันที่เริ่มจ้างงาน ได้ที่ สปส. ณ ที่ตั้ง สำนักงานใหญ่ของท่าน สอบถามรายละเอียดได้ที่สายด่วน 1506";
+		$txtsendform = "สำนักงานประกันสังคม";
+		
+		$mailer = new PHPMailer();
+		$mailer->IsSMTP(); // $mailer->Mailer = "mail"; ////$mailer->IsSMTP();
+		$mailer->Host = 'smtp.sso.go.th'; //'smtp.gmail.com'; //'smtp.sso.go.th'
+		$mailer->Port = 25; //587; //25
+		$mailer->SMTPAuth = FALSE;
+		$mailer->From = 'no-reply@sso.go.th'; //'day.jakkrit@gmail.com'; //'no-reply@sso.go.th';
+		$mailer->FromName = iconv('utf-8','tis-620',$txtsendform); 
+		$mailer->Body = iconv('utf-8','tis-620',$txtbody);
+		$mailer->Subject = iconv('utf-8','tis-620',$txtsubject); 
+		$mailer->AddAddress($ema); //$ema
+		/*
+		$mailer->AddAddress($contact_email);
+		$mailer->AddAddress = $contact_email;
+		$mailer->AddAddress $_POST['email']; (taken from the html form)
+		*/
+		/*
+		$mailer->WordWrap = 50; // set word wrap to 50 characters
+		$mailer->IsHTML(true); // set email format to HTML
+		$mailer->Subject = $_POST['subject'];
+		$message = "Hi[name]".$_POST['fullname']." \r\n <br>Email Adrress :".$_POST['email']." \r\n <br> \r \n".$_POST['query'];
+		$mailer->Body = $message;
+		*/
+		
+		if(!$mailer->Send())
+		{
+			//echo "Message was not sent<br/ >";
+			//echo "Mailer Error: " . $mailer->ErrorInfo;
+			return false;
+		}
+		else
+		{
+			//****** insert data ****************************************
+			  $Sendemailcorp = new Sendemailcorp();
+			  
+			  
+			  $Sendemailcorp->crop_name = $accno;
+			  $Sendemailcorp->crop_email = $ema;
+			  $Sendemailcorp->access_code = $brnno;
+			  $Sendemailcorp->status = 2;
+			  $Sendemailcorp->created = date('Y-m-d H:i:s');
+			  $Sendemailcorp->modified = date('Y-m-d H:i:s');
+			  
+			  if($Sendemailcorp->save()){
+				  //echo CJSON::encode(array('status' => 'success'));
+				  //echo preg_replace("/\xEF\xBB\xBF/", "","yes <br>");
+				  //echo "Message has been sent";
+				  
+				  
+				  return true;
+			  }else{
+				  //echo CJSON::encode(array('status' => 'error'));
+				  //echo CJSON::encode($Users->getErrors());
+				  //echo preg_replace("/\xEF\xBB\xBF/", "","no <br>");
+				  return false;
+			  }
+		   //*********************************************************
+		}//if
+		
+	}//function
+	
+}//class
+?>

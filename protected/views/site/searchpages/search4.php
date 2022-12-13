@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Search By Infomation</title>
+<script>
+$(document).ready(function() {
+	
+	$('.panel').lobiPanel({
+       		reload: false,
+    		close: false,
+			editTitle: false,
+			sortable: true
+			//minimize: false
+	});
+	
+	$('#reled1').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+		
+	$("#reled1").load("<?php echo Yii::app()->createAbsoluteUrl('site/callsearchledall'); ?>");
+		
+		//$("#m3").addClass( "active" );
+		//$("#geninfo1").hide("fast");
+		//opensearch(1);
+	
+	
+});
+
+	function showtxt(seltxt){
+		//alert(seltxt);
+		if(seltxt=='1'){
+			$("#txt1").val("");
+			$("#dtxt1").show();
+			$("#dtxt2").hide();
+			$("#dtxt3").hide();
+			$("#txt1").focus();
+			$("#txt1").select();
+		}
+		if(seltxt=='2'){
+			$("#txt2").val("");
+			$("#dtxt1").hide();
+			$("#dtxt2").show();
+			$("#dtxt3").hide();
+			$("#txt2").focus();
+			$("#txt2").select();
+		}
+		if(seltxt=='3'){
+			$("#txt3").val("");
+			$("#dtxt1").hide();
+			$("#dtxt2").hide();
+			$("#dtxt3").show();
+			$("#txt3").focus();
+			$("#txt3").select();
+		}
+	}
+	
+	function callschcropbyinfo1(){
+		seltxt = $("#sel1").val();
+		//alert(seltxt);
+		var schtxt = ""; // 
+	    var str = ""; //new String(cnumb);
+		if(seltxt=='1'){
+			schtxt = $("#txt1").val();
+			if(schtxt){
+				str =  new String(schtxt);
+				ajaxcallschbyinfo1(seltxt,schtxt);
+			}else{
+				BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลชื่อนิติบุคคล ที่ต้องการค้นหา !</font>');   
+				$("#txt1").focus();
+				$("#txt1").select();
+			}
+		}
+		if(seltxt=='2'){
+			schtxt = $("#txt2").val(); 
+			if(schtxt){
+				str =  new String(schtxt);
+				if(str.length < 13){
+					BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขนิติบุคคล 13 หลัก ที่ต้องการค้นหา ให้ครบถ้วน !</font>'); 
+					$("#txt2").focus();
+					$("#txt2").select();
+				}else{
+					ajaxcallschbyinfo1(seltxt,schtxt);
+				}
+			}else{
+				BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขนิติบุคคล 13 หลัก ที่ต้องการค้นหา !</font>');   
+				$("#txt2").focus();
+				$("#txt2").select();
+			}
+		}
+		if(seltxt=='3'){
+			schtxt = $("#txt3").val();
+			if(schtxt){
+				str =  new String(schtxt);
+				if(str.length < 10){
+					BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขประกันสังคม 10 หลัก ที่ต้องการค้นหา ให้ครบถ้วน !</font>');  
+					$("#txt3").focus();
+					$("#txt3").select();
+				}else{
+					ajaxcallschbyinfo1(seltxt,schtxt);
+				}
+			}else{
+				BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขประกันสังคม 10 หลัก ที่ต้องการค้นหา !</font>');   
+				$("#txt3").focus();
+				$("#txt3").select();
+			} 
+		}
+	}
+	
+	function ajaxcallschbyinfo1(seltxt,schtxt){
+		var data1 = 'action=sch&schtxt=' + schtxt + "&seltxt=" + seltxt;
+		//alert(data1);
+		$('#re1').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+		$.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschinfodbd'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   $("#rowresult1").show();	
+			   $("#rowresult2").hide();
+			   $("#re1").html(da);
+			   
+			}
+		});
+	}
+	
+	function backtotable(){
+		$("#rowresult1").show();
+		$("#rowresult2").hide();
+		callschcropbyinfo1();		
+	}
+</script>
+</head>
+
+<body>
+	<div class="about_title thfont5" style="font-size:30px;">ตรวจสอบสถานะถูกฟ้องล้มละลายจาก กรมบังคับคดี</div>
+    
+    
+    <div class="row">
+        <div class="col-md-12">
+        
+            <div class="row" id="rowresult1">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <i class="fa fa-address-book"></i><font class="thfont5" style="font-size:24px;"> สถานประกอบการกลุ่มเสี่ยง</font>
+                        </div><!--panel heading-->
+                        <div class="panel-body">
+                        	<div class="row">
+                            	<div class="col-xs-12 col-xm-12 col-md-12 col-lg-12">
+                                  <div class="alert alert-danger thfont5" role="alert">
+                                      <div style="text-align:right; font-size:16px;">ข้อมูล <b>สถานะ</b> <span class="badge badge-pill badge-info ">1</span> =>ปกติ , <span class="badge badge-pill badge-info">2</span> =>ถูกฟ้องฯ</div>
+                                  </div>
+                                </div>
+                            </div>
+                            <!--<div class="row">
+                            	<div class="col-xs-12 col-xm-12 col-md-12 col-lg-12">
+                                	<hr>
+                                </div>
+                            </div>-->
+                        	<div class="row">
+                             	<div class="col-xs-12 col-xm-12 col-md-12 col-lg-12">
+                            		<div id="reled1" class="thfont5"></div>
+                                </div>
+                            </div>
+                        </div><!--panelbody-->
+                    </div><!--panel-->
+                </div><!--col-md-12-->
+            </div><!--rowresult1-->
+            
+        </div><!--col-md-12-->
+    </div><!--row-->
+</body>
+</html>

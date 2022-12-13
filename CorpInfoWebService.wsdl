@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?><definitions name="CorpInfoWebService" targetNamespace="http://www.dbd.org/cis/webservice" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://www.dbd.org/cis/webservice" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <types>
+    <xsd:schema>
+<xsd:import namespace="http://www.dbd.org/cis/webservice" schemaLocation="CorpInfoWebService.wsd"/>
+</xsd:schema>
+  </types>
+  <message name="GetCorpInfoService">
+    <part element="tns:GetCorpInfoService" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpInfoServiceResponse">
+    <part element="tns:GetCorpInfoServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="Fault">
+    <part element="tns:Fault" name="fault">
+    </part>
+  </message>
+  <message name="GetCorpInfoByRegisterNumberService">
+    <part element="tns:GetCorpInfoByRegisterNumberService" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpInfoByRegisterNumberServiceResponse">
+    <part element="tns:GetCorpInfoByRegisterNumberServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpInfoRecordService">
+    <part element="tns:GetCorpInfoRecordService" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpInfoRecordServiceResponse">
+    <part element="tns:GetCorpInfoRecordServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpMapInfoService">
+    <part element="tns:GetCorpMapInfoService" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpMapInfoServiceResponse">
+    <part element="tns:GetCorpMapInfoServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpMapPageService">
+    <part element="tns:GetCorpMapPageService" name="parameters">
+    </part>
+  </message>
+  <message name="GetCorpMapPageServiceResponse">
+    <part element="tns:GetCorpMapPageServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="GetTradeAssociationInfoService">
+    <part element="tns:GetTradeAssociationInfoService" name="parameters">
+    </part>
+  </message>
+  <message name="GetTradeAssociationInfoServiceResponse">
+    <part element="tns:GetTradeAssociationInfoServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="GetTradeAssociationInfoRecordService">
+    <part element="tns:GetTradeAssociationInfoRecordService" name="parameters">
+    </part>
+  </message>
+  <message name="GetTradeAssociationInfoRecordServiceResponse">
+    <part element="tns:GetTradeAssociationInfoRecordServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="GetMigrantWorkerInfoService">
+    <part element="tns:GetMigrantWorkerInfoService" name="parameters">
+    </part>
+  </message>
+  <message name="GetMigrantWorkerInfoServiceResponse">
+    <part element="tns:GetMigrantWorkerInfoServiceResponse" name="parameters">
+    </part>
+  </message>
+  <message name="GetMigrantWorkerRecordInfoService">
+    <part element="tns:GetMigrantWorkerRecordInfoService" name="parameters">
+    </part>
+  </message>
+  <message name="GetMigrantWorkerRecordInfoServiceResponse">
+    <part element="tns:GetMigrantWorkerRecordInfoServiceResponse" name="parameters">
+    </part>
+  </message>
+  <portType name="CorpInfoWebService">
+    <operation name="GetCorpInfoService">
+      <input message="tns:GetCorpInfoService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoServiceRequest">
+    </input>
+      <output message="tns:GetCorpInfoServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetCorpInfoByRegisterNumberService">
+      <input message="tns:GetCorpInfoByRegisterNumberService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoByRegisterNumberServiceRequest">
+    </input>
+      <output message="tns:GetCorpInfoByRegisterNumberServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoByRegisterNumberServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoByRegisterNumberService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetCorpInfoRecordService">
+      <input message="tns:GetCorpInfoRecordService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoRecordServiceRequest">
+    </input>
+      <output message="tns:GetCorpInfoRecordServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoRecordServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpInfoRecordService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetCorpMapInfoService">
+      <input message="tns:GetCorpMapInfoService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpMapInfoServiceRequest">
+    </input>
+      <output message="tns:GetCorpMapInfoServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpMapInfoServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpMapInfoService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetCorpMapPageService">
+      <input message="tns:GetCorpMapPageService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpMapPageServiceRequest">
+    </input>
+      <output message="tns:GetCorpMapPageServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpMapPageServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetCorpMapPageService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetTradeAssociationInfoService">
+      <input message="tns:GetTradeAssociationInfoService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetTradeAssociationInfoServiceRequest">
+    </input>
+      <output message="tns:GetTradeAssociationInfoServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetTradeAssociationInfoServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetTradeAssociationInfoService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetTradeAssociationInfoRecordService">
+      <input message="tns:GetTradeAssociationInfoRecordService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetTradeAssociationInfoRecordServiceRequest">
+    </input>
+      <output message="tns:GetTradeAssociationInfoRecordServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetTradeAssociationInfoRecordServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetTradeAssociationInfoRecordService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetMigrantWorkerInfoService">
+      <input message="tns:GetMigrantWorkerInfoService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetMigrantWorkerInfoServiceRequest">
+    </input>
+      <output message="tns:GetMigrantWorkerInfoServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetMigrantWorkerInfoServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetMigrantWorkerInfoService/Fault/Fault">
+    </fault>
+    </operation>
+    <operation name="GetMigrantWorkerRecordInfoService">
+      <input message="tns:GetMigrantWorkerRecordInfoService" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetMigrantWorkerRecordInfoServiceRequest">
+    </input>
+      <output message="tns:GetMigrantWorkerRecordInfoServiceResponse" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetMigrantWorkerRecordInfoServiceResponse">
+    </output>
+      <fault message="tns:Fault" name="Fault" wsam:Action="//www.dbd.org/cis/webservice/CorpInfoWebService/GetMigrantWorkerRecordInfoService/Fault/Fault">
+    </fault>
+    </operation>
+  </portType>
+  <binding name="CorpInfoWebServicePortBinding" type="tns:CorpInfoWebService">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="GetCorpInfoService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetCorpInfoByRegisterNumberService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetCorpInfoRecordService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetCorpMapInfoService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetCorpMapPageService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetTradeAssociationInfoService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetTradeAssociationInfoRecordService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetMigrantWorkerInfoService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+    <operation name="GetMigrantWorkerRecordInfoService">
+      <soap:operation soapAction=""/>
+      <input>
+        <soap:body use="literal"/>
+      </input>
+      <output>
+        <soap:body use="literal"/>
+      </output>
+      <fault name="Fault">
+        <soap:fault name="Fault" use="literal"/>
+      </fault>
+    </operation>
+  </binding>
+  <service name="CorpInfoWebService">
+    <port binding="tns:CorpInfoWebServicePortBinding" name="CorpInfoWebServicePort">
+      <soap:address location="https://172.16.11.232:443/corpinfo-webservice-v2/CorpInfoWebService"/>
+    </port>
+  </service>
+</definitions>

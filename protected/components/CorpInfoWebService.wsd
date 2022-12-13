@@ -1,0 +1,395 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI at http://jax-ws.dev.java.net. RI's version is Metro/2.1 (branches/2.1-6728; 2011-02-03T14:14:58+0000) JAXWS-RI/2.2.3 JAXWS/2.2. --><xs:schema xmlns:tns="http://www.dbd.org/cis/webservice" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://www.dbd.org/cis/webservice">
+
+<xs:element name="Fault" type="tns:Fault" />
+
+<xs:element name="GetCorpInfoByRegisterNumberService" type="tns:GetCorpInfoByRegisterNumberService" />
+
+<xs:element name="GetCorpInfoByRegisterNumberServiceResponse" type="tns:GetCorpInfoByRegisterNumberServiceResponse" />
+
+<xs:element name="GetCorpInfoRecordService" type="tns:GetCorpInfoRecordService" />
+
+<xs:element name="GetCorpInfoRecordServiceResponse" type="tns:GetCorpInfoRecordServiceResponse" />
+
+<xs:element name="GetCorpInfoService" type="tns:GetCorpInfoService" />
+
+<xs:element name="GetCorpInfoServiceResponse" type="tns:GetCorpInfoServiceResponse" />
+
+<xs:element name="GetCorpMapInfoService" type="tns:GetCorpMapInfoService" />
+
+<xs:element name="GetCorpMapInfoServiceResponse" type="tns:GetCorpMapInfoServiceResponse" />
+
+<xs:element name="GetCorpMapPageService" type="tns:GetCorpMapPageService" />
+
+<xs:element name="GetCorpMapPageServiceResponse" type="tns:GetCorpMapPageServiceResponse" />
+
+<xs:element name="GetMigrantWorkerInfoService" type="tns:GetMigrantWorkerInfoService" />
+
+<xs:element name="GetMigrantWorkerInfoServiceResponse" type="tns:GetMigrantWorkerInfoServiceResponse" />
+
+<xs:element name="GetMigrantWorkerRecordInfoService" type="tns:GetMigrantWorkerRecordInfoService" />
+
+<xs:element name="GetMigrantWorkerRecordInfoServiceResponse" type="tns:GetMigrantWorkerRecordInfoServiceResponse" />
+
+<xs:element name="GetTradeAssociationInfoRecordService" type="tns:GetTradeAssociationInfoRecordService" />
+
+<xs:element name="GetTradeAssociationInfoRecordServiceResponse" type="tns:GetTradeAssociationInfoRecordServiceResponse" />
+
+<xs:element name="GetTradeAssociationInfoService" type="tns:GetTradeAssociationInfoService" />
+
+<xs:element name="GetTradeAssociationInfoServiceResponse" type="tns:GetTradeAssociationInfoServiceResponse" />
+
+<xs:element name="address" type="tns:address" />
+
+<xs:element name="committee" type="tns:committee" />
+
+<xs:element name="corpInfo" type="tns:corpInfo" />
+
+<xs:element name="corpInfoLink" type="tns:corpInfoLink" />
+
+<xs:element name="corpInfoResult" type="tns:corpInfoResult" />
+
+<xs:element name="dateRange" type="tns:dateRange" />
+
+<xs:element name="imageInfo" type="tns:imageInfo" />
+
+<xs:element name="mwInfo" type="tns:mwInfo" />
+
+<xs:element name="mwInfoResult" type="tns:mwInfoResult" />
+
+<xs:element name="taInfo" type="tns:taInfo" />
+
+<xs:element name="taInfoResult" type="tns:taInfoResult" />
+
+<xs:complexType name="GetCorpInfoRecordService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="corpInfoFilter" type="tns:corpInfoFilter" minOccurs="0" />
+<xs:element name="registerDateRange" type="tns:dateRange" minOccurs="0" />
+<xs:element name="updatedDateRange" type="tns:dateRange" minOccurs="0" />
+<xs:element name="newEntry" type="xs:boolean" />
+<xs:element name="updatedEntry" type="xs:boolean" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="corpInfoFilter">
+<xs:sequence>
+<xs:element name="corpType" type="xs:string" minOccurs="0" />
+<xs:element name="province" type="xs:string" minOccurs="0" />
+<xs:element name="tsic" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="dateRange">
+<xs:sequence>
+<xs:element name="startDate" type="xs:dateTime" minOccurs="0" />
+<xs:element name="endDate" type="xs:dateTime" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpInfoRecordServiceResponse">
+<xs:sequence>
+<xs:element name="CorpInfoCount" type="xs:long" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Fault">
+<xs:sequence>
+<xs:element name="code" type="xs:int" />
+<xs:element name="message" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetMigrantWorkerRecordInfoService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="provinceFilter" type="xs:string" minOccurs="0" />
+<xs:element name="registerDateRange" type="tns:dateRange" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetMigrantWorkerRecordInfoServiceResponse">
+<xs:sequence>
+<xs:element name="MWInfoCount" type="xs:int" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpInfoService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="corpInfoFilter" type="tns:corpInfoFilter" minOccurs="0" />
+<xs:element name="registerDateRange" type="tns:dateRange" minOccurs="0" />
+<xs:element name="changeDateRange" type="tns:dateRange" minOccurs="0" />
+<xs:element name="newEntry" type="xs:boolean" />
+<xs:element name="changedEntry" type="xs:boolean" />
+<xs:element name="recordOffset" type="xs:int" minOccurs="0" />
+<xs:element name="recordLimit" type="xs:int" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpInfoServiceResponse">
+<xs:sequence>
+<xs:element name="CorpInfoList" type="tns:corpInfoResult" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="corpInfoResult">
+<xs:sequence>
+<xs:element name="corpInfo" type="tns:corpInfo" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+<xs:attribute name="count" type="xs:long" use="required" />
+</xs:complexType>
+
+<xs:complexType name="corpInfo">
+<xs:sequence>
+<xs:element name="tsic" type="xs:string" />
+<xs:element name="tsicName" type="xs:string" />
+<xs:element name="corpType" type="xs:string" />
+<xs:element name="corpTypeName" type="xs:string" />
+<xs:element name="registerNumber" type="xs:string" />
+<xs:element name="registerName" type="xs:string" />
+<xs:element name="registerDate" type="xs:dateTime" />
+<xs:element name="updatedDate" type="xs:dateTime" />
+<xs:element name="updatedEntry" type="xs:boolean" />
+<xs:element name="authorizedCapital" type="xs:decimal" minOccurs="0" />
+<xs:element name="committees" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="committee" type="tns:committee" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="branches" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="branch" type="tns:address" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="rdNumber" type="xs:string" minOccurs="0" />
+<xs:element name="ssoNumber" type="xs:string" minOccurs="0" />
+<xs:element name="accountingDate" type="xs:string" minOccurs="0" />
+<xs:element name="employeeNumber" type="xs:int" minOccurs="0" />
+<xs:element name="mapPageAmount" type="xs:int" minOccurs="0" />
+<xs:element name="statusCode" type="xs:string" minOccurs="0" />
+<xs:element name="transform" type="tns:corpInfoLink" minOccurs="0" />
+<xs:element name="combine" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="corpInfo" type="tns:corpInfoLink" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+<xs:element name="cpower" minOccurs="0">
+<xs:simpleType>
+<xs:list itemType="xs:string" />
+</xs:simpleType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="committee">
+<xs:sequence>
+<xs:element name="committeeType" type="xs:string" minOccurs="0" />
+<xs:element name="orderNumber" type="xs:int" />
+<xs:element name="identityType" type="xs:int" />
+<xs:element name="identity" type="xs:string" minOccurs="0" />
+<xs:element name="title" type="xs:string" minOccurs="0" />
+<xs:element name="firstName" type="xs:string" minOccurs="0" />
+<xs:element name="lastName" type="xs:string" minOccurs="0" />
+<xs:element name="englishTitle" type="xs:string" minOccurs="0" />
+<xs:element name="englishFirstName" type="xs:string" minOccurs="0" />
+<xs:element name="englishLastName" type="xs:string" minOccurs="0" />
+<xs:element name="nationality" type="xs:string" minOccurs="0" />
+<xs:element name="dateOfBirth" type="xs:dateTime" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="address">
+<xs:sequence>
+<xs:element name="name" type="xs:string" minOccurs="0" />
+<xs:element name="orderNumber" type="xs:string" minOccurs="0" />
+<xs:element name="houseId" type="xs:string" minOccurs="0" />
+<xs:element name="houseNumber" type="xs:string" minOccurs="0" />
+<xs:element name="buildingName" type="xs:string" minOccurs="0" />
+<xs:element name="buildingNumber" type="xs:string" minOccurs="0" />
+<xs:element name="buildingFloor" type="xs:string" minOccurs="0" />
+<xs:element name="village" type="xs:string" minOccurs="0" />
+<xs:element name="moo" type="xs:string" minOccurs="0" />
+<xs:element name="soi" type="xs:string" minOccurs="0" />
+<xs:element name="road" type="xs:string" minOccurs="0" />
+<xs:element name="tumbon" type="xs:string" minOccurs="0" />
+<xs:element name="ampur" type="xs:string" minOccurs="0" />
+<xs:element name="province" type="xs:string" minOccurs="0" />
+<xs:element name="tumbonCode" type="xs:string" minOccurs="0" />
+<xs:element name="ampurCode" type="xs:string" minOccurs="0" />
+<xs:element name="provinceCode" type="xs:string" minOccurs="0" />
+<xs:element name="zipCode" type="xs:string" minOccurs="0" />
+<xs:element name="phoneNumber" type="xs:string" minOccurs="0" />
+<xs:element name="faxNumber" type="xs:string" minOccurs="0" />
+<xs:element name="email" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="corpInfoLink">
+<xs:sequence>
+<xs:element name="corpType" type="xs:string" minOccurs="0" />
+<xs:element name="registerNumber" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetTradeAssociationInfoService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="provinceFilter" type="xs:string" minOccurs="0" />
+<xs:element name="corpType" type="xs:string" minOccurs="0" />
+<xs:element name="registerDateRange" type="tns:dateRange" minOccurs="0" />
+<xs:element name="recordOffset" type="xs:int" minOccurs="0" />
+<xs:element name="recordLimit" type="xs:int" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetTradeAssociationInfoServiceResponse">
+<xs:sequence>
+<xs:element name="TAInfoList" type="tns:taInfoResult" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="taInfoResult">
+<xs:sequence>
+<xs:element name="taInfo" type="tns:taInfo" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+<xs:attribute name="count" type="xs:int" use="required" />
+</xs:complexType>
+
+<xs:complexType name="taInfo">
+<xs:sequence>
+<xs:element name="corpType" type="xs:string" />
+<xs:element name="registerNumber" type="xs:string" />
+<xs:element name="registerName" type="xs:string" minOccurs="0" />
+<xs:element name="registerDate" type="xs:dateTime" minOccurs="0" />
+<xs:element name="objectiveCode" type="xs:string" minOccurs="0" />
+<xs:element name="objectiveDescription" type="xs:string" minOccurs="0" />
+<xs:element name="statusCode" type="xs:string" minOccurs="0" />
+<xs:element name="accountingDate" type="xs:string" minOccurs="0" />
+<xs:element name="address" type="tns:address" minOccurs="0" />
+<xs:element name="committees" minOccurs="0">
+<xs:complexType>
+<xs:sequence>
+<xs:element name="committee" type="tns:committee" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+</xs:complexType>
+</xs:element>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetMigrantWorkerInfoService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="provinceFilter" type="xs:string" minOccurs="0" />
+<xs:element name="registerDateRange" type="tns:dateRange" minOccurs="0" />
+<xs:element name="recordOffset" type="xs:int" minOccurs="0" />
+<xs:element name="recordLimit" type="xs:int" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetMigrantWorkerInfoServiceResponse">
+<xs:sequence>
+<xs:element name="MWInfoList" type="tns:mwInfoResult" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="mwInfoResult">
+<xs:sequence>
+<xs:element name="mwInfo" type="tns:mwInfo" minOccurs="0" maxOccurs="unbounded" />
+</xs:sequence>
+<xs:attribute name="count" type="xs:int" use="required" />
+</xs:complexType>
+
+<xs:complexType name="mwInfo">
+<xs:sequence>
+<xs:element name="registerNumber" type="xs:string" />
+<xs:element name="registerName" type="xs:string" minOccurs="0" />
+<xs:element name="registerDate" type="xs:dateTime" minOccurs="0" />
+<xs:element name="updateDate" type="xs:dateTime" minOccurs="0" />
+<xs:element name="objectiveCode" type="xs:int" />
+<xs:element name="objectiveDescription" type="xs:string" minOccurs="0" />
+<xs:element name="address" type="tns:address" minOccurs="0" />
+<xs:element name="accountingDate" type="xs:string" minOccurs="0" />
+<xs:element name="countryCode" type="xs:string" minOccurs="0" />
+<xs:element name="corpType" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpInfoByRegisterNumberService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="registerNumber" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpInfoByRegisterNumberServiceResponse">
+<xs:sequence>
+<xs:element name="CorpInfo" type="tns:corpInfo" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetTradeAssociationInfoRecordService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="provinceFilter" type="xs:string" minOccurs="0" />
+<xs:element name="corpType" type="xs:string" minOccurs="0" />
+<xs:element name="registerDateRange" type="tns:dateRange" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetTradeAssociationInfoRecordServiceResponse">
+<xs:sequence>
+<xs:element name="TAInfoCount" type="xs:int" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpMapPageService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="corpType" type="xs:string" minOccurs="0" />
+<xs:element name="registerNumber" type="xs:string" minOccurs="0" />
+<xs:element name="pageNumber" type="xs:int" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpMapPageServiceResponse">
+<xs:sequence>
+<xs:element name="ImageInfo" type="tns:imageInfo" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="imageInfo">
+<xs:sequence>
+<xs:element name="format" type="xs:string" minOccurs="0" />
+<xs:element name="imageData" type="xs:base64Binary" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpMapInfoService">
+<xs:sequence>
+<xs:element name="subscribeId" type="xs:string" minOccurs="0" />
+<xs:element name="pincode" type="xs:string" minOccurs="0" />
+<xs:element name="corpType" type="xs:string" minOccurs="0" />
+<xs:element name="registerNumber" type="xs:string" minOccurs="0" />
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetCorpMapInfoServiceResponse">
+<xs:sequence>
+<xs:element name="CorpMapInfo" type="xs:int" />
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

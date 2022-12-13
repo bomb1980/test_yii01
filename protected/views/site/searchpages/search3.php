@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Search By Infomation</title>
+<script>
+$(document).ready(function() {
+	$('.panel').lobiPanel({
+       		reload: false,
+    		close: false,
+			editTitle: false,
+			sortable: true
+			//minimize: false
+	});
+	
+	$("#btnsav1").hide();
+});
+
+	function showtxt(seltxt){
+		//alert(seltxt);
+		if(seltxt=='1'){
+			$("#txt1").val("");
+			$("#dtxt1").show();
+			$("#dtxt2").hide();
+			$("#dtxt3").hide();
+			$("#txt1").focus();
+			$("#txt1").select();
+		}
+		if(seltxt=='2'){
+			$("#txt2").val("");
+			$("#dtxt1").hide();
+			$("#dtxt2").show();
+			$("#dtxt3").hide();
+			$("#txt2").focus();
+			$("#txt2").select();
+		}
+		if(seltxt=='3'){
+			$("#txt3").val("");
+			$("#dtxt1").hide();
+			$("#dtxt2").hide();
+			$("#dtxt3").show();
+			$("#txt3").focus();
+			$("#txt3").select();
+		}
+	}
+	
+	function callschcropbyinfo1(){
+		$("#rowresult1").show();
+		$("#rowresult2").hide();
+		$('#re1').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' />");
+		
+		seltxt = $("#sel1").val();
+		//alert(seltxt);
+		var schtxt = ""; // 
+	    var str = ""; //new String(cnumb);
+		if(seltxt=='1'){
+			schtxt = $("#txt1").val();
+			if(schtxt){
+				str =  new String(schtxt);
+				ajaxcallschbyinfo1(seltxt,schtxt);
+			}else{
+				BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลชื่อนิติบุคคล ที่ต้องการค้นหา !</font>');   
+				$("#txt1").focus();
+				$("#txt1").select();
+			}
+		}
+		if(seltxt=='2'){
+			schtxt = $("#txt2").val(); 
+			if(schtxt){
+				str =  new String(schtxt);
+				if(str.length < 13){
+					BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขนิติบุคคล 13 หลัก ที่ต้องการค้นหา ให้ครบถ้วน !</font>'); 
+					$("#txt2").focus();
+					$("#txt2").select();
+				}else{
+					ajaxcallschbyinfo1(seltxt,schtxt);
+				}
+			}else{
+				BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขนิติบุคคล 13 หลัก ที่ต้องการค้นหา !</font>');   
+				$("#txt2").focus();
+				$("#txt2").select();
+			}
+		}
+		if(seltxt=='3'){
+			schtxt = $("#txt3").val();
+			if(schtxt){
+				str =  new String(schtxt);
+				if(str.length < 10){
+					BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขประกันสังคม 10 หลัก ที่ต้องการค้นหา ให้ครบถ้วน !</font>');  
+					$("#txt3").focus();
+					$("#txt3").select();
+				}else{
+					ajaxcallschbyinfo1(seltxt,schtxt);
+				}
+			}else{
+				BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขประกันสังคม 10 หลัก ที่ต้องการค้นหา !</font>');   
+				$("#txt3").focus();
+				$("#txt3").select();
+			} 
+		}
+	}
+	
+	function ajaxcallschbyinfo1(seltxt,schtxt){
+		var data1 = 'action=sch&schtxt=' + schtxt + "&seltxt=" + seltxt;
+		//alert(data1);
+		$("#rowresult1").show();
+		$("#rowresult2").hide();
+		$('#re1').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+		$.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschinfodbd'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   $("#rowresult1").show();	
+			   $("#rowresult2").hide();
+			   $("#re1").html(da);
+			   
+			}
+		});
+	}
+	
+	function backtotable(){
+		$("#rowresult1").show();
+		$("#rowresult2").hide();
+		callschcropbyinfo1();		
+	}
+	
+	function callschandsavecropinfo1(){
+		var seltxt = $("#sel1").val();
+		var schtxt = "";
+	    var str = "";
+		//alert(seltxt);	
+		if(seltxt=='2'){
+			schtxt = $("#txt2").val(); 
+			if(schtxt){
+				str =  new String(schtxt);
+				if(str.length < 13){
+					BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขนิติบุคคล 13 หลัก ที่ต้องการค้นหา ให้ครบถ้วน !</font>'); 
+					$("#txt2").focus();
+					$("#txt2").select();
+				}else{
+					ajaxcallschandsavecropinfo1(seltxt,schtxt);
+				}
+			}else{
+				BootstrapDialog.alert('<font class="thfont5">กรุณาป้อนข้อมูลเลขนิติบุคคล 13 หลัก ที่ต้องการค้นหา !</font>');   
+				$("#txt2").focus();
+				$("#txt2").select();
+			}
+		}
+	}
+	
+	
+	function ajaxcallschandsavecropinfo1(seltxt,schtxt){
+		var data1 = 'action=sch&schtxt=' + schtxt + "&seltxt=" + seltxt;
+		//alert(data1);
+		$('#relsave1').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' />");
+		
+		$.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschandsavecropinfo'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   //$("#relsave1").html(da);
+			   BootstrapDialog.alert('<font class="thfont5">' + da + '</font>');
+			   $('#relsave1').html(""); 
+			}
+		});
+		
+	}
+	
+	
+</script>
+</head>
+
+<body>
+	<div class="about_title thfont5" style="font-size:30px;">ค้นหาข้อมูลสถานประกอบการจาก กรมพัฒนาธุรกิจการค้า ตามเลขทะเบียนพาณิชย์ 13 หลัก</div>
+    <div class="row"><!--row-->
+    	<div class="col-md-12"><!--rcorners-->
+        	<div class=""><!--row-->
+            
+            	<div class="col-md-3" style="display:none;">
+            		<div class="form-group">
+                    	<p class="thfont5" style="">
+                        	<label for="sel1">ค้นหาจาก:</label>
+                            <select class="form-control thfont5" id="sel1" style="height:auto;" onChange="javascript:showtxt(this.value);">
+                              <option value="1" disabled>ชื่อนิติบุคคล</option>
+                              <option value="2" selected>เลขนิติบุคคล 13 หลัก</option>
+                              <option value="3" disabled>เลขประกันสังคม 10 หลัก</option>
+                            </select>
+                        </p>
+                    </div><!--formgroup-->
+                </div><!--cal-md-3-->
+                
+                <div class="col-md-3">
+                	<div class="form-group" style="display:none;" id="dtxt1">
+                		<p class="thfont5" style="">
+                        	
+  								<label class="thfont5" for="txt1">ชื่อนิติบุคคล:</label>
+  								<input type="text" class="form-control thfont5" id="txt1" style="height:auto;" placeholder="ชื่อนิติบุคคล">
+							
+                        </p>
+                	</div><!--formgroup-->
+                    <div class="form-group" id="dtxt2">
+                		<p class="thfont5" style="">
+                        	
+  								<label class="thfont5" for="txt2">เลขนิติบุคคล 13 หลัก:</label>
+  								<input type="text" class="form-control thfont5" id="txt2" style="height:auto;" placeholder="0000000000000" maxlength="13" onFocus="this.select()">
+							
+                        </p>
+                	</div><!--formgroup-->
+                    <div class="form-group" style="display:none;" id="dtxt3">
+                		<p class="thfont5" style="">
+                        	
+  								<label  class="thfont5" for="txt3">เลขประกันสังคม 10 หลัก:</label>
+  								<input type="text" class="form-control thfont5" id="txt3" style="height:auto;" placeholder="0000000000" maxlength="10" onFocus="this.select()">
+							
+                        </p>
+                	</div><!--formgroup--> 
+                </div><!--cal-md-3-->
+                
+                <div class="col-md-6">
+                	<div class="form-group" style="" id="dbtn1">
+                    	<p class="thfont5" style="padding-top:32px;">
+                        	<label  class="thfont5" for="btn1"></label>
+                    		<button  class="btn btn-info" id="btnfdbd1" onClick="javascript:callschcropbyinfo1();"><i class="fa fa-search"></i><font class="thfont5"> ค้นหาข้อมูลนิติบุคคล</font></button>
+                           
+                            <button class="btn btn-danger" id="btnsav1" onClick="callschandsavecropinfo1();"><i class="fa fa-save"></i><font class="thfont5"> บันทึกรายการเพิ่มเติม </font></button>
+                            	
+                            <span id="relsave1"></span>
+                        </p>
+                    </div><!--formgroup-->
+                </div><!--cal-md-3-->
+                
+            </div><!--row-->
+        </div><!--rcorners-->
+    </div><!--row-->
+    
+    <div class="row">
+        <div class="col-md-12">
+        
+            <div class="row" id="rowresult1" style="display:none;">
+                <div class="col-md-12">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">
+                            <i class="fa fa-address-book"></i><font class="thfont5" style="font-size:24px;"> ข้อมูลนิติบุคคลจาก กรมพัฒนาธุรกิจการค้า (DBD)</font>
+                        </div><!--panel heading-->
+                        <div class="panel-body">
+                            <div id="re1" class="thfont5" style="font-size:24px; color:#666; width:100%; height:auto;">
+                                
+                            </div>
+                        </div><!--panelbody-->
+                    </div><!--panel-->
+                </div><!--col-md-12-->
+            </div><!--rowresult1-->
+            
+             <div class="row" id="rowresult2" style="display:none;">
+             	<div class="col-md-12">
+                	<div class="row" id="btnbacktb" style="padding-bottom:15px;">
+                    	<div class="col-md-3">
+                        	<button class="btn btn-primary" onClick="javascript:backtotable();" ><i class="fa fa-mail-reply"></i> <font class="thfont5">ย้อนกลับ</font></button>
+                        </div>
+                    </div><!--row-->
+                	<div class="row">
+                    	<div class="col-md-12">
+                        
+                        	<div class="panel panel-info"><!--panel-->
+                                <div class="panel-heading">
+                                    <i class="fa fa-address-book"></i><font class="thfont5" style="font-size:24px;"> ข้อมูลนิติบุคคล</font>
+                                </div>
+                                <div class="panel-body">
+                                    <div id="cres1" class="thfont5">ข้อมูล Cropinfo</div>
+                                </div>
+                            </div><!--panel-->
+                        	
+                        </div>
+                    </div><!--row-->
+                    <div class="row">
+                    	<div class="col-md-4">
+                        
+                        	<div class="panel panel-danger"><!--panel-->
+                                <div class="panel-heading">
+                                    <i class="fa fa-address-book"></i><font class="thfont5" style="font-size:24px;"> ข้อมูลสำนักงาน</font>
+                                </div>
+                                <div class="panel-body">
+                                    <div id="cres2" class="thfont5">ข้อมูล branch</div>
+                                </div>
+                            </div><!--panel-->
+                        	
+                        </div><!--col-md-4-->
+                        <div class="col-md-8">
+                        	<div class="row">
+                            	<div class="col-md-12">
+                                	<div class="panel panel-danger"><!--panel-->
+                                        <div class="panel-heading">
+                                            <i class="fa fa-address-book"></i><font class="thfont5" style="font-size:24px;"> ข้อมูลเจ้าของกิจการ</font>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div id="cres3" class="thfont5">ข้อมูล committee</div>
+                                        </div>
+                                    </div><!--panel-->
+                                	
+                                </div><!--col-md-12-->
+                            </div><!--row-->
+                            <div class="row">
+                            	<div class="col-md-12">
+                                	<div class="panel panel-danger"><!--panel-->
+                                        <div class="panel-heading">
+                                            <i class="fa fa-address-book"></i><font class="thfont5" style="font-size:24px;"> รายละเอียดกิจการ</font>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div id="cres4" class="thfont5">ข้อมูล DetailCorp</div>
+                                        </div>
+                                    </div><!--panel-->
+                                	
+                                </div>
+                            </div><!--row-->
+                        </div><!--col-md-8-->
+                    </div><!--row-->
+                </div><!--rowresult2-->
+             </div><!--row-->
+            
+        </div><!--col-md-12-->
+    </div><!--row-->
+</body>
+</html>

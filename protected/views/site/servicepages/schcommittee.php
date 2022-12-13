@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Search CropInfo</title>
+<style>
+.table4_1 table {
+	width:100%;
+	margin:15px 0;
+	border:0;
+}
+.table4_1 th {
+	background-color:#93DAFF;
+	color:#000000
+}
+.table4_1,.table4_1 th,.table4_1 td {
+	font-size:0.95em;
+	/*text-align:center;*/
+	padding:4px;
+	border-collapse:collapse;
+}
+.table4_1 th,.table4_1 td {
+	border: 1px solid #c1e9fe;
+	border-width:1px 0 1px 0
+}
+.table4_1 tr {
+	border: 1px solid #c1e9fe;
+}
+.table4_1 tr:nth-child(odd){
+	background-color:#dbf2fe;
+}
+.table4_1 tr:nth-child(even){
+	background-color:#fdfdfd;
+}
+
+
+@media 
+only screen and (max-width: 760px),
+(min-device-width: 768px) and (max-device-width: 1024px)  {
+
+	/* Force table to not be like tables anymore */
+	.table4_1 table, .table4_1 thead, .table4_1 tbody, .table4_1 th, .table4_1 td, .table4_1 tr { 
+		display: block; 
+	}
+	
+	/* Hide table headers (but not display: none;, for accessibility) */
+	.table4_1 thead tr { 
+		position: absolute;
+		top: -9999px;
+		left: -9999px;
+	}
+	
+	.table4_1 tr { border: 1px solid #ccc; }
+	
+	.table4_1 td { 
+		/* Behave  like a "row" */
+		border: none;
+		border-bottom: 1px solid #eee; 
+		position: relative;
+		padding-left: 50%; 
+	}
+	
+	.table4_1 td:before { 
+		/* Now like a table header */
+		position: absolute;
+		/* Top/left values mimic padding */
+		top: 6px;
+		left: 6px;
+		width: 45%; 
+		padding-right: 10px; 
+		white-space: nowrap;
+	}
+	
+	.table4_1 button{
+		width:80%;
+		height:100%;
+	}
+	
+	/*
+	Label the data
+	*/
+	.table4_1 td:nth-of-type(1):before { content: ""; }
+	.table4_1 td:nth-of-type(2):before { content: ""; }
+	.table4_1 td:nth-of-type(3):before { content: ""; }
+	.table4_1 td:nth-of-type(4):before { content: ""; }
+	.table4_1 td:nth-of-type(5):before { content: ""; }
+	.table4_1 td:nth-of-type(5):after { content: "";}
+	.table4_1 td:nth-of-type(6):before { content: ""; }
+	.table4_1 td:nth-of-type(6):after { content: "";}
+	
+}
+</style>
+<script>
+	$(document).ready(function() {
+/*		
+    	//$('#wpddt1').DataTable();
+		// Setup - add a text input to each footer cell
+		$('#scropinfo1 tfoot th').each( function () {
+			var title = $(this).text();
+			$(this).html( '<input type="text" placeholder="'+title+'" style="width:100%; padding-left:3px;" />' );
+		} );
+	 
+		// DataTable
+		var table = $('#scropinfo1').DataTable({
+			"scrollX": true,
+			"searching": false,
+			"paging":   false,
+        	"ordering": false,
+        	"info":     false	
+		});
+		
+		
+		
+		
+	 
+		// Apply the search
+		table.columns().every( function () {
+			var that = this;
+	 
+			$( 'input', this.footer() ).on( 'keyup change', function () {
+				if ( that.search() !== this.value ) {
+					that
+						.search( this.value )
+						.draw();
+				}
+			});
+		});
+		
+		$('.panel').lobiPanel({
+       		reload: false,
+    		close: false,
+    		editTitle: false
+			//minimize: false
+		});
+	*/
+	});
+	
+</script>
+
+</head>
+
+<body>
+	<!--<span style="thfont5">ข้อมูลบริษัท : </span>-->
+	<table id="scommittee1" class="table4_1 display row-border responsive nowrap" style="width:100%; height:auto; color:#003;">
+      <thead>
+      	  <tr style="background-color:#6CC;">
+              <td style="text-align:center; width:10%; font-weight:bold;">#</td>
+              <td style="width:20%; font-weight:bold;">ชื่อ - สกุล (ไทย)</td>
+              <td style="width:20%; font-weight:bold;">ชื่อ - สกุล (Eng)</td>
+              <td style="text-align:center; width:20%; font-weight:bold;">เลขที่บัตรประจำตัว</td>
+              <td style="width:10%; font-weight:bold;">สัญชาติ</td>
+              <td style="text-align:center; width:20%; font-weight:bold;">ประเภท</td>
+          </tr>
+      </thead>
+      <tbody>
+      <?php
+	  	$rowno = 1;
+		$ordernumber_old=0;
+		$model = CommitteeTmpTb::model()->findAllByAttributes(array('registernumber'=>$regisnum));
+		foreach ($model as $rows){
+			
+			$registernumber = $rows->registernumber;
+			$committeetype = $rows->committeetype;
+			$ordernumber = $rows->ordernumber;
+			$typeno = $rows->typeno;
+			$identity = $rows->identity;
+			$title = $rows->title;
+			$firstname = $rows->firstname;
+			$lastname = $rows->lastname;
+			$englishtitle = $rows->englishtitle;
+			$englishfirstname12 = $rows->englishfirstname12;
+			$englishlastname = $rows->englishlastname;
+			$nation = $rows->nation;
+			
+			$fullname = $title . $firstname . "  " . $lastname;
+			
+			$fullnameeng = $englishtitle . $englishfirstname12 . "  " . $englishlastname;
+			
+			if($ordernumber_old!=$ordernumber){
+			
+			if($committeetype=='K'){
+				$committeetype = "กรรมการ";
+			}else if($committeetype=='L'){
+				$committeetype = "หุ้นส่วน";
+			}
+	  	
+	  ?>
+          <tr>
+              <td style="text-align:center; width:5%;"><?=$ordernumber?></td>
+              <td style="width:25%;"><?=$fullname?></td>
+              <td style="width:25%;"><?=$fullnameeng?></td>
+              <td style="text-align:center; width:20%;"><?=$identity?></td>
+              <td style="text-align:center; width:10%;"><?=$nation?></td>
+              <td style="text-align:center; width:20%;"><?=$committeetype?></td>
+          </tr>
+       <?php
+	   		
+	   		$ordernumber_old = $ordernumber;
+			
+      	    $rowno += 1;
+			
+			}//if($ordernumber_old!=$ordernumber){
+				
+				
+		}//foreach ($model as $rows){
+	  ?>     
+          
+      </tbody>
+  </table>
+  
+
+  
+</body>
+</html>

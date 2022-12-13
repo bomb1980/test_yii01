@@ -1,0 +1,157 @@
+2022/11/04 09:45:39 [error] [php] Undefined variable: pnd (D:\Server\www\wpdcore\protected\views\site\searchpages\callpnd103.php:79)
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CBaseController.php(126): require()
+#1 D:\Server\www\wpdcore\framework\web\CBaseController.php(95): PndController->renderInternal()
+#2 D:\Server\www\wpdcore\framework\web\CController.php(872): PndController->renderFile()
+#3 D:\Server\www\wpdcore\framework\web\CController.php(785): PndController->renderPartial()
+#4 D:\Server\www\wpdcore\protected\controllers\PndController.php(860): PndController->render()
+#5 D:\Server\www\wpdcore\framework\web\actions\CInlineAction.php(49): PndController->actionCallpnd103()
+#6 D:\Server\www\wpdcore\framework\web\CController.php(308): CInlineAction->runWithParams()
+#7 D:\Server\www\wpdcore\framework\web\CController.php(286): PndController->runAction()
+#8 D:\Server\www\wpdcore\framework\web\CController.php(265): PndController->runActionWithFilters()
+#9 D:\Server\www\wpdcore\framework\web\CWebApplication.php(282): PndController->run()
+#10 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController()
+#11 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#12 D:\Server\www\wpdcore\index.php(27): CWebApplication->run()
+REQUEST_URI=/wpdcore/pnd/callpnd103
+in D:\Server\www\wpdcore\protected\views\site\searchpages\callpnd103.php (79)
+in D:\Server\www\wpdcore\protected\controllers\PndController.php (860)
+in D:\Server\www\wpdcore\index.php (27)
+2022/11/04 10:40:18 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/styles/bootstrap-4.1.2/bootstrap.min.css.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/st...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/styles/bootstrap-4.1.2/bootstrap.min.css.map
+---
+2022/11/04 10:40:18 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/bootstrap/bootstrap.min.css.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/bootstrap/bootstrap.min.css.map
+---
+2022/11/08 08:53:33 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/datatable/images/sort_asc.png". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/datatable/images/sort_asc.png
+HTTP_REFERER=http://127.0.0.1:92/wpdcore/themes/vcard/plugins/datatable/css/jquery.dataTables.min.css
+---
+2022/11/08 13:35:24 [error] [php] file_get_contents({&quot;username&quot;:&quot;SSO001&quot;,&quot;password&quot;:&quot;&quot;,&quot;type&quot;:&quot;DATA&quot;,&quot;firstName&quot;:&quot;&quot;,&quot;lastName&quot;:&quot;&quot;,&quot;idCard&quot;:&quot;0105515005871&quot;,&quot;reqHeader&quot;:{&quot;transID&quot;:&quot;SSO20180620&quot;,&quot;rqAppID&quot;:&quot;SSO&quot;,&quot;transDateTimestamp&quot;:&quot;20180620&quot;,&quot;terminalID&quot;:&quot;terminalID&quot;,&quot;ip&quot;:&quot;127.0.0.1&quot;,&quot;branchCode&quot;:&quot;001&quot;}}): failed to open stream: No such file or directory (D:\Server\www\wpdcore\protected\controllers\LedController.php:435)
+Stack trace:
+#0 D:\Server\www\wpdcore\protected\controllers\LedController.php(435): file_get_contents()
+#1 D:\Server\www\wpdcore\framework\web\actions\CInlineAction.php(49): LedController->actionCallledservicecall()
+#2 D:\Server\www\wpdcore\framework\web\CController.php(308): CInlineAction->runWithParams()
+#3 D:\Server\www\wpdcore\framework\web\CController.php(286): LedController->runAction()
+#4 D:\Server\www\wpdcore\framework\web\CController.php(265): LedController->runActionWithFilters()
+#5 D:\Server\www\wpdcore\framework\web\CWebApplication.php(282): LedController->run()
+#6 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController()
+#7 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#8 D:\Server\www\wpdcore\index.php(27): CWebApplication->run()
+REQUEST_URI=/wpdcore/led/callledservicecall
+in D:\Server\www\wpdcore\protected\controllers\LedController.php (435)
+in D:\Server\www\wpdcore\index.php (27)
+2022/11/08 13:36:12 [error] [php] file_get_contents({&quot;username&quot;:&quot;SSO001&quot;,&quot;password&quot;:&quot;&quot;,&quot;type&quot;:&quot;DATA&quot;,&quot;firstName&quot;:&quot;&quot;,&quot;lastName&quot;:&quot;&quot;,&quot;idCard&quot;:&quot;0105515005871&quot;,&quot;reqHeader&quot;:{&quot;transID&quot;:&quot;SSO20180620&quot;,&quot;rqAppID&quot;:&quot;SSO&quot;,&quot;transDateTimestamp&quot;:&quot;20180620&quot;,&quot;terminalID&quot;:&quot;terminalID&quot;,&quot;ip&quot;:&quot;127.0.0.1&quot;,&quot;branchCode&quot;:&quot;001&quot;}}): failed to open stream: No such file or directory (D:\Server\www\wpdcore\protected\controllers\LedController.php:435)
+Stack trace:
+#0 D:\Server\www\wpdcore\protected\controllers\LedController.php(435): file_get_contents()
+#1 D:\Server\www\wpdcore\framework\web\actions\CInlineAction.php(49): LedController->actionCallledservicecall()
+#2 D:\Server\www\wpdcore\framework\web\CController.php(308): CInlineAction->runWithParams()
+#3 D:\Server\www\wpdcore\framework\web\CController.php(286): LedController->runAction()
+#4 D:\Server\www\wpdcore\framework\web\CController.php(265): LedController->runActionWithFilters()
+#5 D:\Server\www\wpdcore\framework\web\CWebApplication.php(282): LedController->run()
+#6 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController()
+#7 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#8 D:\Server\www\wpdcore\index.php(27): CWebApplication->run()
+REQUEST_URI=/wpdcore/led/callledservicecall
+in D:\Server\www\wpdcore\protected\controllers\LedController.php (435)
+in D:\Server\www\wpdcore\index.php (27)
+2022/11/08 13:38:28 [error] [php] Invalid argument supplied for foreach() (D:\Server\www\wpdcore\protected\controllers\LedController.php:451)
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\actions\CInlineAction.php(49): LedController->actionCallledservicecall()
+#1 D:\Server\www\wpdcore\framework\web\CController.php(308): CInlineAction->runWithParams()
+#2 D:\Server\www\wpdcore\framework\web\CController.php(286): LedController->runAction()
+#3 D:\Server\www\wpdcore\framework\web\CController.php(265): LedController->runActionWithFilters()
+#4 D:\Server\www\wpdcore\framework\web\CWebApplication.php(282): LedController->run()
+#5 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController()
+#6 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#7 D:\Server\www\wpdcore\index.php(27): CWebApplication->run()
+REQUEST_URI=/wpdcore/led/callledservicecall
+in D:\Server\www\wpdcore\protected\controllers\LedController.php (451)
+in D:\Server\www\wpdcore\index.php (27)
+2022/11/11 16:30:09 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/datatable/js/pdfmake.min.js.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/datatable/js/pdfmake.min.js.map
+---
+2022/11/11 16:30:09 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/styles/bootstrap-4.1.2/popper.js.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/st...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/styles/bootstrap-4.1.2/popper.js.map
+---
+2022/11/11 16:30:09 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/bootstrap/bootstrap.min.css.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/bootstrap/bootstrap.min.css.map
+---
+2022/11/11 16:30:11 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/highcharts/exporting.js.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/highcharts/exporting.js.map
+---
+2022/11/11 16:30:11 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/highcharts/modules/data.js.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/highcharts/modules/data.js.map
+---
+2022/11/11 16:30:13 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/highcharts/modules/drilldown.js.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/highcharts/modules/drilldown.js.map
+---
+2022/11/11 16:30:14 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/styles/bootstrap-4.1.2/bootstrap.min.css.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/st...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/styles/bootstrap-4.1.2/bootstrap.min.css.map
+---
+2022/11/11 16:30:14 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/styles/bootstrap-4.1.2/bootstrap.min.js.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/st...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/styles/bootstrap-4.1.2/bootstrap.min.js.map
+---
+2022/11/11 16:30:14 [error] [exception.CHttpException.404] CHttpException: Unable to resolve the request "themes/vcard/plugins/highcharts/highcharts.js.map". in D:\Server\www\wpdcore\framework\web\CWebApplication.php:286
+Stack trace:
+#0 D:\Server\www\wpdcore\framework\web\CWebApplication.php(141): CWebApplication->runController('themes/vcard/pl...')
+#1 D:\Server\www\wpdcore\framework\base\CApplication.php(185): CWebApplication->processRequest()
+#2 D:\Server\www\wpdcore\index.php(27): CApplication->run()
+#3 {main}
+REQUEST_URI=/wpdcore/themes/vcard/plugins/highcharts/highcharts.js.map
+---

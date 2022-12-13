@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Search By Information</title>
+<style>
+   .bst-dialog {
+      width: 800px;
+   }
+</style>
+
+<script>
+	$(document).ready(function() {
+		
+		$('.panel').lobiPanel({
+       		reload: false,
+    		close: false,
+			editTitle: false,
+			sortable: true
+			//minimize: false
+		});
+		
+		$('[data-toggle="tooltip"]').tooltip();
+		
+    	//$('#wpddt1').DataTable();
+		// Setup - add a text input to each footer cell
+		$('#sbitb tfoot th').each( function () {
+			var title = $(this).text();
+			$(this).html( '<input type="text" placeholder="'+title+'" style="width:100%; padding-left:3px;" />' );
+		} );
+	 
+		// DataTable
+		var table = $('#sbitb').DataTable({
+			"scrollX": true,
+			"order": [[ 3, "desc" ]],	
+		});
+	 
+		// Apply the search
+		table.columns().every( function () {
+			var that = this;
+	 
+			$( 'input', this.footer() ).on( 'keyup change', function () {
+				if ( that.search() !== this.value ) {
+					that
+						.search( this.value )
+						.draw();
+				}
+			});
+		});
+	
+	});
+	
+	function showdetailcorp(action,crop_id,registernumber,registername,statusremark,rowno){
+		//alert(action + "," + crop_id + "," + registernumber + "," + registername);
+		var data1 = 'action=' + action + '&crop_id=' + crop_id + '&registernumber=' + registernumber + '&statusremark=' + statusremark;
+		$('#sp' + rowno).html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+		if(statusremark=='P'){
+		  	
+		  //เริ่มตรวจสอบ data cleansing ========
+		  var data1 = 'action=sch&regisnum=' + registernumber;
+		 
+		  $.ajax({
+			  type: "POST", 
+			  url: "<?php echo Yii::app()->createAbsoluteUrl('site/cleansingdatastep2'); ?>",      
+			  data: data1,         
+			  success: function (da)
+			  {
+				 var obj = jQuery.parseJSON(da);
+				 if(obj.status=="Y"){//แสดงว่ามีการ update จาก sapeins
+						$("#rowresult1").hide();
+		  				$("#rowresult2").show(); 	
+		  				ajaxschcropinfosp1(registernumber);
+		  				ajaxschbranchsp(registernumber);
+		  				ajaxschcommitteesp(registernumber);
+		  				ajaxschdetailcropsp(registernumber);	
+				 }else if(obj.status=="N"){ //แสดงว่าไม่่มีการ update จาก sapeins
+				        //เริ่มการ check update ที่อยู่จาก dbd
+						var data2 = 'action=sch&schtxt=' + registernumber + "&seltxt=2";
+						$.ajax({
+							type: "POST",
+							url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschandsavecropinfo2'); ?>", 
+							data: data2,
+							success: function (da){
+								//BootstrapDialog.alert('<font class="thfont5">' + da + '</font>');
+								if(da){
+									var obj2 = jQuery.parseJSON(da);
+									if(obj2.statusx != "X"){
+										BootstrapDialog.alert('<font class="thfont5">' + da + '</font>');
+									}//if
+								}//if
+									$("#rowresult1").hide();
+		  			  				$("#rowresult2").show();	
+					  				ajaxschcropinfosp(registernumber);
+					  				ajaxschbranchsp(registernumber);
+					  				ajaxschcommitteesp(registernumber);
+					  				ajaxschdetailcropsp(registernumber);	
+							}//success
+						});//ajac
+				 }//if
+			  }//success 
+		  }); 
+		
+		}else{//ถ้า status ไม่เป็น P
+		  $("#rowresult1").hide();
+		  $("#rowresult2").show(); 	
+		  ajaxschcropinfosp1(registernumber);
+		  ajaxschbranchsp(registernumber);
+		  ajaxschcommitteesp(registernumber);
+		  ajaxschdetailcropsp(registernumber);	
+		}
+		
+		//$("#c1").html(data1);	
+/*		var dilg1 = "";
+		//alert(data1);
+		dilg1 = new BootstrapDialog({
+			type: BootstrapDialog.TYPE_INFO,
+			size: BootstrapDialog.SIZE_WIDE,
+			title: "<i class='fa fa-details'></i><font class='thfont5'> " + registername + " </font>",
+			//cssClass: 'bst-dialog',
+			message: $('<div></div>').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading..."),
+			message: $('<div class="thfont5"></div>').load(<?php echo "'" . Yii::app()->createAbsoluteUrl('site/schdetailfrm') ."'" ; ?>, { action: action, crop_id: crop_id, registernumber: registernumber }),
+			draggable: true,
+			closable: true,	
+			closeByBackdrop: false,
+			closeByKeyboard: false,
+			buttons: [{
+				id: 'btn0',
+				label: "<i class='fa fa-window-close'></i><font class='thfont5'> Close</font>",
+				cssClass: 'btn-secondary',
+				action: function(dialogItself){			
+					dialogItself.close();
+				}
+			},{
+				id: 'btn1',
+				label: "<i class='fa fa-check'></i>&nbsp;<font class='thfont5'> Save</font>",
+				cssClass: 'btn-primary',
+				//hotkey: 13, //enter
+				action: function(dialogItself){
+					//aust3.close();
+					 //ajaxupdatestatus1(action,crop_id,registernumber);
+				}
+			}]
+			
+		});
+		dilg1.open(); 
+		*/
+	}//function
+	
+	function ajaxschcropinfosp1(regisnum){
+		var data1 = 'action=sch&regisnum=' + regisnum;
+		$('#cres1').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");	
+		$.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschcropinfosp1'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   $("#cres1").html(da);
+			   
+			}
+		});   
+	}//function
+	
+	function ajaxschcropinfosp(regisnum){
+	
+		var data1 = 'action=sch&regisnum=' + regisnum;
+		
+		$('#cres1').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+		
+		$.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschcropinfosp'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   $("#cres1").html(da);
+			   
+			}
+		});   
+   }//function
+	   
+	function ajaxschbranchsp(regisnum){
+	   
+	   var data1 = 'action=sch&regisnum=' + regisnum;
+	   $('#cres2').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+	   $.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschbranchsp'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   $("#cres2").html(da);
+			   
+			   
+			}
+		});
+   }//function	
+   
+   function ajaxschcommitteesp(regisnum){
+	   
+	   var data1 = 'action=sch&regisnum=' + regisnum;
+	   $('#cres3').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+	   $.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschcommitteesp'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   $("#cres3").html(da);
+			   
+			}
+		});	
+   }//function
+   
+   function ajaxschdetailcropsp(regisnum){
+	   var data1 = 'action=sch&regisnum=' + regisnum;
+	   $('#cres4').html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+	   $.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/callschdetailcropsp'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+			   $("#cres4").html(da);
+			   
+			}
+		});   
+   }//function
+   
+   function genaccnonew(regisnum,accnum,rownum){
+	 //alert("test ok," + regisnum + "," + accnum );
+	 var data1 = 'action=chgaccnum&regisnum=' + regisnum + "&accnum=" + accnum;
+	 //alert(data1);
+	 $('#accno' + rownum).html("<img src='<?php echo Yii::app()->request->baseUrl; ?>/themes/vcard/images/preloader-01.gif' height='30' width='30' /> <br> Loading...");
+	 	
+		$.ajax({
+			type: "POST", 
+			url: "<?php echo Yii::app()->createAbsoluteUrl('site/chkandgenaccno'); ?>",      
+			data: data1,         
+			success: function (da)
+			{
+				BootstrapDialog.alert('<font class="thfont5">' + da + '</font>');
+				$('#accno' + rownum).html("");
+				callschcropbyinfo();
+				//alert(da);
+			   //$("#cres4").html(da);
+			}
+		});   
+	 
+   }//function 
+   
+</script>
+
+</head>
+
+<body>
+
+<?php
+  if(!Yii::app()->user->isGuest) {
+	  if(Yii::app()->user->getId()){
+		  $user_id = Yii::app()->user->getId();
+	  }
+	  if(Yii::app()->user->firstname){
+		  $user_firstname = Yii::app()->user->firstname;
+	  }
+	  if(Yii::app()->user->lastname){
+		  $user_lastname = Yii::app()->user->lastname;
+	  }
+	  if(Yii::app()->user->email){
+		  $user_email = Yii::app()->user->email;
+	  }
+	  if(Yii::app()->user->access_level){
+		  $user_access_level = Yii::app()->user->access_level;
+	  }
+	  if(Yii::app()->user->address){
+		  $user_address = Yii::app()->user->address;
+	  }
+	  if(Yii::app()->user->access_code){
+		  $user_access_code = Yii::app()->user->access_code;
+	  }
+	  if(Yii::app()->user->username){
+		  $user_username = Yii::app()->user->username;
+	  }
+	  
+  }
+?>
+
+<?php
+	//echo "{$action}, {$seltxt}, {$schtxt}"; 
+	
+	if($seltxt=='1'){
+				
+		//if(Yii::app()->user->access_code=='1'){
+		  //$bc = str_split(Yii::app()->user->address,2);	
+		  //$bcd = "0" . $bc[0];
+		  $qsbi = new CDbCriteria( array(
+			  'condition' => "registername like :schtxt ",         
+			  'params'    => array(':schtxt' => "%{$schtxt}%")  
+		  ));
+		//}else{
+		  //$bc = str_split(Yii::app()->user->address,2);	
+		  //$bcd = "0" . $bc[0];
+		  //$qsbi = new CDbCriteria( array(
+			  //'condition' => "registername like :schtxt and registernumber like :bcd",         
+			  //'params'    => array(':schtxt' => "%{$schtxt}%", ':bcd' => "{$bcd}%")  
+		  //));	
+		//}
+	}
+	if($seltxt=='2'){
+		
+		/*if(Yii::app()->user->access_code=='1'){
+		  $bc = str_split(Yii::app()->user->address,2);	
+		  $bcd = "0" . $bc[0];*/
+		  $qsbi = new CDbCriteria( array(
+			  'condition' => "registernumber = :schtxt ",         
+			  'params'    => array(':schtxt' => "{$schtxt}")  
+		  ));
+		/*}else{
+		  $bc = str_split(Yii::app()->user->address,2);	
+		  $bcd = "0" . $bc[0];
+		  $qsbi = new CDbCriteria( array(
+			  'condition' => "registernumber = :schtxt and registernumber like :bcd",         
+			  'params'    => array(':schtxt' => "{$schtxt}", ':bcd' => "{$bcd}%")  
+		  ));
+		}*/
+	}
+	if($seltxt=='3'){
+		/*if(Yii::app()->user->access_code=='1'){
+		  $bc = str_split(Yii::app()->user->address,2);	
+		  $bcd = "0" . $bc[0];*/
+		  $qsbi = new CDbCriteria( array(
+			  'condition' => "acc_no = :schtxt ",         
+			  'params'    => array(':schtxt' => "{$schtxt}"),
+			  'order' =>  "registerdate DESC"  
+		  ));
+		/*}else{
+		  $bc = str_split(Yii::app()->user->address,2);	
+		  $bcd = "0" . $bc[0];
+		  $qsbi = new CDbCriteria( array(
+			  'condition' => "acc_no = :schtxt and registernumber like :bcd",         
+			  'params'    => array(':schtxt' => "{$schtxt}", ':bcd' => "{$bcd}%")  
+		  ));	
+		}*/
+	}
+			
+	  $modelsbi = CropinfoTmpTb::model()->findAll($qsbi);
+	  $countsbi = count($modelsbi);
+	  
+	  if($countsbi>0){
+			
+?>
+ <table id="sbitb" class="display row-border responsive nowrap" style="width:100%; height:auto; color:#003;">
+ 	<thead>
+      <tr>
+          <!--<th>ลำดับ</th>-->
+          <th>ชื่อนิติบุคคล</th>
+          <th>เลขนิติบุคคล 13 หลัก</th>
+          <th>เลขประกันสังคม 10 หลัก</th>
+          <th>วันที่จดทะเบียน</th>
+          <th style="text-align:center;">สถานะ</th>
+          <!--<th>บันทึกโดย</th>
+          <th>บันทึกเมื่อ</th>
+          <th>ปรับปรุงโดย</th>
+          <th>ปรับปรุงเมื่อ</th>-->
+          <th style="text-align:center;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+    	<?php
+	  		$rowno = 1;
+			
+			foreach ($modelsbi as $rows){
+			  $crop_id = $rows->crop_id; 	
+			  $registername = $rows->registername;
+			  $registernumber = $rows->registernumber;
+			  $acc_no = $rows->acc_no;
+			  $acc_bran = $rows->acc_bran;
+			  $registerdate = $rows->registerdate;
+			  $crop_remark = $rows->crop_remark;
+			  $crop_status = $rows->crop_status;
+			  
+			  $crop_createby = $rows->crop_createby;
+			  $crop_createtime = $rows->crop_createtime;
+   			  $crop_updateby = $rows->crop_updateby;
+			  $crop_updatetime = $rows->crop_updatetime;
+			  
+			  //ตรวจสอบสถานะ ว่าเป็น P หรือไม่
+			  //echo $crop_remark; exit;
+			  if($crop_remark=='P'){
+				$updateby = $crop_createby;
+ 			  	$modified = $crop_createtime;   
+			  }else{
+				//echo $registernumber;  exit;
+				$mest=EmpstateTb::model()->findByAttributes(array('ems_registernumber'=>$registernumber));
+				//var_dump($mest);exit;
+				//var_dump($mest->ems_updateby);exit;
+				if($mest){
+			  		$updateby = $mest->ems_createby;
+ 			  		$modified = $mest->ems_created;
+				}else{
+					$updateby = $crop_createby;
+ 			  		$modified = $crop_createtime;
+				}
+			  }
+			  
+			  
+			  
+			  $regisday = date_create($registerdate)->format('d');
+			  $regismth = date_create($registerdate)->format('m');
+			  $regisyer = date_create($registerdate)->format('Y')+543;
+			  $registerdatef = $regisday . "-" . $regismth . "-" . $regisyer;//date_create($registerdate)->format('d-m-Y');
+			/*  สีเหลือง : #FF6; สีเขียว : #6F6  */	
+		?>
+        	<tr <?php if($crop_remark=='B'){  ?> style="background-color:#FFFFC6;" <?php }else if($crop_remark=='A'){ ?> style="background-color:#CEFFDB;" <?php } ?> >
+                <!--<td style="text-align:center;"><?=$rowno?></td>-->
+                <td onMouseOver="this.style.cursor='pointer', this.style.color='red'" onMouseOut="this.style.color='#333'" onClick="javascript:showdetailcorp('sch',<?=$crop_id?>,'<?=$registernumber?>','<?=$registername?>','<?=$crop_remark?>',<?=$rowno?>);">
+					<?=$registername?>
+                </td>
+                <td style="text-align:center;"><?=$registernumber?></td>
+                <td style="text-align:center;">
+					<?=$acc_no?>
+                    <?php if($user_access_level=='admin'){ ?>
+                    &nbsp;
+                	<font color="#3300CC" style="cursor:pointer;">
+                    	<a href="javascript:genaccnonew('<?=$registernumber?>','<?=$acc_no?>','<?=$rowno?>');"><i class="fa fa-refresh"></i></a>
+                    </font>
+                    <?php } ?>
+                    <div id="accno<?=$rowno?>"></div>
+                </td>
+                <td style="text-align:center;"><?=$registerdatef?></td>
+                <td style="color:red; text-align:center;"><span class="badge thfont3" data-toggle="tooltip" data-placement="right" title="<?=$updateby?> , <?=$modified?>" style="color:#FF0;"><?=$crop_remark?></span></td>
+                <!--<td style="text-align:left;"><?$crop_createby?></td>
+                <td style="text-align:left;"><?$crop_createtime?></td>
+                <td style="text-align:left;"><?$crop_updateby?></td>
+                <td style="text-align:left;"><?$crop_updatetime?></td>-->
+                <td style="text-align:center;">
+                	<button class="btn btn-primary" onClick="javascript:showdetailcorp('sch',<?=$crop_id?>,'<?=$registernumber?>','<?=$registername?>','<?=$crop_remark?>',<?=$rowno?>);"><i class="fa fa-newspaper-o"></i><font class="thfont5"> รายละเอียด</font></button><span id="sp<?=$rowno?>"></span>
+                </td>
+            </tr>
+        <?php
+			  $rowno += 1;
+		  }//foreach ($model as $rows){
+		
+		?>  
+    </tbody>
+    <tfoot>
+      <tr>
+          <!--<th>ลำดับ</th>-->
+          <th>ชื่อนิติบุคคล</th>
+          <th>เลขนิติบุคคล 13 หลัก</th>
+          <th>เลขประกันสังคม 10 หลัก</th>
+          <th>วันที่จดทะเบียน</th>
+          <th style="text-align:center;">สถานะ</th>
+          <!--<th>บันทึกโดย</th>
+          <th>บันทึกเมื่อ</th>
+          <th>ปรับปรุงโดย</th>
+          <th>ปรับปรุงเมื่อ</th>-->
+          <th style="text-align:center;">Action</th>
+      </tr>
+  </tfoot>
+ </table>
+ <?php
+ 	}else{//if > 0
+		if($seltxt=='1'){
+			echo "<font style='color:red;'><i class='fa fa-warning'></i> ไม่พบข้อมูลสถานประกอบการนิติบุคคล ตามชื่อ : {$schtxt} ,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;กรุณาตรวจสอบ ชื่อนิติบุคคลที่ใช้ค้นหาอีกครั้ง.</font> <br>";
+		}else if($seltxt=='2'){
+			echo "<font style='color:red;'><i class='fa fa-warning'></i> ไม่พบข้อมูลสถานประกอบการนิติบุคคล เลขที่ : {$schtxt} ,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;กรุณาตรวจสอบ เลขนิติบุคคลที่ใช้ค้นหาอีกครั้ง. <br></font>";
+		}else if($seltxt=='3'){
+			echo "<font style='color:red;'><i class='fa fa-warning'></i> ไม่พบข้อมูลสถานประกอบการนิติบุคคล เลขที่ : {$schtxt} ,<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;กรุณาตรวจสอบ เลขประกันสังคม 10 หลัก ที่ใช้ค้นหาอีกครั้ง. <br></font>";
+		}//if
+	}
+ ?>
+</body>
+</html>

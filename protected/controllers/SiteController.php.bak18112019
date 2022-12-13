@@ -1,0 +1,3115 @@
+<?php
+
+class SiteController extends Controller
+{
+	/**
+	 * Declares class-based actions.
+	 */
+	 
+	 private $idtoken_logout; 
+	 
+    /*function init(){
+		//if(Yii::app()->user->isGuest){
+			//parent::chkLogin(); 
+		//}
+	}*/
+	 
+	public function actions()
+	{
+		return array(
+			// captcha action renders the CAPTCHA image displayed on the contact page
+			'captcha'=>array(
+				'class'=>'CCaptchaAction',
+				'backColor'=>0xFFFFFF,
+			),
+			// page action renders "static" pages stored under 'protected/views/site/pages'
+			// They can be accessed via: index.php?r=site/page&view=FileName
+			'page'=>array(
+				'class'=>'CViewAction',
+			),
+		);
+	}
+
+	/**
+	 * This is the default 'index' action that is invoked
+	 * when an action is not explicitly requested by users.
+	 */
+	public function actionIndex()
+	{
+		
+		if(!Yii::app()->user->isGuest) { //if(!isset(Yii::app()->session['sub'])){ //
+			//ถ้า login แล้ว
+		if(isset(Yii::app()->user->firstname)){
+			  if(Yii::app()->user->access_level=='admin'){
+				  $this->render('index');
+			  }else{
+				  $this->render('/site/searchpages/searchs');	
+			  }
+		   }else{
+				echo preg_replace("/\xEF\xBB\xBF/", "","กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");	
+		   }
+			
+		}else{
+			//ถ้ายังไม่ login
+			
+			if(!isset(Yii::app()->session['sub'])){
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+				
+				$this->idtoken_logout=$idplib->idtoken;
+				
+				//sch user
+			  $q = new CDbCriteria( array(
+				  'condition' => "username = :username ",         
+				  'params'    => array(':username' => $idplib->sub)  
+			  ));
+			   $susa = Users::model()->findAll($q);
+			   $countusa = count($susa);
+			   if($countusa==0){
+				   if($idplib->sub=='kporntima'){
+					   $puser = "admin";
+				   }else{
+					   $puser = "user";
+				   }
+				   
+				  $Users = new Users();
+				  $Users->firstname = $idplib->SSOfirstname;
+				  $Users->lastname = $idplib->SSOsurname;
+				  $Users->email = "-";
+				  $Users->contact_number = "-";
+				  $Users->address = $idplib->SSObranchCode;
+				  $Users->username = $idplib->sub;
+				  $Users->password = "-";
+				  $Users->access_level = "user";
+				  $Users->access_code = "1";
+				  $Users->status = 1;
+				  $Users->image = "-";
+				  $Users->created = date('Y-m-d H:i:s');
+				  $Users->modified = date('Y-m-d H:i:s');
+				  if($Users->save()){
+					  //echo CJSON::encode(array('status' => 'success'));
+					  $identity = new UserIdentity($idplib->sub,""); 
+					  $identity->authenticate();
+					  if($identity->errorCode===UserIdentity::ERROR_NONE)
+					  {
+						  
+						  $duration=3600*24*30; // 30 days
+						  Yii::app()->user->login($identity,$duration);
+						  
+						  if(Yii::app()->user->firstname){
+						  
+							  if(Yii::app()->user->access_level=='admin'){
+								  $this->render('index');
+							  }else{
+								  $this->render('/site/searchpages/searchs');	
+							  }
+						  
+						  }else{
+							  echo preg_replace("/\xEF\xBB\xBF/", "","กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");	
+						  }
+					  }
+					  
+				  }else{
+					  //echo CJSON::encode(array('status' => 'error'));
+					  echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode($Users->getErrors()));
+				  }
+			   }else{//if($countusg==0)
+				  //echo CJSON::encode(array('status' => 'errordup'));
+				  $identity = new UserIdentity($idplib->sub,""); 
+				  $identity->authenticate();
+				  if($identity->errorCode===UserIdentity::ERROR_NONE)
+				  {
+					  Yii::app()->user->login($identity);
+					  
+					  if(Yii::app()->user->firstname){
+					  
+						  if(Yii::app()->user->access_level=='admin'){
+							  $this->render('index');
+						  }else{
+							  $this->render('/site/searchpages/searchs');	
+						  }
+					  
+					  }else{
+						  echo preg_replace("/\xEF\xBB\xBF/", "","กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");	
+					  }
+				  }
+				  
+			   }
+			   
+			   
+			}
+			
+			
+			/*
+			$model=new LoginForm;
+			if(isset($_POST['ajax']) && $_POST['ajax']==='login-form')
+			{
+				echo CActiveForm::validate($model);
+				Yii::app()->end();
+			}
+			if(isset($_POST['LoginForm']))
+			{
+				$model->attributes=$_POST['LoginForm'];
+				
+				if($model->validate() && $model->login())
+					$this->redirect(Yii::app()->user->returnUrl);
+			}
+			
+			$this->render('login',array('model'=>$model));
+			*/
+			
+		}// if isGuest
+	}// function actionIndex
+
+	/**
+	 * This is the action to handle external exceptions.
+	 */
+	 
+    public function actionShowabout(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+				$msgresult = Yii::app()->Clogevent->createlogevent("open", "aboutpage", "openabountpage", "about", "เปิดหน้าAbout");
+				$this->render('index');
+	   		}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	 
+	public function actionError()
+	{
+	    if($error=Yii::app()->errorHandler->error)
+	    {
+	    	if(Yii::app()->request->isAjaxRequest)
+	    		echo preg_replace("/\xEF\xBB\xBF/", "",$error['message']);
+	    	else
+	        	$this->render('error', $error);
+	    }
+	}
+
+	/**
+	 * Displays the contact page
+	 */
+	public function actionContact()
+	{
+		$model=new ContactForm;
+		if(isset($_POST['ContactForm']))
+		{
+			$model->attributes=$_POST['ContactForm'];
+			if($model->validate())
+			{
+				$headers="From: {$model->email}\r\nReply-To: {$model->email}";
+				mail(Yii::app()->params['adminEmail'],$model->subject,$model->body,$headers);
+				Yii::app()->user->setFlash('contact','Thank you for contacting us. We will respond to you as soon as possible.');
+				$this->refresh();
+			}
+		}
+		$this->render('contact',array('model'=>$model));
+	}
+
+	/**
+	 * Displays the login page
+	 */
+	public function actionLogin()
+	{
+		$model=new LoginForm;
+
+		// if it is ajax validation request
+		if(isset($_POST['ajax']) && $_POST['ajax']==='login-form')
+		{
+			echo preg_replace("/\xEF\xBB\xBF/", "",CActiveForm::validate($model));
+			Yii::app()->end();
+		}
+
+		// collect user input data
+		if(isset($_POST['LoginForm']))
+		{
+			$model->attributes=$_POST['LoginForm'];
+			// validate user input and redirect to the previous page if valid
+			if($model->validate() && $model->login())
+				$this->redirect(Yii::app()->user->returnUrl);
+		}
+		// display the login form
+		$this->render('login',array('model'=>$model));
+	}
+
+	/**
+	 * Logs out the current user and redirect to homepage.
+	 */
+	public function actionLogout()
+	{
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		
+		$msgresult = Yii::app()->Clogevent->createlogevent("logout", "loginpage", "logout", "userstb", "ออกจากระบบ");
+		
+		$idtokeninfo = Yii::app()->session['idtoken'];
+		foreach($idtokeninfo as $key=>$value){
+		  if($key=='payload'){
+			  $idtoken2 = $value[0] . "." . $value[1] . "." . $value[2];
+		  }
+		}
+		
+		Yii::app()->session->destroy();
+		Yii::app()->user->logout();
+		//$this->redirect(Yii::app()->homeUrl);
+		
+		$linklogout = Yii::app()->params['urllogout1'] . $idtoken2 . Yii::app()->params['urllogout2'];
+		$this->redirect($linklogout);
+		
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	/* custom function */
+	public function actionOpenhome(){
+		if(!Yii::app()->user->isGuest) {
+			$this->layout='nolayout';
+			$this->render('home');
+		}
+	}
+	
+	public function actionServices(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "services", "เปิดหน้าservice");
+		$this->render('/site/servicepages/allservices');
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	
+	
+	public function actionSearchs(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "searchpage", "opensearchpage", "search", "เปิดหน้าsearch");
+		$this->render('/site/searchpages/searchs');
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionReports(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "reportpage", "openreportpage", "report", "เปิดหน้าreport");
+		$this->render('/site/reportpages/reports');
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionAdmins(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "adminpage", "openadminpage", "admin", "เปิดหน้าadmin");
+		$this->render('/site/adminpages/admins');
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	
+	public function actionOpenservice(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$snum = $_POST['snum'];
+		$lremark = "เปิดเมนูย่อยservice:" . $snum;
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/service' . $snum);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionOpensearch(){
+		
+			//$idplib = new Idplib();
+			//$idplib->getIdpinfo();
+		
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$snum = $_POST['snum'];
+		$lremark = "เปิดเมนูย่อยsearch:" . $snum;
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "searchpage", "opensearchpage", "subsearch", $lremark);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/search' . $snum);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionOpenreport(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$snum = $_POST['snum'];
+		$lremark = "เปิดเมนูย่อยreport:" . $snum;
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "reportpage", "openreportpage", "subreport", $lremark);
+		$this->layout='nolayout';
+		$this->render('/site/reportpages/report' . $snum);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionOpenadmin(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$snum = $_POST['snum'];
+		$lremark = "เปิดเมนูย่อยadmin:" . $snum;
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "adminpage", "openadminpage", "subadmin", $lremark);
+		$this->layout='nolayout';
+		$this->render('/site/adminpages/admin' . $snum);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionOpenadminuser(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$snum = $_POST['snum'];
+		$lremark = "เปิดเมนูย่อยadminuser:" . $snum;
+		$msgresult = Yii::app()->Clogevent->createlogevent("open", "adminuserpage", "openadminuserpage", "subadminuser", $lremark);
+		$this->layout='nolayout';
+		$this->render('/site/adminpages/admin1' . $snum);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalldbdservice(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		//bgdatep,eddatep,newdap,updap
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		//$this->render('/site/servicepages/callaspservice');
+		$this->render('/site/servicepages/calldbdservice', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalldbdservice2(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		//bgdatep,eddatep,newdap,updap
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice2', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalldbdservice2auto(){
+		
+		//bgdatep,eddatep,newdap,updap
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice2auto', $data1);
+		
+	}
+	
+	public function actionCalldbdservice3(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice3', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionCalldbdservice3auto(){
+		
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice3auto', $data1);
+		
+		
+	}
+	
+	public function actionCalldbdservice4(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice4', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionCalldbdservice4auto(){
+		
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice4auto', $data1);
+		
+		
+	}
+	
+	
+	public function actionCallwpdservice1(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$bgdatep = $_POST['bgdatep'];
+		$rundate = date_create($bgdatep)->format('Ymd');
+		//echo "{$action}";
+		Yii::app()->Clogrunservice->lrs_servicename = "service1";	
+		Yii::app()->Clogrunservice->lrs_remark = $rundate; //date('Ymd'); //$rundate;	
+		
+		$resultlrs = Yii::app()->Clogrunservice->checkexists2();
+		
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$resultlrs}");	
+		/*if(!Yii::app()->Clogrunservice->checkexists2()){
+			echo "No data";
+		}else{
+			echo "Have data";
+		}*/
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallservice2(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$aa=$_POST['aa'];
+		Yii::app()->CWpdApi->registernumber = "0905562002699"; //กำหนดค่าให้ property in class
+		Yii::app()->CCropinfo_tmp->registernumber = "0905562002699"; //กำหนดค่าให้ property in class
+		$msg1 = Yii::app()->CWpdApi->getVersion();
+		$msg2 = Yii::app()->CCropinfo_tmp->create_corpinfo_temp();
+		$msg3 = Yii::app()->CWpdApi->getVar1();
+		echo preg_replace("/\xEF\xBB\xBF/", "","Test Callservice {$aa} : {$msg1} <br> {$msg2}, {$msg3}");
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallservice3(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$provicecode=$_POST['provicecode']; //รับค่าจาก view
+		$registernumber=$_POST['registernumber'];
+		Yii::app()->CGenAccNo->provice_code = $provicecode; //กำหนดค่าให้ propreties
+		Yii::app()->CGenAccNo->registernumber = $registernumber; 
+		//$msg3 = Yii::app()->CGenAccNo->getVar1();
+		$numrows = Yii::app()->CGenAccNo->RowsCount();
+		Yii::app()->CGenAccNo->rowcountnew = intval($numrows) + 1;
+		$newrow = Yii::app()->CGenAccNo->rowcountnew;
+		$genacc = Yii::app()->CGenAccNo->genAccNumber();//เรียกใช้ method 
+		$createnumprovice = Yii::app()->CGenAccNo->updatenumprovice();
+		//$createc = Yii::app()->CGenAccNo->CreateNewAcc(); 
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$numrows},-{$genacc}-, {$newrow}, {$createnumprovice}"); //{$numrows}, {$newrow}, {$createnumprovice}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallservice4(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		if($action=="add"){
+			/*
+			$f1 = iconv("utf-8","tis-620","8000");
+			$f2 = iconv("utf-8","tis-620","25620501");
+			$f3 = iconv("utf-8","tis-620","102016");
+			$f4 = iconv("utf-8","tis-620","8320000025");
+			$f5 = iconv("utf-8","tis-620","000000");
+			$f6 = iconv("utf-8","tis-620","0835562007340");
+			$f7 = iconv("utf-8","tis-620","อีซี่ ทัวร์ เพอร์ซันนอล เทเลอร์");
+			$f8 = iconv("utf-8","tis-620","01");
+			$f9 = iconv("utf-8","tis-620","52/134 หมู่.2");
+			$f10 = iconv("utf-8","tis-620","ตำบลวิชิต");
+			$f11 = iconv("utf-8","tis-620","8301");
+			$f12 = iconv("utf-8","tis-620","83");
+			$f13 = iconv("utf-8","tis-620","83000");
+			$f14 = iconv("utf-8","tis-620","0645406893");
+			$f15 = iconv("utf-8","tis-620","0645406893");
+			$f16 = iconv("utf-8","tis-620","25620601");
+			$f17 = iconv("utf-8","tis-620","");
+			*/
+			
+			Yii::app()->CGenAccNo->provice_code = "11"; //กำหนดค่าให้ propreties
+		    Yii::app()->CGenAccNo->registernumber = "0115562012587"; 
+			
+			//set data to properties
+			Yii::app()->CCropinfo_tmp->registernumber = "0115562012587"; // VARCHAR( 13 ) NOT NULL COMMENT 'เลขทะเบียนนิติบุคคล' ,
+			Yii::app()->CCropinfo_tmp->registername = "คุ้มหลวง ทูยู" ; // VARCHAR( 1000 ) NOT NULL COMMENT 'ชื่อที่ใช้จดทะเบียน' ,
+			Yii::app()->CCropinfo_tmp->acc_no = Yii::app()->CGenAccNo->genAccNumber(); // VARCHAR( 10 ) NOT NULL COMMENT 'เลขที่บัญชี' ,
+			Yii::app()->CCropinfo_tmp->acc_bran = "000000"; // VARCHAR( 6 ) NOT NULL COMMENT 'สาขา' ,
+			Yii::app()->CCropinfo_tmp->tsic = "47612"; // VARCHAR( 5 ) NOT NULL COMMENT 'รหัส tsic' ,
+			Yii::app()->CCropinfo_tmp->tsicname = "ร้านขายปลีกเครื่องเขียนและเครื่องใช้สำนักงาน"; // VARCHAR( 1000 ) NOT NULL COMMENT 'ชื่อ tsic' ,
+			Yii::app()->CCropinfo_tmp->corptype = "5"; // VARCHAR( 1 ) NOT NULL COMMENT 'รหัสประเภทธุรกิจ' ,
+			Yii::app()->CCropinfo_tmp->corptypename = "บริษัทจำกัด"; // VARCHAR( 1000 ) NOT NULL COMMENT 'ชื่อประเภท' ,
+			Yii::app()->CCropinfo_tmp->registerdate = "2019-05-01 00:00:00"; // DATETIME NOT NULL COMMENT 'วันที่จดทะเบียน' ,
+			Yii::app()->CCropinfo_tmp->updateddate = "1900-01-01 00:00:00"; // DATETIME NOT NULL COMMENT 'วันที่มีการแก้ไขข้อมูลล่าสุด' ,
+			Yii::app()->CCropinfo_tmp->updateentry = "0"; // VARCHAR( 1 ) NOT NULL COMMENT 'มีการแก้ไขข้อมูลหลังจากลงทะเบียน' ,
+			Yii::app()->CCropinfo_tmp->accountingdate = "3112"; // VARCHAR( 4 ) NOT NULL COMMENT 'รอบปีบัญชี' ,
+			Yii::app()->CCropinfo_tmp->authorizedcapital = "1000000"; // Double(20 ,2) NOT NULL COMMENT 'ทุนจดทะเบียน' ,
+			Yii::app()->CCropinfo_tmp->statuscode = "1"; // VARCHAR( 1 ) NOT NULL COMMENT 'สถานะนิติบุคคล' ,
+			Yii::app()->CCropinfo_tmp->cpower = "กรรมการหนึ่งคนลงลายมือชื่อและประทับตราสำคัญของบริษัท"; // VARCHAR( 5000 ) NOT NULL COMMENT 'จำนวนหรือชื่อกรรมการที่ลงชื่อผูกพัน' ,
+			Yii::app()->CCropinfo_tmp->crop_remark = "-"; // TEXT NULL COMMENT 'หมายเหตุ' ,
+			Yii::app()->CCropinfo_tmp->crop_createby = "sys"; // VARCHAR( 100 ) NOT NULL COMMENT 'สร้างโดย' ,
+			Yii::app()->CCropinfo_tmp->crop_createtime = date('Y-m-d H:i:s'); // DATETIME NOT NULL COMMENT 'วันที่สร้าง' ,
+			Yii::app()->CCropinfo_tmp->crop_updateby = "sys"; // VARCHAR( 100 ) NOT NULL COMMENT 'แก้ไขโดย' ,
+			Yii::app()->CCropinfo_tmp->crop_updatetime = date('Y-m-d H:i:s'); // DATETIME NOT NULL COMMENT 'วันที่แก้ไข' ,
+			Yii::app()->CCropinfo_tmp->crop_status = 1; // TINYINT( 1 ) NOT NULL DEFAULT '1' COMMENT 'สถานะ 1.ใช้งานปกติ' ,
+			
+			if(!Yii::app()->CCropinfo_tmp->regexists()){
+				$createc = Yii::app()->CGenAccNo->CreateNewAcc(); 
+				$msg_result = Yii::app()->CCropinfo_tmp->create();
+			}else{
+				$msg_result = "มีรายการข้อมูลเลขนิติบุคคล : " . Yii::app()->CCropinfo_tmp->registernumber . " อยู่ในระบบแล้ว.";	
+			}
+			
+			
+			echo preg_replace("/\xEF\xBB\xBF/", "","{$msg_result},");
+			
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallservice5(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		Yii::app()->CCropinfo_tmp->registernumber = "0115562012587";
+		//$msg_result = Yii::app()->CWpdApi->regexists();
+		if(Yii::app()->CCropinfo_tmp->regexists()){
+			echo preg_replace("/\xEF\xBB\xBF/", "","มีข้อมูลอยู่แล้ว");
+		}else{
+			echo preg_replace("/\xEF\xBB\xBF/", "","ยังไม่มีข้อมูล");
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}//public function actionCallservice5(){
+	
+	public function actionAddcommittee(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$action},");
+		
+		//กำหนดค่า ให้ properties ใน class
+		Yii::app()->CCommittee_tmp->crop_id = Yii::app()->CCropinfo_tmp->getlastcorpid(); 
+		Yii::app()->CCommittee_tmp->registernumber = "0115562012587"; //** select
+		Yii::app()->CCommittee_tmp->tsic = "47612"; //** select
+		Yii::app()->CCommittee_tmp->corptype = "5";  //** select
+		Yii::app()->CCommittee_tmp->committeetype = "K"; 
+		Yii::app()->CCommittee_tmp->ordernumber = 1; 
+		Yii::app()->CCommittee_tmp->typeno = "1"; 
+		Yii::app()->CCommittee_tmp->identity = "1100800307965"; 
+		Yii::app()->CCommittee_tmp->birthday = "1986-10-24 00:00:00"; 
+		Yii::app()->CCommittee_tmp->title = "น.ส."; 
+		Yii::app()->CCommittee_tmp->firstname = "จันท์สุดา"; 
+		Yii::app()->CCommittee_tmp->lastname = "นวมรัตน์"; 
+		Yii::app()->CCommittee_tmp->englishtitle = "Ms."; 
+		Yii::app()->CCommittee_tmp->englishfirstname12 = "JANSUDA"; 
+		Yii::app()->CCommittee_tmp->englishlastname = "NAWAMARAT"; 
+		Yii::app()->CCommittee_tmp->nation = "TH"; 
+		Yii::app()->CCommittee_tmp->cmit_remark = "-"; 
+		Yii::app()->CCommittee_tmp->cmit_createby = "sys"; 
+		Yii::app()->CCommittee_tmp->cmit_createtime = date('Y-m-d H:i:s'); 
+		Yii::app()->CCommittee_tmp->cmit_updateby = "sys"; 
+		Yii::app()->CCommittee_tmp->cmit_updatetime = date('Y-m-d H:i:s');
+		Yii::app()->CCommittee_tmp->cmit_status = 1; 
+		
+		if(!Yii::app()->CCommittee_tmp->committeeexists()){
+			$msg_result = Yii::app()->CCommittee_tmp->create();
+		}else{
+			$msg_result = preg_replace("/\xEF\xBB\xBF/", "","มีรายการเลขที่บัตรประจำตัว : " . Yii::app()->CCommittee_tmp->identity . " อยู่ในระบบแล้ว.");	
+		}
+		
+		echo "{$msg_result},";
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionGetlastcorpid(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$lastcropid = Yii::app()->CCropinfo_tmp->getlastcorpid();
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$action}, {$lastcropid}");
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionChkcommitteeexists(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$action}, ");
+		Yii::app()->CCommittee_tmp->crop_id = 1;
+		Yii::app()->CCommittee_tmp->registernumber = "0115562012587";
+		Yii::app()->CCommittee_tmp->committeetype = "K";
+		Yii::app()->CCommittee_tmp->ordernumber = 1;
+		Yii::app()->CCommittee_tmp->identity = "1100800307965";
+		if(Yii::app()->CCommittee_tmp->committeeexists()){
+			echo preg_replace("/\xEF\xBB\xBF/", "","มีข้อมูลอยู่แล้ว");
+		}else{
+			echo preg_replace("/\xEF\xBB\xBF/", "","ยังไม่มีข้อมูล");	
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}//public function actionChkcommitteeexists(){
+		
+	public function actionAddbbranch(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$action}, ");
+
+		Yii::app()->CBranch_tmp->crop_id = Yii::app()->CCropinfo_tmp->getlastcorpid();
+		Yii::app()->CBranch_tmp->registernumber = "0115562012587"; 
+		Yii::app()->CBranch_tmp->tsic = "47612"; 
+		Yii::app()->CBranch_tmp->corptype = "5"; 
+		Yii::app()->CBranch_tmp->ordernumber = 1; 
+		Yii::app()->CBranch_tmp->name = "สำนักงานใหญ่"; 
+		Yii::app()->CBranch_tmp->houseid = "11031785426"; 
+		Yii::app()->CBranch_tmp->housenumber = "111/418"; 
+		Yii::app()->CBranch_tmp->buildingname = "-"; 
+		Yii::app()->CBranch_tmp->buildingnumber = "-"; 
+		Yii::app()->CBranch_tmp->buildingfloor = "-";
+		Yii::app()->CBranch_tmp->village = "-"; 
+		Yii::app()->CBranch_tmp->moo = "4"; 
+		Yii::app()->CBranch_tmp->soi = "-"; 
+		Yii::app()->CBranch_tmp->road = "-"; 
+		Yii::app()->CBranch_tmp->tumbon = "บางแก้ว"; 
+		Yii::app()->CBranch_tmp->tumboncode = "02"; 
+		Yii::app()->CBranch_tmp->ampur = "บางพลี"; 
+		Yii::app()->CBranch_tmp->ampurcode = "03"; 
+		Yii::app()->CBranch_tmp->province = "สมุทรปราการ"; 
+		Yii::app()->CBranch_tmp->provincecode = "11"; 
+		Yii::app()->CBranch_tmp->zipcode = "10540"; 
+		Yii::app()->CBranch_tmp->phonenumber = "0922460043"; 
+		Yii::app()->CBranch_tmp->faxnumber = "-";
+		Yii::app()->CBranch_tmp->email = "-"; 
+		Yii::app()->CBranch_tmp->brch_remark = "-"; 
+		Yii::app()->CBranch_tmp->brch_createby = "sys"; 
+		Yii::app()->CBranch_tmp->brch_createtime = date('Y-m-d H:i:s'); 
+		Yii::app()->CBranch_tmp->brch_updateby = "sys"; 
+		Yii::app()->CBranch_tmp->brch_updatetime = date('Y-m-d H:i:s'); 
+		Yii::app()->CBranch_tmp->brch_status = 1; 
+		
+		if(!Yii::app()->CBranch_tmp->branchexists()){
+			$msg_result = Yii::app()->CBranch_tmp->create();
+		}else{
+			$msg_result = "มีรายการสาขา : " . Yii::app()->CBranch_tmp->name . " อยู่ในระบบแล้ว.";		
+		}
+		
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$msg_result},");
+		
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschcropinfo(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/schcropinfo', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschcropinfosp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schcropinfosp', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschcropinfosp1(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schcropinfosp1', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschcommittee(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/schcommittee', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschcommitteesp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schcommitteesp', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschbranch(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/schbranch', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschbranchsp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schbranchsp', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschdetailcrop(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/schdetailcrop', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschdetailcropsp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$regisnum = $_POST['regisnum'];
+		//echo "{$action},{$regisnum}";
+		$data1 = array('action' => $action, 'regisnum' => $regisnum);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schdetailcropsp', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionChgstatusfrm(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$crop_id = $_POST['crop_id'];
+		$registernumber = $_POST['registernumber'];
+		//echo "{$action},{$crop_id},{$registernumber}";
+		//$match = addcslashes($eid, '%_'); // escape LIKE's special characters
+		$q = new CDbCriteria( array(
+    		'condition' => "crop_id = :crop_id",         // no quotes around :match
+    		'params'    => array(':crop_id' => "{$crop_id}")  // Aha! Wildcards go here
+		));
+		$model = CropinfoTmpTb::model()->findAll($q);
+	 	$encode = CJSON::encode($model);
+		//echo "{$encode}";
+		$data1 = array('encode'=>$encode); //, 'action'=>$action, 'crop_id'=>$crop_id, 'registernumber'=>$registernumber 
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/chgstatusfrm', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionChgstatusfrmsp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$crop_id = $_POST['crop_id'];
+		$registernumber = $_POST['registernumber'];
+		//echo "{$action},{$crop_id},{$registernumber}";
+		//$match = addcslashes($eid, '%_'); // escape LIKE's special characters
+		$q = new CDbCriteria( array(
+    		'condition' => "crop_id = :crop_id",         // no quotes around :match
+    		'params'    => array(':crop_id' => "{$crop_id}")  // Aha! Wildcards go here
+		));
+		$model = CropinfoTmpTb::model()->findAll($q);
+	 	$encode = CJSON::encode($model);
+		//echo "{$encode}";
+		$data1 = array('encode'=>$encode); //, 'action'=>$action, 'crop_id'=>$crop_id, 'registernumber'=>$registernumber 
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/chgstatusfrmsp', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionCallupdatestatus1(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$crop_id = $_POST['crop_id'];
+		$registernumber = $_POST['registernumber'];
+		$d1 = $_POST['d1']; //วันที่มีลูกจ้าง
+		$e1 = $_POST['e1']; //email ติดต่อกลับ
+		$accno = $_POST['accno']; //เลขประกันสังคม 10 หลัก
+		$accbranch = $_POST['accbranch']; //เลขสาขา 6 หลัก
+		$numemp1 = $_POST['numemp1'];
+		$numemp2 = $_POST['numemp2'];
+		
+		$d1d = date_create($d1)->format('d');
+		$d1m = date_create($d1)->format('m');
+		$d1y = date_create($d1)->format('Y')-543;
+		$d1t = date_create($d1)->format('H:i:s');
+		$d1f1 = $d1y . "-" . $d1m . "-" . $d1d . " " . $d1t;
+		//$datedbd2 = date_create('2019-02-04T23:59:59+07:00')->format('Y-m-d H:i:s');
+		$d1f = date_create($d1f1)->format('Y-m-d H:i:s');
+		
+		if($e1==""){
+			$e1 ="-";	
+		}
+		if(!$e1){
+			$e1 ="-";
+		}
+		if(Yii::app()->user->username){
+			$username = Yii::app()->user->username;
+		}else{
+			$username = "sys";
+		}
+		//echo "{$action},{$crop_id},{$registernumber}, {$d1f}, {$e1}, {$accno}, {$accbranch} <br>"
+		
+	//ค้นหา status ใน cropinfo_tmp ก่อนว่าเป็น A หรือไม่ --------------------------------------------------------------------
+	$cit=CropinfoTmpTb::model()->findByAttributes(array('registernumber'=>$registernumber));
+	$crop_remark = $cit->crop_remark;	//A
+	$crop_status = $cit->crop_status; //4
+	
+	if($crop_remark!='A'){
+		
+		$qems = new CDbCriteria( array(
+			'condition' => "ems_registernumber = :ems_registernumber ",         
+			'params'    => array(':ems_registernumber' => $registernumber)  
+		));
+		$mems = EmpstateTb::model()->findAll($qems);
+		$cems = count($mems);
+		if($cems==0){
+			$EmpstateTb = new EmpstateTb();
+			 $EmpstateTb->ems_registernumber = $registernumber;
+			 $EmpstateTb->ems_accno = $accno;
+			 $EmpstateTb->ems_accbran = $accbranch;
+			 $EmpstateTb->ems_email = $e1;
+			 $EmpstateTb->ems_startdate = $d1f;
+			 $EmpstateTb->ems_numofemp = $numemp1;
+ 			 $EmpstateTb->ems_totalsalary = $numemp2;
+			 $EmpstateTb->ems_createby = $username;
+			 $EmpstateTb->ems_created = date('Y-m-d H:i:s');
+			 $EmpstateTb->ems_updateby = $username;
+			 $EmpstateTb->ems_modified = date('Y-m-d H:i:s');
+			 $EmpstateTb->ems_remark = "-";
+			 $EmpstateTb->ems_status = 1;
+			 if($EmpstateTb->save()){
+				  $msg = "add data is success";
+				  //***** update CropinfoTmpTb ***************************
+				  $ucif = CropinfoTmpTb::model()->findBySQL('SELECT * FROM cropinfo_tmp_tb WHERE crop_id =' . $crop_id . ' AND registernumber =' . $registernumber);
+				  	$ucif->crop_updateby = $username;
+ 					$ucif->crop_updatetime = date('Y-m-d H:i:s');
+					$ucif->crop_remark = "B";
+					$ucif->crop_status = 3;
+					if($ucif->save()){
+						$msg2 = "update data cropinfo is success.";
+						//update status crop_v_bran
+						$cropid = $crop_id;
+						$registernumber = $registernumber;
+						Yii::app()->Cwpdreport->updatetob($cropid, $registernumber);
+						
+						//********* update accnumber_tb *******************
+						$anb=AccnumberTb::model()->findByAttributes(array('acc_no'=>$accno, 'acc_regis_no'=>$registernumber));
+						$anb->acc_updateby = $username;
+						$anb->acc_modified = date('Y-m-d H:i:s');
+						$anb->acc_remark = "B";
+						$anb->acc_status = 3;
+						if($anb->save()){
+							$msg3 = "update data is success.";
+						}else{
+							$msg3 = "can't update data.";
+						}
+						echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+					}else{
+						$msg2 = $ucif->getErrors();
+						echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+					}
+					$levremark = "ปรับปรุงสถานะนิติบุคคลเป็นB&เพิ่มข้อมูลสถานนิติบุคคล" . $crop_id . "&" . $registernumber . "&" . $accno . "&" . $e1;
+					$msgresult = Yii::app()->Clogevent->createlogevent("Update", "UpdateStatusPage", "UpdatestatustoB", "CropInfo&Empstate", $levremark);	
+			  }else{
+				  $msg = $EmpstateTb->getErrors();
+				  echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+			  }
+			 
+		}//if($cems==0){
+		
+	}else{//if($crop_remark!='A')
+		echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+	}//if($crop_remark!='A')
+		
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	
+	
+	public function actionCallschstatusp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'P-' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		//$this->render('/site/servicepages/callaspservice');
+		$this->render('/site/servicepages/schstatusp', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschstatusb(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'B-' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		//$this->render('/site/servicepages/callaspservice');
+		$this->render('/site/servicepages/schstatusb', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschstatusa(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'A-' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		//$this->render('/site/servicepages/callaspservice');
+		$this->render('/site/servicepages/schstatusa', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallgentextfile(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$statusgt = $_POST['statusgt'];
+		//echo "{$action},{$statusgt}";
+		$data1 = array('action' => $action, 'statusgt' => $statusgt);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/gentextfile', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallgentextfileauto(){
+		
+		$action = $_POST['action'];
+		$statusgt = $_POST['statusgt'];
+		//echo "{$action},{$statusgt}";
+		$data1 = array('action' => $action, 'statusgt' => $statusgt);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/gentextfileauto', $data1);
+		
+	}
+	
+	public function actionCallschbydate(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$levremark = "ค้นหาข้อมูลนิติบุคคลตามวันที่:" . $bgdatep . "&" . $eddatep . "&" . $eddatep . "&" . $newdap . "&" . $updap ;
+		$msgresult = Yii::app()->Clogevent->createlogevent("Search", "SearchByDate", "Search", "CropInfo", $levremark);
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schbydate', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallschbyinfo(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(Yii::app()->user->username){
+	  		$username = Yii::app()->user->username;
+  		}else{
+	  		$username = "sys";
+  		}
+		
+		$action = $_POST['action'];
+		$schtxt = $_POST['schtxt'];
+		$seltxt = $_POST['seltxt'];
+		//echo "{$action},{$schtxt},{$seltxt}";
+		
+		$levremark = "ค้นหาข้อมูลนิติบุคคลด้วย:" . $seltxt . "&" . $schtxt ;
+		$msgresult = Yii::app()->Clogevent->createlogevent("Search", "SearchByInfo", "Search", "CropInfo", $levremark);
+		
+		$data1 = array('action' => $action, 'schtxt' => $schtxt, 'seltxt' => $seltxt);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schbyinfo', $data1);
+		
+		//ค้นหาข้อมุลในฐานข้อมูล WPD ก่อนว่ามีหรือไม่
+		/*if($seltxt == "2"){
+			//echo "{$action},{$schtxt},{$seltxt} <br>";
+			$qwpd = new CDbCriteria( array(
+				'condition' => "registernumber = :schtxt ",         
+				'params'    => array(':schtxt' => "{$schtxt}")  
+			));
+			$modelwpd = CropinfoTmpTb::model()->findAll($qwpd);
+			$countwpd = count($modelwpd);
+			//echo "{$countwpd} <br>";
+			if($countwpd == 0){ 
+				//echo "not have data in wpd.";	
+				//เรียกใช้ web service dbd รายตัว
+				Yii::app()->CCropinfo_tmp->registernumber = $schtxt; //กำหนดค่าให้ property in class
+				Yii::app()->CCropinfo_tmp->username = $username; 
+				Yii::app()->CCropinfo_tmp->GetinfoByRN(); //call dbd webservice methode
+				Yii::app()->CCropinfo_tmp->GenSsoNumber(); //call genssonumber method
+				
+				$data1 = array('action' => $action, 'schtxt' => $schtxt, 'seltxt' => $seltxt);
+				$this->layout='nolayout';
+				$this->render('/site/searchpages/schbyinfo', $data1);
+				
+			}else{
+				$data1 = array('action' => $action, 'schtxt' => $schtxt, 'seltxt' => $seltxt);
+				$this->layout='nolayout';
+				$this->render('/site/searchpages/schbyinfo', $data1);
+			}
+		}else{
+			$data1 = array('action' => $action, 'schtxt' => $schtxt, 'seltxt' => $seltxt);
+			$this->layout='nolayout';
+			$this->render('/site/searchpages/schbyinfo', $data1);
+		}*/
+		
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionCallschinfodbd(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(Yii::app()->user->username){
+	  		$username = Yii::app()->user->username;
+  		}else{
+	  		$username = "sys";
+  		}
+		$action = $_POST['action'];
+		$schtxt = $_POST['schtxt'];
+		$seltxt = $_POST['seltxt'];
+		//echo "{$action},{$schtxt},{$seltxt},{$username}";
+		$levremark = "search DBD :" . $seltxt . "&" . $schtxt ;
+		$msgresult = Yii::app()->Clogevent->createlogevent("Search", "SearchByInfo", "Search", "CropInfo", $levremark);
+		Yii::app()->CCropinfo_tmp->registernumber = $schtxt; //กำหนดค่าให้ property in class
+		Yii::app()->CCropinfo_tmp->username = $username; 
+		//$dbddata = Yii::app()->CCropinfo_tmp->Getinfofrmdbd(); //ดึง xml data จาก dbd
+		$dbddata = Yii::app()->CCropinfo_tmp->GetinfofrmdbdV5();
+		$data1 = array('action' => $action, 'schtxt' => $schtxt, 'seltxt' => $seltxt, 'dbddata' => $dbddata);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schinfofrmdbd', $data1);
+		
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionCallschandsavecropinfo(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+			if(Yii::app()->user->username){
+				$username = Yii::app()->user->username;
+			}else{
+				$username = "sys";
+			}
+			
+			$action = $_POST['action'];
+			$schtxt = $_POST['schtxt'];
+			$seltxt = $_POST['seltxt'];
+			//echo "{$action},{$schtxt},{$seltxt}";
+			//ค้นหาข้อมุลในฐานข้อมูล WPD ก่อนว่ามีหรือไม่
+			if($seltxt == "2"){
+				//echo "{$action},{$schtxt},{$seltxt} <br>";
+				$qwpd = new CDbCriteria( array(
+					'condition' => "registernumber = :schtxt ",         
+					'params'    => array(':schtxt' => "{$schtxt}")  
+				));
+				$modelwpd = CropinfoTmpTb::model()->findAll($qwpd);
+				$countwpd = count($modelwpd);
+				//echo "{$countwpd} <br>";
+				if($countwpd == 0){ 
+					//echo "not have data in wpd.";	
+					//เรียกใช้ web service dbd รายตัว
+					Yii::app()->CCropinfo_tmp->registernumber = $schtxt; //กำหนดค่าให้ property in class
+					Yii::app()->CCropinfo_tmp->username = $username; 
+					Yii::app()->CCropinfo_tmp->GetinfoByRN(); //call dbd webservice methode
+					Yii::app()->CCropinfo_tmp->GenSsoNumber(); //call genssonumber method
+					
+					/*$data1 = array('action' => $action, 'schtxt' => $schtxt, 'seltxt' => $seltxt);
+					$this->layout='nolayout';
+					$this->render('/site/searchpages/schbyinfo', $data1);*/
+					
+					echo "บันทึกข้อมูลสถานประอบการเพิ่มเติม เรียบร้อยแล้ว.";
+					
+				}else{
+					echo "มีข้อมูลสถานประกอบการ เลขที่นิติบุคคล {$schtxt} <br> อยู่ในระบบแล้ว ไม่สามารถบันทึกซ้ำได้ !";	
+				}
+			}else{
+				echo "ไม่สามารถบันทึกข้อมูลได้ เนื่องจากเกิดข้อผิดพลาด กรุณาติดต่อผู้ดูแลระบบ !";
+			}
+			//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionSchdetailfrm(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$crop_id = $_POST['crop_id'];
+		$registernumber = $_POST['registernumber'];
+		//echo "{$action},{$crop_id},{$registernumber}";
+		$data1 = array('action' => $action, 'crop_id' => $crop_id, 'registernumber' => $registernumber);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/schdetailfrm', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowtextfile(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		//echo "{$action}";
+		$data1 = array('action' => $action);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/showtextfile', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallusergroupfrm(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$usgid = $_POST['usgid'];
+		$data1 = array('action' => $action, 'usgid' => $usgid);
+		$this->layout='nolayout';
+		$this->render('/site/adminpages/usergroupfrm', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallusergroup(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		//echo "{$action}";
+		$data1 = array('action' => $action);
+		$this->layout='nolayout';
+		$this->render('/site/adminpages/usergroup', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalladdusg(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$ug_name = $_POST['ustxt1'];
+		$ug_remark = $_POST['ustxt2'];
+ 		$ug_createby = "sys";
+ 		$ug_created = date('Y-m-d H:i:s');
+		$ug_updateby = "sys";
+		$ug_modified = date('Y-m-d H:i:s');
+		$ug_status = 1;
+		//echo "{$action},{$action},{$ug_remark}";
+		$q = new CDbCriteria( array(
+					'condition' => "ug_name = :ug_name ",         
+					'params'    => array(':ug_name' => $ug_name)  
+		));
+		$musg = UsergroupTb::model()->findAll($q);
+		$countusg = count($musg);
+		if($countusg==0){
+			$UsergroupTb = new UsergroupTb();
+			$UsergroupTb->ug_name = $ug_name;
+			$UsergroupTb->ug_remark = $ug_remark;
+ 			$UsergroupTb->ug_createby = $ug_createby;
+ 			$UsergroupTb->ug_created = $ug_created;
+			$UsergroupTb->ug_updateby = $ug_updateby;
+			$UsergroupTb->ug_modified = $ug_modified;
+			$UsergroupTb->ug_status = $ug_status;
+			if($UsergroupTb->save()){
+				//actionCallusergroup();
+				//echo "y";
+				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+			}else{
+				//echo "n";
+				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+			}
+		}else{//if($countusg==0)
+			//echo "d";
+			echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'errordup')));
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}//actionCalladdusg()
+	
+	public function actionCallchgusg(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$udid = $_POST['udid'];
+		$action = $_POST['action'];
+		$ug_name = $_POST['ustxt1'];
+		$ug_remark = $_POST['ustxt2'];
+		$ug_updateby = "sys";
+		$ug_modified = date('Y-m-d H:i:s');
+		$ug_status = 1;
+		//echo "{$action},{$udid}, {$ug_name}, {$ug_remark}";
+		//echo CJSON::encode(array('status' => 'success'));
+		$updateusg = UsergroupTb::model()->findByPk($udid);
+		$updateusg->ug_name = $ug_name;
+		$updateusg->ug_remark = $ug_remark;
+		$updateusg->ug_updateby = $ug_updateby;
+		$updateusg->ug_modified = $ug_modified;
+		if($updateusg->save()){
+			echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+		}else{
+			echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionCalldelusg(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$deid = $_POST['deid'];
+		$dename = $_POST['dename'];
+		//echo "{$action},{$deid}, {$dename}";
+		try{
+		   $deleteusg = UsergroupTb::model()->findByPk($deid);
+		   $deleteusg->delete();
+		   echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+		}catch (Exception $e){
+		   echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error'))); 
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalluserall(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		//echo "{$action}";
+		$data1 = array('action' => $action);
+		$this->layout='nolayout';
+		$this->render('/site/adminpages/userall', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallusafrm(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$usaid = $_POST['usaid'];
+		$data1 = array('action' => $action, 'usaid' => $usaid);
+		$this->layout='nolayout';
+		$this->render('/site/adminpages/userfrm', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalladdusa(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+ 		 $firstname = $_POST['usatxt1'];
+		 $lastname = $_POST['usatxt2'];
+		 $email = $_POST['usatxt5'];
+		 $contact_number = $_POST['usatxt6'];
+		 $address = $_POST['usatxt7'];
+		 $username = $_POST['usatxt3'];
+		 $password = $_POST['usatxt4'];
+		 $access_level = $_POST['usatxt9'];
+		 $access_code = $_POST['usatxt8'];
+		 $status = 1;
+		 $image = "-";
+		 $created = date('Y-m-d H:i:s');
+		 $modified = date('Y-m-d H:i:s');
+		 //echo "{$firstname}, {$lastname}, {$email}, {$contact_number}, {$address}, {$username}, {$password}, {$access_level}, {$access_code}, {$status}, {$image}, {$created}, {$modified}";
+		 $q = new CDbCriteria( array(
+			'condition' => "username = :username ",         
+			'params'    => array(':username' => $username)  
+		 ));
+		 $susa = Users::model()->findAll($q);
+		 $countusa = count($susa);
+		 if($countusa==0){
+		 	$Users = new Users();
+		    $Users->firstname = $firstname;
+		    $Users->lastname = $lastname;
+		    $Users->email = $email;
+		    $Users->contact_number = $contact_number;
+		    $Users->address = $address;
+		    $Users->username = $username;
+		    $Users->password = $password;
+		    $Users->access_level = $access_level;
+		    $Users->access_code = $access_code;
+		    $Users->status = $status;
+		    $Users->image = $image;
+		    $Users->created = $created;
+		    $Users->modified = $modified;
+			if($Users->save()){
+				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+			}else{
+				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+				//echo CJSON::encode($Users->getErrors());
+			}
+		 }else{//if($countusg==0)
+			echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'errordup')));
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallchgusa(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$udid = $_POST['udid'];
+		$action = $_POST['action'];
+		$firstname = $_POST['usatxt1'];
+		$lastname = $_POST['usatxt2'];
+		$email = $_POST['usatxt5'];
+		$contact_number = $_POST['usatxt6'];
+		$username = $_POST['usatxt3'];
+		$password = $_POST['usatxt4'];
+		$address = $_POST['usatxt7'];
+		$access_level = $_POST['usatxt9'];
+		$access_code = $_POST['usatxt8'];
+		$modified = date('Y-m-d H:i:s');
+		//echo "{$firstname}, {$lastname}, {$email}, {$contact_number}, {$username}, {$password}, {$address}, {$access_level}, {$access_code}"; exit;
+		//echo CJSON::encode(array('status' => 'success'));
+		$updateusa = Users::model()->findByPk($udid);
+		
+		$updateusa->firstname = $firstname;
+		$updateusa->lastname = $lastname;
+		$updateusa->email = $email;
+		$updateusa->contact_number = $contact_number;
+		$updateusa->address = $address;
+		$updateusa->username = $username;
+		$updateusa->password = $password;
+		$updateusa->access_level = $access_level;
+		$updateusa->access_code = $access_code;
+		$updateusa->modified = $modified;
+		
+		if($updateusa->save()){
+			echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+		}else{
+			echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+			//echo CJSON::encode($updateusa->getErrors());
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalldelusa(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$deid = $_POST['deid'];
+		$dename = $_POST['dename'];
+		//echo "{$action},{$deid}, {$dename}";
+		try{
+		   $deleteusa = Users::model()->findByPk($deid);
+		   $deleteusa->delete();
+		   echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+		}catch (Exception $e){
+		   echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error'))); 
+		}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCreatelogevent(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$msgresult = Yii::app()->Clogevent->createlogevent("testadd", "tPage", "tCause", "tData", "tRemark");
+		echo preg_replace("/\xEF\xBB\xBF/", "","{$action}, {$msgresult}");
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalluploadfile(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(Yii::app()->user->username){
+			$username = Yii::app()->user->username;
+		}else{
+			$username = "sys";
+		}
+		/*
+		$action = $_POST['action'];
+		$tfid = $_POST['tfid'];
+		//echo "{$action},{$tfid} <br>";
+		//$sqlstring = "SELECT * FROM gentextfile_tb WHERE gtf_id =" . $tfid;
+		//$getpathfile = GentextfileTb::model()->findBySQL($sqlstring);
+		$getpathfile = GentextfileTb::model()->findByPk($tfid);
+		$gtf_name = $getpathfile->gtf_name;
+		$gtf_path = $getpathfile->gtf_path;
+		//echo "{$action},{$tfid}, {$gtf_name}, {$gtf_path} <br>";
+		Yii::app()->Cgentextfile->gtf_name = $gtf_name;
+		Yii::app()->Cgentextfile->gtf_path = $gtf_path;
+		$uploadftxt = Yii::app()->Cgentextfile->uploadtf();
+		//echo "{$uploadftxt}";
+		if($uploadftxt=='Y'){
+			$updattf = GentextfileTb::model()->findByPk($tfid);
+			$updattf->gtf_statusupload = "y";
+			$updattf->gtf_updateby = $username;
+ 			$updattf->gtf_modified = date('Y-m-d H:i:s');
+			if($updattf->save()){
+				$levremark = "uploadtextfiletosftpserver:" . $tfid . "&" . $gtf_name . "&" . $gtf_path;
+				$msgresult = Yii::app()->Clogevent->createlogevent("Upload", "UploadfiltToSFTP", "Upload", "gentextfiletb", $levremark);
+				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+			}else{
+				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+			}
+		}else{
+			 echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
+		}
+		*/
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionShowfile(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		//echo "{$action}";
+		$data1 = array('action' => $action);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/showallfile', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalldbdbyrn(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		//echo "{$action}";	
+		$data1 = array('action' => $action);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdbyrn',$data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalladdaccno(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		echo "{$action} <br>";	
+		//****** insert accnumber_tb ****************************************
+			$intsdata = new AccnumberTb();
+			
+			$intsdata->acc_no = "-";
+		   	$intsdata->acc_bran = "-";
+		  	$intsdata->acc_regis_no = "-";
+		   	$intsdata->acc_active_flag = "-";
+		   	$intsdata->acc_using_date = "";
+		   	$intsdata->acc_createby = "sys";
+		   	$intsdata->acc_created = "";
+		   	$intsdata->acc_updateby = "sys";
+		   	$intsdata->acc_modified = "";
+		   	$intsdata->acc_remark = "-";
+		   	$intsdata->acc_status = 1;
+			
+			if($intsdata->save()){
+				//echo CJSON::encode(array('status' => 'success'));
+				echo preg_replace("/\xEF\xBB\xBF/", "","yes <br>");
+			}else{
+				//echo CJSON::encode(array('status' => 'error'));
+				//echo CJSON::encode($Users->getErrors());
+				echo preg_replace("/\xEF\xBB\xBF/", "","no <br>");
+			}
+		//*********************************************************
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowrpt(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		//echo "{$action} <br>";
+		$data1 = array('action' => $action);
+		$this->layout='nolayout';
+		$this->render('/site/reportpages/printformexcel2', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}
+	
+	public function actionCallsubrpt(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$slv = $_POST['slv'];
+		//echo "{$action}, {$slv} <br>";
+		$data1 = array('action' => $action, 'slv' => $slv);
+		$this->layout='nolayout';
+		$this->render('/site/reportpages/reportpage1', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowrpt1(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$this->layout='nolayout';
+		$this->render('/site/reportpages/printformexcel2');
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowrptled31(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(Yii::app()->user->address){
+ 			$user_bc = Yii::app()->user->address;
+		}
+		
+		if($user_bc=='1050'){
+			$bctid="1";
+		}else{
+			//ค้นหาประเภทของ barch_code
+			$bct=MasSsobranch::model()->findByAttributes(array('ssobranch_code'=>$user_bc));
+			$bctid = $bct->ssobranch_type_id;
+		}
+		//echo $bctid;exit;
+		$data1 = array('bc' => $user_bc, 'bct' => $bctid);
+		$this->layout='nolayout';
+		$this->pageTitle='WPD - Report ';
+		$this->render('/site/reportpages/reportled31', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallsubrptled31(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$d1 = $_POST['d1'];
+		$d2 = $_POST['d2'];
+		$sso1 = $_POST['sso1'];
+		$bct = $_POST['bct'];
+		$bc = $_POST['bc'];
+		//ค้นหาชื่อ สปส รับผิดชอบ
+		if($sso1=='0'){
+			$sso1t="ทั่วประเทศ";
+		}else if($sso1=='1050'){
+			$sso1t="สำนักบริหารเทคโนโลยีสารสนเทศ";
+		}else{
+			$bcr=MasSsobranch::model()->findByAttributes(array('ssobranch_code'=>$sso1));
+			$bcn = $bcr->name;	
+			$sso1t = $bcn;
+		}
+		
+		$data1 = array('action'=>$action,'d1'=>$d1,'d2'=>$d2,'sso1'=>$sso1,'bct'=>$bct,'bc'=>$bc,'sso1t'=>$sso1t);
+		$this->layout='nolayout';
+		$this->pageTitle='report - ' . $sso1t;
+		$this->render('/site/reportpages/reportsled31sub', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowrptled32(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$ssobranch_code = $_GET['ssobranch_code'];
+		$d1 = $_GET['d1'];
+		$d2 = $_GET['d2'];
+		//echo "{$ssobranch_code},{$d1},{$d2}";exit;
+		//ค้นหาชื่อ สปส รับผิดชอบ
+		if($ssobranch_code=='0'){
+			$ssobranch_codet="ทั่วประเทศ";
+		}else if($ssobranch_code=='1050'){
+			$ssobranch_codet="สำนักบริหารเทคโนโลยีสารสนเทศ";
+		}else{
+			$bcr=MasSsobranch::model()->findByAttributes(array('ssobranch_code'=>$ssobranch_code));
+			$bcn = $bcr->name;	
+			$ssobranch_codet = $bcn;
+		}
+		
+		$data1 = array('ssobranch_code'=>$ssobranch_code,'d1'=>$d1,'d2'=>$d2, 'ssobranch_codet' => $ssobranch_codet);
+		$this->layout='nolayout';
+ 	    $this->pageTitle='report - ' . $ssobranch_codet;
+		$this->render('/site/reportpages/reportsled32sub', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowrpt31(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(Yii::app()->user->address){
+ 			$user_bc = Yii::app()->user->address;
+		}
+		
+		if($user_bc=='1050'){
+			$bctid="1";
+		}else{
+			//ค้นหาประเภทของ barch_code
+			$bct=MasSsobranch::model()->findByAttributes(array('ssobranch_code'=>$user_bc));
+			$bctid = $bct->ssobranch_type_id;
+		}
+		//echo $bctid;exit;
+		$data1 = array('bc' => $user_bc, 'bct' => $bctid);
+		$this->layout='nolayout';
+		$this->pageTitle='WPD - Report ';
+		$this->render('/site/reportpages/report31', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallsubrpt31(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$d1 = $_POST['d1'];
+		$d2 = $_POST['d2'];
+		$sso1 = $_POST['sso1'];
+		$bct = $_POST['bct'];
+		$bc = $_POST['bc'];
+		
+		//formatdate
+		$d1d = date_create($d1)->format('d');
+		$d1m = date_create($d1)->format('m');
+		$d1y = date_create($d1)->format('Y'); //-543;
+		//$d1t = date_create($d1)->format('H:i:s');
+		$d1f1 = $d1y . "-" . $d1m . "-" . $d1d; // " " . $d1t;
+		//$datedbd2 = date_create('2019-02-04T23:59:59+07:00')->format('Y-m-d H:i:s');
+		$d1 = date_create($d1f1)->format('Y-m-d');
+		
+		//formatdate
+		$d2d = date_create($d2)->format('d');
+		$d2m = date_create($d2)->format('m');
+		$d2y = date_create($d2)->format('Y'); //-543;
+		//$d1t = date_create($d1)->format('H:i:s');
+		$d2f2 = $d2y . "-" . $d2m . "-" . $d2d; // " " . $d1t;
+		//$datedbd2 = date_create('2019-02-04T23:59:59+07:00')->format('Y-m-d H:i:s');
+		$d2 = date_create($d2f2)->format('Y-m-d');
+		
+		//ค้นหาชื่อ สปส รับผิดชอบ
+		if($sso1=='0'){
+			$sso1t="ทั่วประเทศ";
+		}else if($sso1=='1050'){
+			$sso1t="สำนักบริหารเทคโนโลยีสารสนเทศ";
+		}else{
+			$bcr=MasSsobranch::model()->findByAttributes(array('ssobranch_code'=>$sso1));
+			$bcn = $bcr->name;	
+			$sso1t = $bcn;
+		}
+		
+		$data1 = array('action'=>$action,'d1'=>$d1,'d2'=>$d2,'sso1'=>$sso1,'bct'=>$bct,'bc'=>$bc,'sso1t'=>$sso1t);
+		$this->layout='nolayout';
+		$this->pageTitle='report - ' . $sso1t;
+		$this->render('/site/reportpages/reports31sub', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowrpt32(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$ssobranch_code = $_GET['ssobranch_code'];
+		$d1 = $_GET['d1'];
+		$d2 = $_GET['d2'];
+		//echo "{$ssobranch_code},{$d1},{$d2}";exit;
+		//ค้นหาชื่อ สปส รับผิดชอบ
+		if($ssobranch_code=='0'){
+			$ssobranch_codet="ทั่วประเทศ";
+		}else if($ssobranch_code=='1050'){
+			$ssobranch_codet="สำนักบริหารเทคโนโลยีสารสนเทศ";
+		}else{
+			$bcr=MasSsobranch::model()->findByAttributes(array('ssobranch_code'=>$ssobranch_code));
+			$bcn = $bcr->name;	
+			$ssobranch_codet = $bcn;
+		}
+		
+		$data1 = array('ssobranch_code'=>$ssobranch_code,'d1'=>$d1,'d2'=>$d2, 'ssobranch_codet' => $ssobranch_codet);
+		$this->layout='nolayout';
+ 	    $this->pageTitle='report - ' . $ssobranch_codet;
+		$this->render('/site/reportpages/reports32sub', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallshowrptled33(){
+		$this->layout='nolayout';
+		$this->pageTitle='report';
+		$this->render('/site/reportpages/reportsled33sub');
+	}
+	
+	public function actionCallcripvbran(){ //insert crop_v_bran เมื่อ ดึงข้อมูลจาก dbd มาลงฐานข้อมูล
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$m = $_POST['m'];
+		//echo "{$action}, {$m} <br>";
+		$cropid = 3404;
+		$registernumber = "0605562001211";
+		Yii::app()->Cwpdreport->createcrop_v_bran($cropid, $registernumber);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallupdatetob(){ //update crop_v_bran status is b เมื่อ ขึ้นทะเบียนลูกจ้าง
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$m = $_POST['m'];
+		//echo "{$action}, {$m} <br>";
+		$cropid = 3404;
+		$registernumber = "0605562001211";
+		Yii::app()->Cwpdreport->updatetob($cropid, $registernumber);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallupdatetoa(){ //update crop_v_bran status is a เมื่อ gen textfile ออกไปแล้ว
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$m = $_POST['m'];
+		//echo "{$action}, {$m} <br>";
+		$cropid = 3404;
+		$registernumber = "0605562001211";
+		Yii::app()->Cwpdreport->updatetoa($cropid, $registernumber);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallgettxtdata(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$action = $_POST['action'];
+		$fn1 = $_POST['fn1']; //ชื่อ textfile 
+		$minrec = $_POST['minrec'];
+		//echo "{$action},{$fn1}";
+		$data1 = array('action' => $action, 'fn1' => $fn1, 'minrec' => $minrec);
+		$this->layout='nolayout';
+		//$this->render('/site/servicepages/callaspservice');
+		$this->render('/site/servicepages/gettxtdata', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallajaxjson(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		/*if(isset(Yii::app()->user->username)){
+	  		$username = Yii::app()->user->username;
+ 		}else{
+	  		$username = "sys";
+  		}
+		
+		
+		$sso_accno_arr = CJSON::decode($_POST['sso_accno_arr']);
+		$sso_accbran_arr = CJSON::decode($_POST['sso_accbran_arr']);
+		$crg_registernum_arr = CJSON::decode($_POST['crg_registernum_arr']);
+		$crg_cropname_arr = CJSON::decode($_POST['crg_cropname_arr']);
+		$crg_cropaddrss_arr = CJSON::decode($_POST['crg_cropaddrss_arr']);
+		$crg_brancode_arr = CJSON::decode($_POST['crg_brancode_arr']);
+		
+		$countarray1 = count($sso_accno_arr);
+		ini_set('max_execution_time', 3600); 
+		$time_start = microtime(true);
+		for($i=0;$i<=$countarray1-1;$i++){
+			$selq = CropRiskGroup::model()->findByAttributes(array('crg_registernum'=>$t3));
+			if(empty($selq)){
+			  $CropRiskGroup = new CropRiskGroup();
+			  $CropRiskGroup->sso_accno = $sso_accno_arr[$i];
+			  $CropRiskGroup->sso_accbran = $sso_accbran_arr[$i];
+			  $CropRiskGroup->crg_registernum = $crg_registernum_arr[$i];
+			  $CropRiskGroup->crg_cropname = $crg_cropname_arr[$i];
+			  $CropRiskGroup->crg_cropaddrss = $crg_cropaddrss_arr[$i];
+			  $CropRiskGroup->crg_brancode = $crg_brancode_arr[$i];
+			  $CropRiskGroup->crg_createby = $username;
+			  $CropRiskGroup->crg_created = date('Y-m-d H:i:s');
+			  $CropRiskGroup->crg_updateby = $username;
+			  $CropRiskGroup->crg_modified = date('Y-m-d H:i:s');
+			  $CropRiskGroup->crg_remark = "-";
+			  $CropRiskGroup->crg_status = 1;
+			  $CropRiskGroup->save();
+			}
+		}
+		$time_end = microtime(true);
+		$execution_time = ($time_end - $time_start)/60;
+		echo '<b>Total Execution Time:</b> '.$execution_time.' Mins <br>';
+		*/
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallledservicecall(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$time_start = microtime(true);
+		
+		$action = $_POST['action'];
+		//echo "{$action}";
+		
+		$url = 'https://services.led.go.th/v1/GdxWebServiceSam';
+
+		$data = json_encode(
+			array(
+				"username" => "SSO001",
+				"password" => "",
+				"type" => "DATA",
+				"firstName" => "",
+				"lastName" => "",
+				"idCard" => "3100200572958",
+				"reqHeader" => array( "transID" => "SSO20180620",
+					"rqAppID" => "SSO",
+					"transDateTimestamp" => "20180620",
+					"terminalID" => "terminalID",
+					"ip" => "127.0.0.1",
+					"branchCode" => "001"
+					)
+			)
+		);
+		
+		$arrContextOptions=array(
+			"http" => array(
+			  "method" => "POST",
+			  "header" =>
+				  //"Consumer-Key: 8400dfa3-4fe3-43b9-b830-060d948d75cf", 
+				  "Content-Type: application/json; charset=utf-8;\r\n".
+				  "Connection: keep-alive\r\n",
+				  "ignore_errors" => true,
+				  "timeout" => (float)30.0,
+				  "content" => $data,
+			),
+			"ssl"=>array(
+				"verify_peer"=>false,
+				"verify_peer_name"=>false,
+			),
+		);  
+		
+		$content = file_get_contents($url, false, stream_context_create($arrContextOptions));
+		
+		echo "<pre>";
+		echo "{$content} <br>";
+		echo "</pre> <br>";
+		$time_end = microtime(true);
+		$execution_time = ($time_end - $time_start)/60;
+		echo '<b>ใช้เวลาเรียก service:</b> '.$execution_time.' Mins <br>';
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	
+	public function actionCallsearchledall(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/searchledall');
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCallsendmail(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+			$action = $_POST['action'];
+			$ema = $_POST['ema'];
+			$accno = $_POST['accno'];
+			$brnno = $_POST['brnno'];
+			
+			$msgresult = Yii::app()->Clogevent->sendmail($ema, $accno, $brnno);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalluploadfiletosftp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(isset(Yii::app()->user->username)){
+	  		$username = Yii::app()->user->username;
+ 		}else{
+	  		$username = "sys";
+  		}
+		//$time_start = microtime(true);
+		
+			$action = $_POST['action'];
+			$gtfname = $_POST['gtfname'];
+			
+			$localFile = Yii::app()->Cgentextfile->localpathf . $gtfname; //'wpd25620517.txt';
+			$remoteFile = Yii::app()->Cgentextfile->remotepathf . $gtfname; //'wpd25620517.txt';
+			
+			if(Yii::app()->Cgentextfile->getConnectionsftp()){
+				$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn); 
+				$contents = file_get_contents($localFile);  
+				$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);	
+				//echo "success";
+				//echo preg_replace("/\xEF\xBB\xBF/", "","Success");
+				$anb=GentextfileTb::model()->findByAttributes(array('gtf_name'=>$gtfname));
+				//$anb = GentextfileTb::model()->findByPk($gtfid);
+				$anb->gtf_statusupload = 'y';
+				$anb->gtf_updateby = $username;
+				$anb->gtf_modified = date('Y-m-d H:i:s');
+				$anb->gtf_status = 2;
+				if($anb->save()){
+					//$msg3 = "update data is success.";
+					$msgresult = Yii::app()->Clogevent->createlogevent("upload", "showtextfile", "uploadtextfiletosftp", "upload", "uploadtextfiletosftp");
+					echo "Success";
+				}else{
+					//$msg3 = "can't update data.";
+					//echo "Upload Success but Can't update status GentextfileTb.";
+					echo "Failed";
+				}
+			}else{
+				//echo "failed"; 
+				echo preg_replace("/\xEF\xBB\xBF/", "","Failed");
+			}
+	
+			
+			
+			//****** call wpdapi service ********************************************************
+			/*
+			$url = 'http://localhost/wpdapi/api/uploadfile/uploadtosftp.php?fn1=' . $gtfname ;
+			
+			$arrContextOptions=array(
+				"http" => array(
+				  "method" => "GET",
+				  "header" =>
+					  //"Consumer-Key: 8400dfa3-4fe3-43b9-b830-060d948d75cf", 
+					  "Content-Type: application/json; charset=utf-8;\r\n".
+					  "Connection: keep-alive\r\n",
+					  "ignore_errors" => true,
+					  "timeout" => (float)30.0,
+					  //"content" => $data,
+				),
+				"ssl"=>array(
+					"verify_peer"=>false,
+					"verify_peer_name"=>false,
+				),
+			);  
+			
+			$content = file_get_contents($url, false, stream_context_create($arrContextOptions));
+			
+			//echo "{$content} <br>";
+			
+			if($content){
+				//echo "Success";
+				//update gentextfile_tb
+				$anb=GentextfileTb::model()->findByAttributes(array('gtf_name'=>$gtfname));
+				//$anb = GentextfileTb::model()->findByPk($gtfid);
+				$anb->gtf_statusupload = 'y';
+				$anb->gtf_updateby = $username;
+				$anb->gtf_modified = date('Y-m-d H:i:s');
+				$anb->gtf_status = 2;
+				if($anb->save()){
+					//$msg3 = "update data is success.";
+					echo "Success";
+				}else{
+					//$msg3 = "can't update data.";
+					//echo "Upload Success but Can't update status GentextfileTb.";
+					echo "Failed";
+				}
+			}else{
+				echo "Failed";
+			}
+			*/
+		//***********************************************************************************
+		//$time_end = microtime(true);
+		//$execution_time = ($time_end - $time_start)/60;
+		//echo '<b>timeuses:</b> '.$execution_time.' Mins <br>';	
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionCalluploadfiletosftpauto(){
+		
+		
+	  		$username = "sys";
+  		
+		//$time_start = microtime(true);
+		
+			$action = $_POST['action'];
+			$gtfname = $_POST['gtfname'];
+			
+			$localFile = Yii::app()->Cgentextfile->localpathf . $gtfname; //'wpd25620517.txt';
+			$remoteFile = Yii::app()->Cgentextfile->remotepathf . $gtfname; //'wpd25620517.txt';
+			
+			if(Yii::app()->Cgentextfile->getConnectionsftp()){
+				$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn); 
+				$contents = file_get_contents($localFile);  
+				$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);	
+				//echo "success";
+				//echo preg_replace("/\xEF\xBB\xBF/", "","Success");
+				$anb=GentextfileTb::model()->findByAttributes(array('gtf_name'=>$gtfname));
+				//$anb = GentextfileTb::model()->findByPk($gtfid);
+				$anb->gtf_statusupload = 'y';
+				$anb->gtf_updateby = $username;
+				$anb->gtf_modified = date('Y-m-d H:i:s');
+				$anb->gtf_status = 2;
+				if($anb->save()){
+					//$msg3 = "update data is success.";
+					$msgresult = Yii::app()->Clogevent->createlogeventauto("upload", "showtextfile", "uploadtextfiletosftp", "upload", "uploadtextfiletosftp");
+					echo "Success";
+				}else{
+					//$msg3 = "can't update data.";
+					//echo "Upload Success but Can't update status GentextfileTb.";
+					echo "Failed";
+				}
+			}else{
+				//echo "failed"; 
+				echo preg_replace("/\xEF\xBB\xBF/", "","Failed");
+			}
+			
+			
+			
+			/*
+			$url = 'http://localhost/wpdapi/api/uploadfile/uploadtosftp.php?fn1=' . $gtfname ;
+			
+			$arrContextOptions=array(
+				"http" => array(
+				  "method" => "GET",
+				  "header" =>
+					  //"Consumer-Key: 8400dfa3-4fe3-43b9-b830-060d948d75cf", 
+					  "Content-Type: application/json; charset=utf-8;\r\n".
+					  "Connection: keep-alive\r\n",
+					  "ignore_errors" => true,
+					  "timeout" => (float)30.0,
+					  //"content" => $data,
+				),
+				"ssl"=>array(
+					"verify_peer"=>false,
+					"verify_peer_name"=>false,
+				),
+			);  
+			
+			$content = file_get_contents($url, false, stream_context_create($arrContextOptions));
+			
+			//echo "{$content} <br>";
+			
+			if($content){
+				//echo "Success";
+				//update gentextfile_tb
+				$anb=GentextfileTb::model()->findByAttributes(array('gtf_name'=>$gtfname));
+				//$anb = GentextfileTb::model()->findByPk($gtfid);
+				$anb->gtf_statusupload = 'y';
+				$anb->gtf_updateby = $username;
+				$anb->gtf_modified = date('Y-m-d H:i:s');
+				$anb->gtf_status = 2;
+				if($anb->save()){
+					//$msg3 = "update data is success.";
+					
+					echo "Success";
+				}else{
+					//$msg3 = "can't update data.";
+					//echo "Upload Success but Can't update status GentextfileTb.";
+					echo "Failed";
+				}
+			}else{
+				echo "Failed";
+			}
+			*/
+		
+		//$time_end = microtime(true);
+		//$execution_time = ($time_end - $time_start)/60;
+		//echo '<b>timeuses:</b> '.$execution_time.' Mins <br>';	
+	}
+	
+	public function actionCallupdateiden(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//******************************************************
+			$action = $_POST['action'];
+			$ordernum = $_POST['ordernum'];
+			$regisnum = $_POST['regisnum'];
+			$iden = $_POST['iden'];
+			//echo "{$iden}";
+			//update identity committees
+			$upcomt=CommitteeTmpTb::model()->findByAttributes(array('registernumber'=>$regisnum, 'ordernumber'=>$ordernum));
+			$upcomt->identity = $iden;
+			$upcomt->cmit_updateby = Yii::app()->user->username;
+			$upcomt->cmit_updatetime = date('Y-m-d H:i:s');
+			if($upcomt->save()){
+				$txt1 = 'update_identity_' . $iden;
+				$msgresult = Yii::app()->Clogevent->createlogevent("update", "committee", "identity", "update", $txt1);
+				echo "{$iden}";
+			}else{
+				echo "";
+			}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}	
+	}
+	
+	public function actionCallupdatetsic(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//******************************************************
+			$action = $_POST['action'];
+			$regisnum = $_POST['regisnum'];
+			$tsiccode = $_POST['tsiccode'];
+			$tsicdetial = $_POST['tsicdetial'];
+			//echo "{$action}, {$regisnum}, {$tsiccode}, {$tsicdetial}";
+			$upcif=CropinfoTmpTb::model()->findByAttributes(array('registernumber'=>$regisnum));
+			$upcif->tsic = $tsiccode;
+			$upcif->tsicname = $tsicdetial;
+			$upcif->crop_updateby = Yii::app()->user->username;
+			$upcif->crop_updatetime = date('Y-m-d H:i:s');
+			if($upcif->save()){
+				$txt1 = 'update_tsic_' . $tsiccode . '-' . $tsicdetial . '-' . Yii::app()->user->username;
+				$msgresult = Yii::app()->Clogevent->createlogevent("update", "tsic", "schdetailcropsp", "update", $txt1);
+				echo "{$tsiccode} :: {$tsicdetial}";
+			}
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionSchfrmwpd(){
+		
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(isset(Yii::app()->user->username)){
+	  		$username = Yii::app()->user->username;
+  		}else{
+	  		$username = "sys";
+  		}
+		$action = $_POST['action'];
+		$schtxt = $_POST['schtxt'];
+		$seltxt = $_POST['seltxt'];
+		//echo "{$action},{$schtxt},{$seltxt}";
+		
+		$levremark = "ค้นหาสถานประกอบการที่ถูกฟ้องล้มละลาย:" . $seltxt . "&" . $schtxt ;
+		$msgresult = Yii::app()->Clogevent->createlogevent("Search", "SearchByInfo", "Search", "CropInfo", $levremark);
+		
+		$data1 = array('action' => $action, 'schtxt' => $schtxt, 'seltxt' => $seltxt);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/searchledfrmwpd', $data1); //schbyinfo
+		
+	
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	
+	}//function
+	
+	public function actionGetfilenameall(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(isset(Yii::app()->user->username)){
+	  		$username = Yii::app()->user->username;
+  		}else{
+	  		$username = "sys";
+  		}
+		//*********************************************************
+		$action = $_POST['action'];
+		$fns = $_POST['fns'];
+		
+		$levremark = "เปิดpopupแสดงชื่อtextfile:" . $fns . "&" . $action . "by" . $username ;
+		$msgresult = Yii::app()->Clogevent->createlogevent("Searchpages", "getfilenameall", "Search7", "getfilenameall", $levremark);
+		
+		$data1 = array('action' => $action, 'fns' => $fns);
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/getfilenameall', $data1);	
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+	
+	public function actionDownloadtxtfilefrmsftp(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(isset(Yii::app()->user->username)){
+	  		$username = Yii::app()->user->username;
+  		}else{
+	  		$username = "sys";
+  		}
+		//*********************************************************
+		$action = $_POST['action'];
+		$dwntxt = $_POST['dwntxt'];
+		
+		
+		$localpathf = Yii::app()->Cgentextfile->localpathd . $dwntxt; //"C:/xampp/htdocs/wpdtextfile/out/" . $dwntxt;
+		$remotepathf = Yii::app()->Cgentextfile->remotepathd . $dwntxt; //"/home/wpdusr/uploaddir/" . $dwntxt; //T8000_D621030.txt";
+		
+		// checking whether file exists or not 
+		if (file_exists($localpathf))  
+		{ 
+			echo "The file $localpathf exists"; 
+		} 
+		else 
+		{ 
+			if(Yii::app()->Cgentextfile->getConnectionsftp()){
+			  $sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
+			  $contents = file_get_contents("ssh2.sftp://" . intval($sftp) . "$remotepathf");
+			  if(file_put_contents($localpathf,$contents)){
+				echo "Success to download $dwntxt <br>";
+              }else{
+				echo "Failed to download $dwntxt <br>";
+              }
+		
+			}
+		}//if
+		
+		//================================================================
+		
+		//echo "{$action}, {$dwntxt}";
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}//function
+	
+	public function actionDownloadtxtfilefrmsftpauto(){
+		
+		$action = $_POST['action'];
+		$dwntxt = $_POST['dwntxt'];
+		
+		
+		$localpathf = Yii::app()->Cgentextfile->localpathd . $dwntxt; //"C:/xampp/htdocs/wpdtextfile/out/" . $dwntxt;
+		$remotepathf = Yii::app()->Cgentextfile->remotepathd . $dwntxt; //"/home/wpdusr/uploaddir/" . $dwntxt; //T8000_D621030.txt";
+		
+		// checking whether file exists or not 
+		if (file_exists($localpathf))  
+		{ 
+			echo "The file $localpathf exists"; 
+		} 
+		else 
+		{ 
+			if(Yii::app()->Cgentextfile->getConnectionsftp()){
+			  $sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
+			  $contents = file_get_contents("ssh2.sftp://" . intval($sftp) . "$remotepathf");
+			  if(file_put_contents($localpathf,$contents)){
+				echo "Success to download $dwntxt <br>";
+              }else{
+				echo "Failed to download $dwntxt <br>";
+              }
+		
+			}
+		}//if
+		
+		
+	}//function
+	
+	public function actionGetfilenamealltb(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		if(isset(Yii::app()->user->username)){
+	  		$username = Yii::app()->user->username;
+  		}else{
+	  		$username = "sys";
+  		}
+		//*********************************************************
+		$this->layout='nolayout';
+		$this->render('/site/searchpages/getfilenamealltb');	
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}//function
+	
+	public function actionCalldbdservice5(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		$fntxt1 = $_POST['fntxt1'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap, 'fntxt1' => $fntxt1);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice5', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}//function
+	
+	public function actionCalldbdservice5auto(){
+		if(!Yii::app()->user->isGuest) {
+	   		if(isset(Yii::app()->user->username)){
+		//*********************************************************
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = $_POST['newdap'];
+		$updap = $_POST['updap'];
+		$fntxt1 = $_POST['fntxt1'];
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap, 'fntxt1' => $fntxt1);
+		$this->layout='nolayout';
+		$this->render('/site/servicepages/calldbdservice5auto', $data1);
+		//*********************************************************
+			}else{//if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}else{//if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+		
+	}//function
+	
+}//class
