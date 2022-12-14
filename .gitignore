@@ -2,3 +2,5 @@
 note.txt
 keep/*
 .svn/*
+protected/runtime/application.log
+protected/runtime/application.log

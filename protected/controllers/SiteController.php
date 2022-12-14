@@ -14,6 +14,260 @@ class SiteController extends Controller
 		//}
 	}*/
 
+	
+	public function actionIndex()
+	{
+		$connection = Yii::app()->db; //get connection
+
+		if (!Yii::app()->user->isGuest) { //if(!isset(Yii::app()->session['sub'])){ //
+			//ถ้า login แล้ว
+			//update status user is 2 --------------------------------
+			if (isset(Yii::app()->user->username)) {
+
+				// arr(Yii::app()->user->username);exit;
+				$suser = Users::model()->findByAttributes(array('username' => Yii::app()->user->username, 'status' => 1));
+				if ($suser) {
+
+					$connection->createCommand()->update('users', ['status' => 2,'modified' => date('Y-m-d H:i:s')], 'id = ' . $suser->id);
+					
+					$msgresult = Yii::app()->Clogevent->createlogevent("login", "loginpage", "login", "userstb", "เข้าสู่ระบบ");
+				} 
+				
+				if (Yii::app()->user->access_level == 'admin') {
+					$this->render('index');
+				} else {
+					$this->render('/site/searchpages/searchs');
+				}
+			} 
+			else {
+				echo preg_replace("/\xEF\xBB\xBF/", "", "กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");
+			}
+		} else {
+			 
+
+			$model = new LoginForm;
+			if (isset($_POST['ajax']) && $_POST['ajax'] === 'login-form') {
+				echo CActiveForm::validate($model);
+				Yii::app()->end();
+			}
+			if (isset($_POST['LoginForm'])) {
+				$model->attributes = $_POST['LoginForm'];
+
+				if ($model->validate() && $model->login())
+					$this->redirect(Yii::app()->user->returnUrl);
+			}
+
+			$this->render('login', array('model' => $model));
+		}
+	}
+
+	public function actionLogout()
+	{
+		if (!Yii::app()->user->isGuest) {
+
+
+			if (isset(Yii::app()->user->username)) {
+
+				$connection = Yii::app()->db; //get connection
+
+
+				$suser = Users::model()->findByAttributes(['username' => Yii::app()->user->username]);
+
+
+				if ($suser) {
+
+					$connection->createCommand()->update('users', ['status' => 1], 'id = ' . $suser->id);
+
+
+					$msgresult = Yii::app()->Clogevent->createlogevent("logout", "loginpage", "logout", "userstb", "ออกจากระบบ");
+				}
+
+
+
+
+				// $idtokeninfo = Yii::app()->session['idtoken'];
+
+				// foreach ($idtokeninfo as $key => $value) {
+				// 	if ($key == 'payload') {
+				// 		$idtoken2 = $value[0] . "." . $value[1] . "." . $value[2];
+				// 	}
+				// }
+
+				Yii::app()->session->destroy();
+				Yii::app()->user->logout();
+				//$this->redirect(Yii::app()->homeUrl);
+
+				// $linklogout = Yii::app()->params['urllogout1'] . $idtoken2 . Yii::app()->params['urllogout2'];
+				// $this->redirect($linklogout);
+				$this->redirect('/');
+
+				//*********************************************************
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else { //if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	public function actionServices($id = NULL, $gogo = NULL)
+	{
+		if (!Yii::app()->user->isGuest) {
+
+
+			if (isset(Yii::app()->user->username)) {
+				$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "services", "เปิดหน้าservice");
+				$this->render('/site/servicepages/allservices');
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	///site/services หลังจากกดปุ่มรัน service ต่างๆ 
+	public function actionOpenservice($id = NULL)
+	{
+
+		//open page directly from url 
+		if (!empty($id)) {
+
+			if (!Yii::app()->user->isGuest) {
+				if (isset(Yii::app()->user->username)) {
+
+					$snum = $id;
+					$lremark = "เปิดเมนูย่อยservice:" . $snum;
+					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
+					// $this->layout = 'nolayout';
+
+					if ($snum == 1) { //Call DBD WebService
+
+						$this->render('/site/servicepages/service1');
+					} else if ($snum == 5) { //Export textfile & Upload to SFTP
+
+						$this->render('/site/servicepages/service5');
+					} else if ($snum == 6) { //Call LED Webservice
+
+						$this->render('/site/servicepages/service6');
+					} else if ($snum == 7) { //Data Cleansing
+
+						$this->render('/site/servicepages/service7');
+					} else if ($snum == 8) { //Gen Textfile Old WPD
+
+						$this->render('/site/servicepages/service8');
+					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
+
+						$this->render('/site/servicepages/service9');
+					} else {
+
+						$this->render('/site/servicepages/service' . $snum);
+					}
+				} else { //if
+					$idplib = new Idplib();
+					$idplib->getIdpinfo();
+				}
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+
+			if (!Yii::app()->user->isGuest) {
+				if (isset(Yii::app()->user->username)) {
+
+					$snum = $_POST['snum'];
+					$lremark = "เปิดเมนูย่อยservice:" . $snum;
+					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
+					$this->layout = 'nolayout';
+
+					if ($snum == 1) { //Call DBD WebService
+
+						$this->render('/site/servicepages/service1');
+					} else if ($snum == 5) { //Export textfile & Upload to SFTP
+
+						$this->render('/site/servicepages/service5');
+					} else if ($snum == 6) { //Call LED Webservice
+
+						$this->render('/site/servicepages/service6');
+					} else if ($snum == 7) { //Data Cleansing
+
+						$this->render('/site/servicepages/service7');
+					} else if ($snum == 8) { //Gen Textfile Old WPD
+
+						$this->render('/site/servicepages/service8');
+					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
+
+						$this->render('/site/servicepages/service9');
+					} else {
+
+						$this->render('/site/servicepages/service' . $snum);
+					}
+				} else { //if
+					$idplib = new Idplib();
+					$idplib->getIdpinfo();
+				}
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}
+	}
+
+
+
+
+
+
+	public function actionTest($a = NULL, $b = NULL)
+	{
+
+
+		// echo $a;
+
+		// arr(Yii::app()->user->isGuest);
+
+	}
+
+
+
+
+
+
+	public function actionCalldbdservice2()
+	{
+
+		echo 'fdsdsadf';
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+				//*********************************************************
+				//bgdatep,eddatep,newdap,updap
+				$bgdatep = $_POST['bgdatep'];
+				$eddatep = $_POST['eddatep'];
+				$newdap = $_POST['newdap'];
+				$updap = $_POST['updap'];
+				//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+				$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+				$this->layout = 'nolayout';
+				$this->render('/site/servicepages/calldbdservice2', $data1);
+				//*********************************************************
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else { //if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+
+
 	public function actions()
 	{
 		return array(
@@ -30,202 +284,11 @@ class SiteController extends Controller
 		);
 	}
 
-	/**
-	 * This is the default 'index' action that is invoked
-	 * when an action is not explicitly requested by users.
-	 */
 
-	public function actionIndex()
-	{
-		
-		if(!Yii::app()->user->isGuest) { //if(!isset(Yii::app()->session['sub'])){ //
-			//ถ้า login แล้ว
-		//update status user is 2 --------------------------------
-			if(isset(Yii::app()->user->username)){
-				$suser = Users::model()->findByAttributes(array('username'=>Yii::app()->user->username, 'status'=>1));
-				if($suser){
-					$suser->status = 2;
-					$suser->modified = date('Y-m-d H:i:s');
-					if($suser->save()){
-						$msgresult = Yii::app()->Clogevent->createlogevent("login", "loginpage", "login", "userstb", "เข้าสู่ระบบ");
-					}//if
-				}//if
-			}//if
-		//--------------------------------------------------------
-		
-		if(isset(Yii::app()->user->firstname)){
-			  if(Yii::app()->user->access_level=='admin'){
-				  $this->render('index');
-			  }else{
-				  $this->render('/site/searchpages/searchs');	
-			  }
-		   }else{
-				echo preg_replace("/\xEF\xBB\xBF/", "","กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");	
-		   }
-			
-		}else{
-			//ถ้ายังไม่ login
-			/*
-			//IDP
-			
-			if(!isset(Yii::app()->session['sub'])){
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-				
-				$this->idtoken_logout=$idplib->idtoken;
-				
-				//sch user
-			  $q = new CDbCriteria( array(
-				  'condition' => "username = :username ",         
-				  'params'    => array(':username' => $idplib->sub)  
-			  ));
-			   $susa = Users::model()->findAll($q);
-			   $countusa = count($susa);
-			   if($countusa==0){
-				   if($idplib->sub=='kporntima'){
-					   $puser = "admin";
-				   }else{
-					   $puser = "user";
-				   }
-				   
-				  $Users = new Users();
-				  $Users->firstname = $idplib->SSOfirstname;
-				  $Users->lastname = $idplib->SSOsurname;
-				  $Users->email = "-";
-				  $Users->contact_number = "-";
-				  $Users->address = $idplib->SSObranchCode;
-				  $Users->username = $idplib->sub;
-				  $Users->password = "-";
-				  $Users->access_level = "user";
-				  $Users->access_code = "1";
-				  $Users->status = 1;
-				  $Users->image = "-";
-				  $Users->created = date('Y-m-d H:i:s');
-				  $Users->modified = date('Y-m-d H:i:s');
-				  if($Users->save()){
-					  //echo CJSON::encode(array('status' => 'success'));
-					  $identity = new UserIdentity($idplib->sub,""); 
-					  $identity->authenticate();
-					  if($identity->errorCode===UserIdentity::ERROR_NONE)
-					  {
-						  
-						  $duration=3600*24*30; // 30 days
-						  Yii::app()->user->login($identity,$duration);
-						  
-						  if(Yii::app()->user->firstname){
-						  //update status user is 2 --------------------------------
-							if(isset(Yii::app()->user->username)){
-								$suser = Users::model()->findByAttributes(array('username'=>Yii::app()->user->username, 'status'=>1));
-								if($suser){
-									$suser->status = 2;
-									$suser->modified = date('Y-m-d H:i:s');
-									if($suser->save()){
-										$msgresult = Yii::app()->Clogevent->createlogevent("login", "loginpage", "login", "userstb", "เข้าสู่ระบบ");
-									}//if
-								}//if
-							}//if
-						  //--------------------------------------------------------	
-						  
-							  if(Yii::app()->user->access_level=='admin'){
-								  $this->render('index');
-							  }else{
-								  $this->render('/site/searchpages/searchs');	
-							  }
-						  
-						  }else{
-							  echo preg_replace("/\xEF\xBB\xBF/", "","กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");	
-						  }
-					  }
-					  
-				  }else{
-					  //echo CJSON::encode(array('status' => 'error'));
-					  echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode($Users->getErrors()));
-				  }
-			   }else{//if($countusg==0)
-				  //echo CJSON::encode(array('status' => 'errordup'));
-				  //กรณีที่มี user อยู่แล้ว ----------------------------------------
-				  	if($idplib->sub){
-				  		$uuser = Users::model()->findByAttributes(array('username'=>$idplib->sub));
-						if($uuser){
-							if(($uuser->firstname == $idplib->SSOfirstname) && ($uuser->lastname == $idplib->SSOsurname) && ($uuser->address == $idplib->SSObranchCode) ){
-								//ไม่ต้องปรับปรุงข้อมูล	
-							}else{//ถ้ามีไม่ตรงกันให้ทำการ update
-								$uuser->firstname = $idplib->SSOfirstname;
-				  				$uuser->lastname = $idplib->SSOsurname;
-								$uuser->address = $idplib->SSObranchCode;
-								if($uuser->save()){
-									$msgresult = Yii::app()->Clogevent->createlogevent("updatedata", "idpldap", "userprofile", "userstb", "ปรับปรุงข้อมูลผู้ใช้งานจาก idp_ldap");
-								}//if
-							}//if
-						}//if
-					}//if
-				  //--------------------------------------------------------
-				  $identity = new UserIdentity($idplib->sub,""); 
-				  $identity->authenticate();
-				  if($identity->errorCode===UserIdentity::ERROR_NONE) 
-				  {
-					  Yii::app()->user->login($identity);
-					  
-					  if(Yii::app()->user->firstname){
-					  	 //update status user is 2 --------------------------------
-							if(isset(Yii::app()->user->username)){
-								$suser = Users::model()->findByAttributes(array('username'=>Yii::app()->user->username, 'status'=>1));
-								if($suser){
-									$suser->status = 2;
-									$suser->modified = date('Y-m-d H:i:s');
-									if($suser->save()){
-										$msgresult = Yii::app()->Clogevent->createlogevent("login", "loginpage", "login", "userstb", "เข้าสู่ระบบ");
-									}//if
-								}//if
-							}//if
-						  //--------------------------------------------------------
-						  
-						  if(Yii::app()->user->access_level=='admin'){
-							  $this->render('index');
-						  }else{
-							  $this->render('/site/searchpages/searchs');	
-						  }
-					  
-					  }else{
-						  echo preg_replace("/\xEF\xBB\xBF/", "","กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");	
-					  }
-				  }
-				  
-			   }
-			   
-			   
-			}
-			// End IDP			
-			*/
-			//Local
-			
-			$model=new LoginForm;
-			if(isset($_POST['ajax']) && $_POST['ajax']==='login-form')
-			{
-				echo CActiveForm::validate($model);
-				Yii::app()->end();
-			}
-			if(isset($_POST['LoginForm']))
-			{
-				$model->attributes=$_POST['LoginForm'];
-				
-				if($model->validate() && $model->login())
-					$this->redirect(Yii::app()->user->returnUrl);
-			}
-			
-			$this->render('login',array('model'=>$model));
-			
-			//End Local
-			
-			
-		}// if isGuest
-	}// function actionIndex
 
 	/**
 	 * This is the action to handle external exceptions.
 	 */
-
-
 	public function actionShowabout()
 	{
 		if (!Yii::app()->user->isGuest) {
@@ -295,77 +358,13 @@ class SiteController extends Controller
 		$this->render('login', array('model' => $model));
 	}
 
-	/**
-	 * Logs out the current user and redirect to homepage.
-	 */
-	public function actionLogout()
-	{
-		if(!Yii::app()->user->isGuest) {
-	   		if(isset(Yii::app()->user->username)){
-		//*********************************************************
-		if(isset(Yii::app()->user->username)){
-			$suser = Users::model()->findByAttributes(array('username'=>Yii::app()->user->username, 'status'=>2));
-			if($suser){
-				$suser->status = 1;
-				$suser->modified = date('Y-m-d H:i:s');
-				if($suser->save()){
-					$msgresult = Yii::app()->Clogevent->createlogevent("logout", "loginpage", "logout", "userstb", "ออกจากระบบ");
-				}//if
-			}//if
-		}//if
-		//$msgresult = Yii::app()->Clogevent->createlogevent("logout", "loginpage", "logout", "userstb", "ออกจากระบบ");
-		
-		$idtokeninfo = Yii::app()->session['idtoken'];
-		
-		foreach($idtokeninfo as $key=>$value){
-		  if($key=='payload'){
-			  $idtoken2 = $value[0] . "." . $value[1] . "." . $value[2];
-		  }
-		}
-		
-		Yii::app()->session->destroy();
-		Yii::app()->user->logout();
-		//$this->redirect(Yii::app()->homeUrl);
-		
-		$linklogout = Yii::app()->params['urllogout1'] . $idtoken2 . Yii::app()->params['urllogout2'];
-		$this->redirect($linklogout);
-		
-		//*********************************************************
-			}else{//if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		}else{//if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-		
-	}
 
-	/* custom function */
+
 	public function actionOpenhome()
 	{
 		if (!Yii::app()->user->isGuest) {
 			$this->layout = 'nolayout';
 			$this->render('home');
-		}
-	}
-
-	public function actionServices()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "services", "เปิดหน้าservice");
-				$this->render('/site/servicepages/allservices');
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
 		}
 	}
 
@@ -426,26 +425,7 @@ class SiteController extends Controller
 	}
 
 
-	public function actionOpenservice()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$snum = $_POST['snum'];
-				$lremark = "เปิดเมนูย่อยservice:" . $snum;
-				$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/service' . $snum);
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	}
+
 
 	public function actionOpenpnd()
 	{
@@ -587,30 +567,7 @@ class SiteController extends Controller
 		}
 	}
 
-	public function actionCalldbdservice2()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				//bgdatep,eddatep,newdap,updap
-				$bgdatep = $_POST['bgdatep'];
-				$eddatep = $_POST['eddatep'];
-				$newdap = $_POST['newdap'];
-				$updap = $_POST['updap'];
-				//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
-				$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/calldbdservice2', $data1);
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	}
+
 
 	public function actionCalldbdservice2auto()
 	{
