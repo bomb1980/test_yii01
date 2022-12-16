@@ -14,112 +14,100 @@ class SiteController extends Controller
 		//}
 	}*/
 
-	
-	public function actionIndex()
+	public function actionCalldbdservice2auto()
 	{
-		$connection = Yii::app()->db; //get connection
 
-		if (!Yii::app()->user->isGuest) { //if(!isset(Yii::app()->session['sub'])){ //
-			//ถ้า login แล้ว
-			//update status user is 2 --------------------------------
-			if (isset(Yii::app()->user->username)) {
+		// echo 'dsafddsds';
 
-				// arr(Yii::app()->user->username);exit;
-				$suser = Users::model()->findByAttributes(array('username' => Yii::app()->user->username, 'status' => 1));
-				if ($suser) {
+		$conn = Yii::app()->db;
 
-					$connection->createCommand()->update('users', ['status' => 2,'modified' => date('Y-m-d H:i:s')], 'id = ' . $suser->id);
-					
-					$msgresult = Yii::app()->Clogevent->createlogevent("login", "loginpage", "login", "userstb", "เข้าสู่ระบบ");
-				} 
-				
-				if (Yii::app()->user->access_level == 'admin') {
-					$this->render('index');
-				} else {
-					$this->render('/site/searchpages/searchs');
-				}
-			} 
-			else {
-				echo preg_replace("/\xEF\xBB\xBF/", "", "กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");
-			}
+		if (false) {
+
+			$bgdatep = date('m/d/Y');
+			$eddatep = date('m/d/Y');
 		} else {
-			 
 
-			$model = new LoginForm;
-			if (isset($_POST['ajax']) && $_POST['ajax'] === 'login-form') {
-				echo CActiveForm::validate($model);
-				Yii::app()->end();
-			}
-			if (isset($_POST['LoginForm'])) {
-				$model->attributes = $_POST['LoginForm'];
-
-				if ($model->validate() && $model->login())
-					$this->redirect(Yii::app()->user->returnUrl);
-			}
-
-			$this->render('login', array('model' => $model));
+			$bgdatep = '12/16/2022';
+			$eddatep = '12/16/2022';
 		}
+		$bgdatep = isset( $_POST['bgdatep'])?  $_POST['bgdatep']: date('m/d/Y');
+		$eddatep = isset( $_POST['eddatep'])?  $_POST['eddatep']: date('m/d/Y');
+
+		$this->callGooApi($bgdatep, $eddatep, $newdap = 1);
+
+
+		$sql = "
+			SELECT 
+				*, 
+				date_format( registerdate, '%m/%d/%Y' ) as t 
+			FROM cropinfo_tmp_tb having t = :bgdatep  
+		";
+
+		$command = $conn->createCommand($sql);
+
+		$command->bindValue(":bgdatep", $bgdatep);
+
+		$model = $command->queryAll();
+
+		echo json_encode([
+			'success' => 1,
+			'data' => $model,
+
+		]);
+
+	
 	}
 
-	public function actionLogout()
+	public function actionCalldbdservice2()
 	{
+
+		// arr(date('Y-m-d'));
+
 		if (!Yii::app()->user->isGuest) {
-
-
 			if (isset(Yii::app()->user->username)) {
 
-				$connection = Yii::app()->db; //get connection
+				$conn = Yii::app()->db;
 
+				if (true) {
 
-				$suser = Users::model()->findByAttributes(['username' => Yii::app()->user->username]);
+					$bgdatep = $_POST['bgdatep'];
+					$eddatep = $_POST['eddatep'];
+				} else {
 
-
-				if ($suser) {
-
-					$connection->createCommand()->update('users', ['status' => 1], 'id = ' . $suser->id);
-
-
-					$msgresult = Yii::app()->Clogevent->createlogevent("logout", "loginpage", "logout", "userstb", "ออกจากระบบ");
+					$bgdatep = '12/16/2022';
+					$eddatep = '12/16/2022';
 				}
 
+				$this->callGooApi($bgdatep, $eddatep, $newdap = 1);
 
+				$sql = "
+					SELECT 
+						*, 
+						date_format( registerdate, '%m/%d/%Y' ) as t 
+					FROM cropinfo_tmp_tb having t = :bgdatep  
+				";
 
+				$command = $conn->createCommand($sql);
 
-				// $idtokeninfo = Yii::app()->session['idtoken'];
+				$command->bindValue(":bgdatep", $bgdatep);
 
-				// foreach ($idtokeninfo as $key => $value) {
-				// 	if ($key == 'payload') {
-				// 		$idtoken2 = $value[0] . "." . $value[1] . "." . $value[2];
-				// 	}
-				// }
+				$model = $command->queryAll();  //var_dump($rows);exit;
 
-				Yii::app()->session->destroy();
-				Yii::app()->user->logout();
-				//$this->redirect(Yii::app()->homeUrl);
+				$data1 = [
+					'bgdatep' => $bgdatep,
+					'eddatep' => $eddatep,
+					'newdap' => 1,
+					'updap' => 0,
+					'model' => $model,
+					'countmedel' => count($model),
 
-				// $linklogout = Yii::app()->params['urllogout1'] . $idtoken2 . Yii::app()->params['urllogout2'];
-				// $this->redirect($linklogout);
-				$this->redirect('/');
+				];
 
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	}
+				// $data1['test'] = $test;
 
-	public function actionServices($id = NULL, $gogo = NULL)
-	{
-		if (!Yii::app()->user->isGuest) {
+				$this->layout = 'nolayout';
 
-
-			if (isset(Yii::app()->user->username)) {
-				$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "services", "เปิดหน้าservice");
-				$this->render('/site/servicepages/allservices');
+				$this->render('/site/servicepages/calldbdservice2', $data1);
 			} else {
 				$idplib = new Idplib();
 				$idplib->getIdpinfo();
@@ -130,10 +118,612 @@ class SiteController extends Controller
 		}
 	}
 
+
+	private function callGooApi($bgdatep = NULL, $eddatep = NULL, $newdap = NULL, $cronjob = true)
+	{
+		// exit;
+
+
+		if ($cronjob == true) {
+
+			$username = "sys";
+		} else {
+
+			$username = "sys";
+			if (Yii::app()->user->username) {
+				$username = Yii::app()->user->username;
+			}
+		}
+
+		 $startdate = $bgdatep . "T00:00:00+07:00";
+
+		//  '<br>';
+		$enddate = $eddatep . "T23:59:59+07:00";
+
+		 $startdate = date_create($startdate)->format('Y-m-d') . "T00:00:00+07:00";
+
+		//  '<br>';
+		$enddate = date_create($enddate)->format('Y-m-d') . "T23:59:59+07:00";
+
+
+		 $rundate = date_create($bgdatep)->format('Ymd');
+
+		//  '<br>';
+
+		//  "data formate : {$startdate}, {$enddate} <br>";
+		// exit;
+
+		$qlrs = new CDbCriteria(array(
+			'condition' => "lrs_remark = :lrs_remark ",
+			'params'    => array(':lrs_remark' => $rundate)
+		));
+
+
+		//wpdlogdb.logrunservice_tb 
+		$rlrs = LogrunserviceTb::model()->findAll($qlrs);
+
+		if ($newdap == 1) {
+
+			if (true) {
+
+				$testData['CorpInfoList']['corpInfo'][0] = [
+					'cpower' => 'cpower',
+					'tsic' => 87878,
+					'corpType' => 1,
+					'tsicName' => 87878,
+					'corpTypeName' => 87878,
+					'registerNumber' => '3100203295971',
+					'registerName' => 87878,
+					'registerDate' => '2022-12-16 22:22:01',
+					'updatedDate' => '2022-01-01 22:22:01',
+					'updatedEntry' => '1',
+					'branches' => [
+						'branch' =>  [
+							[
+								'name' => 'aaaaaaaaa',
+								'orderNumber' => 1,
+								'houseId' => 99,
+								'houseNumber' => 99,
+								'buildingName' => 'dsddssdsdsd',
+								'buildingNumber' => '0515',
+								'buildingFloor' => '4',
+								'village' => '45',
+								'moo' => '9',
+								'Soi' => 'โรงเหล้า',
+								'Road' => 'รถไฟ',
+								'tumbon' => 'บางซื่อ',
+								'ampur' => 'บางซื่อ',
+								'province' => 'กทม.',
+								'tumbonCode' => '12345',
+								'ampurCode' => '1036',
+								'provinceCode' => '12345',
+								'zipCode' => '10800',
+								'phoneNumber' => '08563787',
+								'faxNumber' => '08563787',
+								'email' => 'bombbomb1980@gmail.com',
+							],
+						]
+					],
+					'committees' => [
+						'committee' => [
+							[
+								'committeeType' => '1',
+								'orderNumber' => 99,
+								'identityType' => 1,
+								'identity' => 99,
+								'title' => 'นาย',
+								'firstName' => 'ปิยพงษ์',
+								'lastName' => 'ไวถนอมทรัพย์',
+								'englishTitle' => 'mr.',
+								'englishFirstName' => 'piyapong',
+								'englishLastName' => 'waitanomthap',
+								'nationality' => 'th',
+								'dateOfBirth' => '1980-11-16',
+							],
+						]
+					],
+				];
+
+				$testData = json_encode($testData);
+
+				$data = json_decode($testData);
+			} else {
+
+				//https://wsg.sso.go.th:443/corpinfo-webservice-v5/CorpInfoWebService?wsdl
+				//https://wsg.sso.go.th/corpinfo-webservice-v2/CorpInfoWebService?wsdl
+				$fullPathToWsdl = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'CorpInfoWebServiceV5.wsdl';
+
+				//   arr($fullPathToWsdl);
+				$client = new SoapClient($fullPathToWsdl, [
+					'stream_context' => stream_context_create([
+						'ssl' => [
+							'verify_peer' => false,
+							'verify_peer_name' => false,
+						],
+					]),
+				]);
+
+				$params = array(
+					"subscribeId" => '6211003', //usersso
+					"pincode" => 'P@ssw0rd', //pinsso
+					"corpInfoFilter" => array("corpType" => '*', "tsic" => '*', "province" => '*'),
+					"registerDateRange" => array("startDate" => $startdate, "endDate" => $enddate),
+					"changeDateRange" => null, //$changeDateRange, 
+					"newEntry" => true, //true
+					"changedEntry" => false, //false,
+					"recordOffset" => 0,
+					"recordLimit" => 1000
+					//registerNumber => "0103555016414"
+				);
+
+				$data = $client->GetCorpInfoService($params);
+			}
+
+			$CorpInfoList = [];
+
+			if (property_exists($data->CorpInfoList, "corpInfo")) {
+				if (is_array($data->CorpInfoList->corpInfo)) {
+
+					$CorpInfoList = $data->CorpInfoList->corpInfo;
+				} else {
+
+					$CorpInfoList[] = $data->CorpInfoList->corpInfo;
+				}
+				$rowno = 1;
+				$dupstate = 0; //ค่าเริ่มต้น
+				foreach ($CorpInfoList as $ko => $vo) {
+
+					$ciftm = CropinfoTmpTb::model()->findByAttributes(array('registernumber' => $vo->registerNumber));
+
+					$lastcrop_id = NULL;
+
+					if ($ciftm) {
+
+						continue;
+						// $lastcrop_id = $ciftm->crop_id ;
+
+						// arr($lastcrop_id );
+					}
+
+					$tsic = "-";
+					if (property_exists($vo, "tsic")) {
+						$tsic = $vo->tsic;
+					}
+
+
+					$tsicName = "-";
+					if (property_exists($vo, "tsicName")) {
+						$tsicName = $vo->tsicName;
+					}
+
+					$corpType = "-";
+					if (property_exists($vo, "corpType")) {
+						$corpType = $vo->corpType;
+					}
+
+					$registerNumber = '-';
+					if (property_exists($vo, "registerNumber")) {
+						$registerNumber = $vo->registerNumber;
+					}
+
+
+					if (property_exists($vo, "registerDate")) {
+						$registerDate = $vo->registerDate;
+						// arr($registerDate); exit;
+
+						$registerDate =  date_create($registerDate)->format('Y-m-d H:i:s'); //date('Y-m-d H:i:s');
+					} else {
+						$registerDate =  date_create('1900-01-01T00:00:00+07:00')->format('Y-m-d H:i:s');  //date('Y-m-d H:i:s');
+					}
+
+					$updatedDate =  date('Y-m-d H:i:s'); //date('Y-m-d H:i:s');
+					if (property_exists($vo, "updatedDate")) {
+						$updatedDate = $vo->updatedDate;
+					}
+
+					//cropinfo_tmp_tb
+					$CropinfoMasTb = new CropinfoTmpTb();
+
+					$CropinfoMasTb->corptype = isset($vo->corpType) ? $vo->corpType : '-';
+					$CropinfoMasTb->corptypename = isset($vo->corpTypeName) ? $vo->corpTypeName : '-';
+					$CropinfoMasTb->registernumber = $registerNumber;
+					$CropinfoMasTb->registername = isset($vo->registerName) ? $vo->registerName : '-';
+					$CropinfoMasTb->cpower = isset($vo->cpower) ? $vo->cpower : '-';
+					$CropinfoMasTb->statuscode = isset($vo->statusCode) ? $vo->statusCode : '-';
+					$CropinfoMasTb->accountingdate = isset($vo->accountingdate) ? $vo->accountingdate : '-';
+					$CropinfoMasTb->authorizedcapital =  isset($vo->authorizedCapital) ? $vo->authorizedCapital : 0;
+					$CropinfoMasTb->updateentry =  isset($vo->updatedEntry) ? $vo->updatedEntry : '-';
+					$CropinfoMasTb->updateddate = $updatedDate;
+					$CropinfoMasTb->acc_no = "0000000000";
+					$CropinfoMasTb->acc_bran = "000000";
+					$CropinfoMasTb->tsic = $tsic;
+					$CropinfoMasTb->tsicname = $tsicName;
+					$CropinfoMasTb->registerdate = $registerDate;
+					$CropinfoMasTb->crop_remark = "N";
+					$CropinfoMasTb->crop_createby = $username;
+					$CropinfoMasTb->crop_createtime = date('Y-m-d H:i:s');
+					$CropinfoMasTb->crop_updateby = $username;
+					$CropinfoMasTb->crop_updatetime = date('Y-m-d H:i:s');
+					$CropinfoMasTb->crop_status = 1;
+
+					$lastcrop_id = NULL;
+					if ($CropinfoMasTb->save()) {
+
+						$lastcrop_id = $CropinfoMasTb->crop_id;
+					}
+
+					if ($lastcrop_id) {
+
+						if (!empty($vo->committees->committee)) {
+
+							if (is_array($vo->committees->committee)) {
+
+								$gogo = $vo->committees->committee;
+							} else {
+								$gogo = [];
+
+								$gogo[] = $vo->committees->committee;
+							}
+
+
+							$crow = 1;
+							foreach ($gogo as $kg => $vg) {
+
+								$committeeType = "-";
+								if (property_exists($vg, "committeeType")) {
+									$committeeType = $vg->committeeType;
+								}
+
+
+								$orderNumber = '-';
+								if (property_exists($vg, "orderNumber")) {
+									$orderNumber = $vg->orderNumber;
+								}
+
+
+								$identityType = "-";
+								if (property_exists($vg, "identityType")) {
+									$identityType = $vg->identityType;
+								}
+
+								$identity = "-";
+								if (property_exists($vg, "identity")) {
+									$identity = $vg->identity;
+								}
+
+								$title = "-";
+								if (property_exists($vg, "title")) {
+									$title = $vg->title;
+								}
+
+
+
+								$firstName = "-";
+								if (property_exists($vg, "firstName")) {
+									$firstName = $vg->firstName;
+								}
+
+
+
+								$lastName = '-';
+								if (property_exists($vg, "lastName")) {
+									$lastName = $vg->lastName;
+								}
+
+
+								$englishTitle = "-";
+								if (property_exists($vg, "englishTitle")) {
+									$englishTitle = $vg->englishTitle;
+								}
+
+
+
+								$englishFirstName = "-";
+								if (property_exists($vg, "englishFirstName")) {
+									$englishFirstName = $vg->englishFirstName;
+								}
+
+
+
+
+								$englishLastName = "-";
+								if (property_exists($vg, "englishLastName")) {
+									$englishLastName = $vg->englishLastName;
+								}
+
+
+
+								$nationality = "-";
+								if (property_exists($vg, "nationality")) {
+									$nationality = $vg->nationality;
+								}
+
+
+								if (property_exists($vg, "dateOfBirth")) {
+									$dateOfBirth = date_create($vg->dateOfBirth)->format('Y-m-d H:i:s');
+								} else {
+									$dateOfBirth = date_create('1901-01-01T00:00:00+07:00')->format('Y-m-d H:i:s');
+								}
+
+
+								//committee_tmp_tb
+								$CommitteeMasTb = new CommitteeTmpTb();
+								//* @property integer $cmit_id
+								$CommitteeMasTb->crop_id = $lastcrop_id;
+								$CommitteeMasTb->registernumber = $registerNumber;
+								$CommitteeMasTb->tsic = $tsic;
+								$CommitteeMasTb->corptype = $corpType;
+								$CommitteeMasTb->committeetype = $committeeType;
+								$CommitteeMasTb->ordernumber = $orderNumber;
+								$CommitteeMasTb->typeno = $identityType;
+								$CommitteeMasTb->identity = $identity;
+								$CommitteeMasTb->birthday = $dateOfBirth;
+								$CommitteeMasTb->title = $title;
+								$CommitteeMasTb->firstname = $firstName;
+								$CommitteeMasTb->lastname = $lastName;
+								$CommitteeMasTb->englishtitle = $englishTitle;
+								$CommitteeMasTb->englishfirstname12 =  $englishFirstName;
+								$CommitteeMasTb->englishlastname = $englishLastName;
+								$CommitteeMasTb->nation = $nationality;
+								$CommitteeMasTb->cmit_remark = "-";
+								$CommitteeMasTb->cmit_createby = $username;
+								$CommitteeMasTb->cmit_createtime = date('Y-m-d H:i:s');
+								$CommitteeMasTb->cmit_updateby = $username;
+								$CommitteeMasTb->cmit_updatetime = date('Y-m-d H:i:s');
+								$CommitteeMasTb->cmit_status = 1;
+
+								$CommitteeMasTb->save();
+							}
+						}
+
+						// if (property_exists($vo, "branches")) {
+						if (!empty($vo->branches->branch)) {
+
+
+
+							if (is_array($vo->branches->branch)) {
+
+								$gogo = $vo->branches->branch;
+							} else {
+
+								$gogo = [];
+								$gogo[] = $vo->branches->branch;
+							}
+
+							$brow = 1;
+							foreach ($gogo as $kg => $vg) {
+
+								$name = "-";
+								if (property_exists($vg, "name")) {
+									$name = $vg->name;
+								}
+
+								$orderNumber = 0;
+								if (property_exists($vg, "orderNumber")) {
+									$orderNumber = $vg->orderNumber;
+								}
+
+								$houseId = "-";
+								if (property_exists($vg, "houseId")) {
+									$houseId = $vg->houseId;
+								}
+
+
+								$houseNumber = "-";
+
+								if (property_exists($vg, "houseNumber")) {
+									$houseNumber = $vg->houseNumber;
+								}
+
+
+								$buildingName = "-";
+								if (property_exists($vg, "buildingName")) {
+									$buildingName = $vg->buildingName;
+								}
+
+
+
+								$buildingNumber = "-";
+								if (property_exists($vg, "buildingNumber")) {
+									$buildingNumber = $vg->buildingNumber;
+								}
+
+
+								$buildingFloor = "-";
+								if (property_exists($vg, "buildingFloor")) {
+									$buildingFloor = $vg->buildingFloor;
+								}
+
+
+
+								$village = "-";
+								if (property_exists($vg, "village")) {
+									$village = $vg->village;
+								}
+
+
+
+								$moo = '-';
+								if (property_exists($vg, "moo")) {
+									$moo = $vg->moo;
+								}
+
+
+								$Soi = '-';
+								if (property_exists($vg, "Soi")) {
+									$Soi = $vg->Soi;
+								}
+
+
+								$Road = "-";
+								if (property_exists($vg, "Road")) {
+									$Road = $vg->Road;
+								}
+
+
+
+								$tumbon = '-';
+								if (property_exists($vg, "tumbon")) {
+									$tumbon = $vg->tumbon;
+								}
+
+
+
+								$ampur = "-";
+								if (property_exists($vg, "ampur")) {
+									$ampur = $vg->ampur;
+								}
+
+
+
+								$province = "-";
+								if (property_exists($vg, "province")) {
+									$province = $vg->province;
+								}
+
+
+
+								$tumbonCode = "-";
+								if (property_exists($vg, "tumbonCode")) {
+									$tumbonCode = $vg->tumbonCode;
+								}
+
+
+								$ampurCode = "-";
+								if (property_exists($vg, "ampurCode")) {
+									$ampurCode = $vg->ampurCode;
+								}
+
+
+								$provinceCode = "-";
+
+								if (property_exists($vg, "provinceCode")) {
+									$provinceCode = $vg->provinceCode;
+								}
+
+
+
+								$zipCode = "-";
+								if (property_exists($vg, "zipCode")) {
+									$zipCode = $vg->zipCode;
+								}
+
+
+
+								$phoneNumber = "-";
+								if (property_exists($vg, "phoneNumber")) {
+									$phoneNumber = $vg->phoneNumber;
+								}
+
+
+								$faxNumber = "-";
+								if (property_exists($vg, "faxNumber")) {
+									$faxNumber = $vg->faxNumber;
+								}
+
+
+								$email = "-";
+								if (property_exists($vg, "email")) {
+									$email = $vg->email;
+								}
+
+
+								//ค้นหา สปส รับผิดชอบ ----------------------------------------------------------
+
+								$SSO_BRAN_CODE = '-';
+								if ($ampurCode != "-") {
+
+									$qldd1 = new CDbCriteria(array(
+										'condition' => "ZONE_AMPUR_CODE = :ZONE_AMPUR_CODE ORDER BY ZONE_AMPUR_CODE DESC LIMIT 0,1 ",
+										'params'    => array(':ZONE_AMPUR_CODE' => $ampurCode)  //  $statusgt
+									));
+									$dd1 = WpdSpnLtSsobran::model()->findAll($qldd1);
+
+
+									foreach ($dd1 as $rows) {
+										$SSO_BRAN_CODE = $rows->SSO_BRAN_CODE;
+									}
+								}
+
+
+								$BranchMasTb = new BranchTmpTb();
+
+								$BranchMasTb->brch_remark = $SSO_BRAN_CODE;
+								$BranchMasTb->crop_id = $lastcrop_id;
+								$BranchMasTb->registernumber = $registerNumber;
+								$BranchMasTb->tsic = $tsic;
+								$BranchMasTb->corptype = $corpType;
+								$BranchMasTb->ordernumber = $orderNumber;
+								$BranchMasTb->name = $name;
+								$BranchMasTb->houseid = $houseId;
+								$BranchMasTb->housenumber = $houseNumber;
+								$BranchMasTb->buildingname = $buildingName;
+								$BranchMasTb->buildingnumber = $buildingNumber;
+								$BranchMasTb->buildingfloor = $buildingFloor;
+								$BranchMasTb->village = $village;
+								$BranchMasTb->moo = $moo;
+								$BranchMasTb->soi = $Soi;
+								$BranchMasTb->road = $Road;
+								$BranchMasTb->tumbon = $tumbon;
+								$BranchMasTb->tumboncode = $tumbonCode;
+								$BranchMasTb->ampur = $ampur;
+								$BranchMasTb->ampurcode = $ampurCode;
+								$BranchMasTb->province = $province;
+								$BranchMasTb->provincecode = $provinceCode;
+								$BranchMasTb->zipcode = $zipCode;
+								$BranchMasTb->phonenumber = $phoneNumber;
+								$BranchMasTb->faxnumber = $faxNumber;
+								$BranchMasTb->email = $email;
+								$BranchMasTb->brch_createby = $username;
+								$BranchMasTb->brch_createtime = date('Y-m-d H:i:s');
+								$BranchMasTb->brch_updateby = $username;
+								$BranchMasTb->brch_updatetime = date('Y-m-d H:i:s');
+								$BranchMasTb->brch_status = 1;
+
+								$BranchMasTb->save();
+							}
+						}
+					}
+				}
+			}
+
+
+			$countcorpinfo = count($CorpInfoList);
+
+
+
+			//logrunservice_tb
+			$LogrunserviceTb = new LogrunserviceTb();
+			//* @property integer $lrs_id
+			$LogrunserviceTb->lrs_servicename = "service1";
+			$LogrunserviceTb->lrs_rundate = date('Y-m-d H:i:s');
+			$LogrunserviceTb->lrs_resultrecord = $countcorpinfo;
+			$LogrunserviceTb->lrs_createby = $username;
+			$LogrunserviceTb->lrs_created = date('Y-m-d H:i:s');
+			$LogrunserviceTb->lrs_updateby = $username;
+			$LogrunserviceTb->lrs_modified = date('Y-m-d H:i:s');
+			$LogrunserviceTb->lrs_remark = $rundate;
+			$LogrunserviceTb->lrs_status = "1";
+
+			if ($LogrunserviceTb->save()) {
+				$lremark = "runserviceดึงข้อมูลจากdbd:service1&" . $rundate . "&จำนวนrecord=" . $countcorpinfo;
+				$msgresult = Yii::app()->Clogevent->createlogevent("runservice", "servicepage", "runservice1", "service1", $lremark);
+			} else {
+				$msgerror =  $LogrunserviceTb->getErrors();
+				echo "{$msgerror}";
+			}
+		}
+	}
+
+
+
+
+
+
+
 	///site/services หลังจากกดปุ่มรัน service ต่างๆ 
 	public function actionOpenservice($id = NULL)
 	{
-
 		//open page directly from url 
 		if (!empty($id)) {
 
@@ -147,7 +737,8 @@ class SiteController extends Controller
 
 					if ($snum == 1) { //Call DBD WebService
 
-						$this->render('/site/servicepages/service1');
+
+						$this->render('/site/servicepages/dbd_webservice');
 					} else if ($snum == 5) { //Export textfile & Upload to SFTP
 
 						$this->render('/site/servicepages/service5');
@@ -219,41 +810,93 @@ class SiteController extends Controller
 	}
 
 
-
-
-
-
-	public function actionTest($a = NULL, $b = NULL)
+	//หน้ารวมปุ่ม service ต่างๆ
+	public function actionServices($id = NULL, $gogo = NULL)
 	{
 
+		if (!Yii::app()->user->isGuest) {
 
-		// echo $a;
-
-		// arr(Yii::app()->user->isGuest);
-
+			if (isset(Yii::app()->user->username)) {
+				$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "services", "เปิดหน้าservice");
+				$this->render('/site/servicepages/allservices');
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
 	}
 
 
-
-
-
-
-	public function actionCalldbdservice2()
+	public function actionIndex()
 	{
+		$connection = Yii::app()->db; //get connection
 
-		echo 'fdsdsadf';
-		if (!Yii::app()->user->isGuest) {
+		if (!Yii::app()->user->isGuest) { //if(!isset(Yii::app()->session['sub'])){ //
+			//ถ้า login แล้ว
+			//update status user is 2 --------------------------------
 			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				//bgdatep,eddatep,newdap,updap
-				$bgdatep = $_POST['bgdatep'];
-				$eddatep = $_POST['eddatep'];
-				$newdap = $_POST['newdap'];
-				$updap = $_POST['updap'];
-				//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
-				$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/calldbdservice2', $data1);
+
+				// arr(Yii::app()->user->username);exit;
+				$suser = Users::model()->findByAttributes(array('username' => Yii::app()->user->username, 'status' => 1));
+				if ($suser) {
+
+					$connection->createCommand()->update('users', ['status' => 2, 'modified' => date('Y-m-d H:i:s')], 'id = ' . $suser->id);
+
+					$msgresult = Yii::app()->Clogevent->createlogevent("login", "loginpage", "login", "userstb", "เข้าสู่ระบบ");
+				}
+
+				if (Yii::app()->user->access_level == 'admin') {
+					$this->render('index');
+				} else {
+					$this->render('/site/searchpages/searchs');
+				}
+			} else {
+				echo preg_replace("/\xEF\xBB\xBF/", "", "กรุณาติดต่อผู้ดูแลระบบ เพื่อตรวจสอบสิทธ์การใช้งานโปรแกรม WPD !");
+			}
+		} else {
+
+
+			$model = new LoginForm;
+			if (isset($_POST['ajax']) && $_POST['ajax'] === 'login-form') {
+				echo CActiveForm::validate($model);
+				Yii::app()->end();
+			}
+			if (isset($_POST['LoginForm'])) {
+				$model->attributes = $_POST['LoginForm'];
+
+				if ($model->validate() && $model->login())
+					$this->redirect(Yii::app()->user->returnUrl);
+			}
+
+			$this->render('login', array('model' => $model));
+		}
+	}
+
+	public function actionLogout()
+	{
+		if (!Yii::app()->user->isGuest) {
+
+
+			if (isset(Yii::app()->user->username)) {
+
+				$suser = Users::model()->findByAttributes(['username' => Yii::app()->user->username]);
+
+				if ($suser) {
+					$connection = Yii::app()->db; //get connection
+
+					$connection->createCommand()->update('users', ['status' => 1], 'id = ' . $suser->id);
+
+					$msgresult = Yii::app()->Clogevent->createlogevent("logout", "loginpage", "logout", "userstb", "ออกจากระบบ");
+				}
+
+				Yii::app()->session->destroy();
+				Yii::app()->user->logout();
+
+				$this->redirect('/');
+
 				//*********************************************************
 			} else { //if
 				$idplib = new Idplib();
@@ -265,6 +908,22 @@ class SiteController extends Controller
 		}
 	}
 
+
+
+
+	public function actionTest($a = NULL, $b = NULL)
+	{
+
+		// $cty_id = 1;
+		// $conn = Yii::app()->db;
+		// $sql = "SELECT * FROM corptype_tb WHERE cty_id =:cty_id";
+
+
+		// $command = $conn->createCommand($sql);
+		// $command->bindValue(":cty_id", $cty_id);
+		// $rowA = $command->queryAll();
+		// arr($rowA);
+	}
 
 
 
@@ -569,19 +1228,7 @@ class SiteController extends Controller
 
 
 
-	public function actionCalldbdservice2auto()
-	{
 
-		//bgdatep,eddatep,newdap,updap
-		$bgdatep = $_POST['bgdatep'];
-		$eddatep = $_POST['eddatep'];
-		$newdap = $_POST['newdap'];
-		$updap = $_POST['updap'];
-		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
-		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-		$this->layout = 'nolayout';
-		$this->render('/site/servicepages/calldbdservice2auto', $data1);
-	}
 
 	public function actionCalldbdservice3()
 	{
