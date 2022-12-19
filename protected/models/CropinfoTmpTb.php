@@ -638,10 +638,6 @@ class CropinfoTmpTb extends CActiveRecord
 	}
 
 
-
-
-
-
 	public static function getDatas($bgdatep = NULL)
 	{
 

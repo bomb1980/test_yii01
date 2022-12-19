@@ -17,82 +17,49 @@ class SiteController extends Controller
 	public function actionCalldbdservice2auto()
 	{
 
-		// echo 'dsafddsds';
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
 
-		$conn = Yii::app()->db;
+		$cronjob = true;
 
-		if (false) {
+		$testJob = true;
+		// $this->callGooApi($bgdatep, $eddatep, $newdap = 1);
 
-			$bgdatep = date('m/d/Y');
-			$eddatep = date('m/d/Y');
-		} else {
-
-			$bgdatep = '12/16/2022';
-			$eddatep = '12/16/2022';
-		}
-		$bgdatep = isset( $_POST['bgdatep'])?  $_POST['bgdatep']: date('m/d/Y');
-		$eddatep = isset( $_POST['eddatep'])?  $_POST['eddatep']: date('m/d/Y');
-
-		$this->callGooApi($bgdatep, $eddatep, $newdap = 1);
-
-
-		$sql = "
-			SELECT 
-				*, 
-				date_format( registerdate, '%m/%d/%Y' ) as t 
-			FROM cropinfo_tmp_tb having t = :bgdatep  
-		";
-
-		$command = $conn->createCommand($sql);
-
-		$command->bindValue(":bgdatep", $bgdatep);
-
-		$model = $command->queryAll();
-
-		echo json_encode([
-			'success' => 1,
-			'data' => $model,
-
-		]);
-
-	
+		CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob );
 	}
+
+
 
 	public function actionCalldbdservice2()
 	{
-
-		// arr(date('Y-m-d'));
-
 		if (!Yii::app()->user->isGuest) {
 			if (isset(Yii::app()->user->username)) {
 
-				$conn = Yii::app()->db;
-
-				if (true) {
+				if (false) {
 
 					$bgdatep = $_POST['bgdatep'];
 					$eddatep = $_POST['eddatep'];
+
+					$cronjob = true;
+
+					$testJob = true;
 				} else {
 
 					$bgdatep = '12/16/2022';
 					$eddatep = '12/16/2022';
+
+					$cronjob = false;
+
+					$testJob = true;
 				}
 
-				$this->callGooApi($bgdatep, $eddatep, $newdap = 1);
+				// $this->callGooApi($bgdatep, $eddatep, $newdap = 1);
 
-				$sql = "
-					SELECT 
-						*, 
-						date_format( registerdate, '%m/%d/%Y' ) as t 
-					FROM cropinfo_tmp_tb having t = :bgdatep  
-				";
+				CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob );
 
-				$command = $conn->createCommand($sql);
-
-				$command->bindValue(":bgdatep", $bgdatep);
-
-				$model = $command->queryAll();  //var_dump($rows);exit;
-
+				$model = CropinfoTmpTb::getDatas( $bgdatep );
+				
+				
 				$data1 = [
 					'bgdatep' => $bgdatep,
 					'eddatep' => $eddatep,
@@ -100,10 +67,7 @@ class SiteController extends Controller
 					'updap' => 0,
 					'model' => $model,
 					'countmedel' => count($model),
-
 				];
-
-				// $data1['test'] = $test;
 
 				$this->layout = 'nolayout';
 
@@ -117,6 +81,321 @@ class SiteController extends Controller
 			$idplib->getIdpinfo();
 		}
 	}
+
+
+
+	function getAuthorizationHeader(){
+
+		$headers = null;
+		
+		
+		if (function_exists('apache_request_headers')) {
+		    $requestHeaders = apache_request_headers();
+		    // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
+		    $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
+		    //print_r($requestHeaders);
+		    if (isset($requestHeaders['Authorization'])) {
+			  $headers = trim($requestHeaders['Authorization']);
+		    }
+		}
+		return $headers;
+	  }
+
+
+	public function actionTest($a = NULL, $b = NULL)
+	{
+		// arr($this->getAuthorizationHeader());
+
+
+		$headers = $this->getAuthorizationHeader();
+
+		// arr( $headers );
+		// HEADER: Get the access token from the header
+		if (!empty($headers)) {
+		    if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+
+			 
+
+			if(Yii::app()->params['checkRequestHeaders']  == $matches[1] ) {
+
+				arr('login success');
+			}
+
+			//   return $matches[1];
+		    }
+		}
+
+		return null;
+
+
+		// arr(Yii::app()->params['checkRequestHeaders']);
+
+		arr(apache_request_headers());
+
+
+		// arr( $_SERVER);
+		// echo 'adsfddsfsd';
+
+		// $cty_id = 1;
+		// $conn = Yii::app()->db;
+		// $sql = "SELECT * FROM corptype_tb WHERE cty_id =:cty_id";
+
+
+		// $command = $conn->createCommand($sql);
+		// $command->bindValue(":cty_id", $cty_id);
+		// $rowA = $command->queryAll();
+		// arr($rowA);
+	}
+
+
+	//หน้ารวมปุ่ม service ต่างๆ
+	public function actionServices($id = NULL, $gogo = NULL)
+	{
+
+		// 		echo $this->password_reset_token = Yii::app()->security->generateRandomString() . '_' . time();
+		// exit;
+		if (!Yii::app()->user->isGuest) {
+
+			if (isset(Yii::app()->user->username)) {
+				$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "services", "เปิดหน้าservice");
+				$this->render('/site/servicepages/allservices');
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	/**
+	 * Displays the login page
+	 */
+	public function actionLogin()
+	{
+		$model = new LoginForm;
+
+		// if it is ajax validation request
+		if (isset($_POST['ajax']) && $_POST['ajax'] === 'login-form') {
+			echo preg_replace("/\xEF\xBB\xBF/", "", CActiveForm::validate($model));
+			Yii::app()->end();
+		}
+
+		// collect user input data
+		if (isset($_POST['LoginForm'])) {
+			$model->attributes = $_POST['LoginForm'];
+			// validate user input and redirect to the previous page if valid
+			if ($model->validate() && $model->login())
+				$this->redirect(Yii::app()->user->returnUrl);
+		}
+		// display the login form
+		$this->render('login', array('model' => $model));
+	}
+
+	public function actionCalldbdservice3auto()
+	{
+
+		if (true) {
+
+			$bgdatep = date('m/d/Y');
+			$eddatep = date('m/d/Y');
+			$newdap = 1;
+			$updap = 0;
+		} else {
+			$bgdatep = $_POST['bgdatep'];
+			$eddatep = $_POST['eddatep'];
+			$newdap = $_POST['newdap'];
+			$updap = $_POST['updap'];
+		}
+
+		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$this->layout = 'nolayout';
+		$this->render('/site/servicepages/calldbdservice3auto', $data1);
+	}
+
+	public function actionCalluploadfiletosftpauto()
+	{
+		$username = "sys";
+
+		//$time_start = microtime(true);
+
+		$action = $_POST['action'];
+		$gtfname = $_POST['gtfname'];
+
+		$localFile = Yii::app()->Cgentextfile->localpathf . $gtfname; //'wpd25620517.txt';
+		$remoteFile = Yii::app()->Cgentextfile->remotepathf . $gtfname; //'wpd25620517.txt';
+
+		if (Yii::app()->Cgentextfile->getConnectionsftp()) {
+			$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
+			$contents = file_get_contents($localFile);
+			$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
+			//echo "success";
+			//echo preg_replace("/\xEF\xBB\xBF/", "","Success");
+			$anb = GentextfileTb::model()->findByAttributes(array('gtf_name' => $gtfname));
+			$anb->gtf_statusupload = 'y';
+			$anb->gtf_updateby = $username;
+			$anb->gtf_modified = date('Y-m-d H:i:s');
+			$anb->gtf_status = 2;
+			if ($anb->save()) {
+				//$msg3 = "update data is success.";
+				$msgresult = Yii::app()->Clogevent->createlogeventauto("upload", "showtextfile", "uploadtextfiletosftp", "upload", "uploadtextfiletosftp");
+				ob_clean();
+				echo "Success";
+			} else {
+				//$msg3 = "can't update data.";
+				//echo "Upload Success but Can't update status GentextfileTb.";
+				ob_clean();
+				echo "Failed";
+			}
+		} else {
+			//echo "failed"; 
+			ob_clean();
+			echo preg_replace("/\xEF\xBB\xBF/", "", "Failed");
+		}
+	}
+
+	public function actionCallshowtextfile()
+	{
+
+		// if(Yii::app()->request->enableCsrfValidation)
+		// {
+		// 	  $csrfTokenName = Yii::app()->request->csrfTokenName;
+		//  echo $csrfToken = Yii::app()->request->csrfToken;
+
+		//  exit;
+
+		//  echo $csrf = "\n\t\tdata:{ '$csrfTokenName':'$csrfToken' },";
+		// }
+
+
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				if (true) {
+					$action = 'sch';
+				} else {
+					$action = $_POST['action'];
+				}
+
+				$data1 = ['action' => $action];
+				$data1['modeltf'] =  GentextfileTb::model()->findAll();
+
+				$this->layout = 'nolayout';
+				$this->render('/site/servicepages/showtextfile', $data1);
+				//*********************************************************
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else { //if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	///site/services หลังจากกดปุ่มรัน service ต่างๆ 
+	public function actionOpenservice($id = NULL)
+	{
+		//open page directly from url 
+		if (!empty($id)) {
+
+			if (!Yii::app()->user->isGuest) {
+				if (isset(Yii::app()->user->username)) {
+
+					$snum = $id;
+					$lremark = "เปิดเมนูย่อยservice:" . $snum;
+					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
+					// $this->layout = 'nolayout';
+
+					if ($snum == 1) { //Call DBD WebService
+
+
+						$this->render('/site/servicepages/dbd_webservice');
+					} else if ($snum == 5) { //Export textfile & Upload to SFTP
+
+						$this->render('/site/servicepages/service5');
+					} else if ($snum == 6) { //Call LED Webservice
+
+						$this->render('/site/servicepages/service6');
+					} else if ($snum == 7) { //Data Cleansing
+
+						$this->render('/site/servicepages/service7');
+					} else if ($snum == 8) { //Gen Textfile Old WPD
+
+						$this->render('/site/servicepages/service8');
+					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
+
+						$this->render('/site/servicepages/service9');
+					} else {
+
+						$this->render('/site/servicepages/service' . $snum);
+					}
+				} else { //if
+					$idplib = new Idplib();
+					$idplib->getIdpinfo();
+				}
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+
+			if (!Yii::app()->user->isGuest) {
+				if (isset(Yii::app()->user->username)) {
+
+					$snum = $_POST['snum'];
+					$lremark = "เปิดเมนูย่อยservice:" . $snum;
+					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
+					$this->layout = 'nolayout';
+
+					if ($snum == 1) { //Call DBD WebService
+
+						$this->render('/site/servicepages/service1');
+					} else if ($snum == 5) { //Export textfile & Upload to SFTP
+
+						$this->render('/site/servicepages/service5');
+					} else if ($snum == 6) { //Call LED Webservice
+
+						$this->render('/site/servicepages/service6');
+					} else if ($snum == 7) { //Data Cleansing
+
+						$this->render('/site/servicepages/service7');
+					} else if ($snum == 8) { //Gen Textfile Old WPD
+
+						$this->render('/site/servicepages/service8');
+					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
+
+						$this->render('/site/servicepages/service9');
+					} else {
+
+						$this->render('/site/servicepages/service' . $snum);
+					}
+				} else { //if
+					$idplib = new Idplib();
+					$idplib->getIdpinfo();
+				}
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		}
+	}
+
+
+
+	// public function behaviors()
+	// {
+	// 	return [
+	// 		'bearerAuth' => [
+	// 			'class' => \yii\filters\auth\HttpBearerAuth::class,
+	// 		],
+	// 	];
+	// }
+
+
+
 
 
 	private function callGooApi($bgdatep = NULL, $eddatep = NULL, $newdap = NULL, $cronjob = true)
@@ -135,18 +414,18 @@ class SiteController extends Controller
 			}
 		}
 
-		 $startdate = $bgdatep . "T00:00:00+07:00";
+		$startdate = $bgdatep . "T00:00:00+07:00";
 
 		//  '<br>';
 		$enddate = $eddatep . "T23:59:59+07:00";
 
-		 $startdate = date_create($startdate)->format('Y-m-d') . "T00:00:00+07:00";
+		$startdate = date_create($startdate)->format('Y-m-d') . "T00:00:00+07:00";
 
 		//  '<br>';
 		$enddate = date_create($enddate)->format('Y-m-d') . "T23:59:59+07:00";
 
 
-		 $rundate = date_create($bgdatep)->format('Ymd');
+		$rundate = date_create($bgdatep)->format('Ymd');
 
 		//  '<br>';
 
@@ -720,116 +999,6 @@ class SiteController extends Controller
 
 
 
-
-	///site/services หลังจากกดปุ่มรัน service ต่างๆ 
-	public function actionOpenservice($id = NULL)
-	{
-		//open page directly from url 
-		if (!empty($id)) {
-
-			if (!Yii::app()->user->isGuest) {
-				if (isset(Yii::app()->user->username)) {
-
-					$snum = $id;
-					$lremark = "เปิดเมนูย่อยservice:" . $snum;
-					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
-					// $this->layout = 'nolayout';
-
-					if ($snum == 1) { //Call DBD WebService
-
-
-						$this->render('/site/servicepages/dbd_webservice');
-					} else if ($snum == 5) { //Export textfile & Upload to SFTP
-
-						$this->render('/site/servicepages/service5');
-					} else if ($snum == 6) { //Call LED Webservice
-
-						$this->render('/site/servicepages/service6');
-					} else if ($snum == 7) { //Data Cleansing
-
-						$this->render('/site/servicepages/service7');
-					} else if ($snum == 8) { //Gen Textfile Old WPD
-
-						$this->render('/site/servicepages/service8');
-					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
-
-						$this->render('/site/servicepages/service9');
-					} else {
-
-						$this->render('/site/servicepages/service' . $snum);
-					}
-				} else { //if
-					$idplib = new Idplib();
-					$idplib->getIdpinfo();
-				}
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else {
-
-			if (!Yii::app()->user->isGuest) {
-				if (isset(Yii::app()->user->username)) {
-
-					$snum = $_POST['snum'];
-					$lremark = "เปิดเมนูย่อยservice:" . $snum;
-					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
-					$this->layout = 'nolayout';
-
-					if ($snum == 1) { //Call DBD WebService
-
-						$this->render('/site/servicepages/service1');
-					} else if ($snum == 5) { //Export textfile & Upload to SFTP
-
-						$this->render('/site/servicepages/service5');
-					} else if ($snum == 6) { //Call LED Webservice
-
-						$this->render('/site/servicepages/service6');
-					} else if ($snum == 7) { //Data Cleansing
-
-						$this->render('/site/servicepages/service7');
-					} else if ($snum == 8) { //Gen Textfile Old WPD
-
-						$this->render('/site/servicepages/service8');
-					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
-
-						$this->render('/site/servicepages/service9');
-					} else {
-
-						$this->render('/site/servicepages/service' . $snum);
-					}
-				} else { //if
-					$idplib = new Idplib();
-					$idplib->getIdpinfo();
-				}
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		}
-	}
-
-
-	//หน้ารวมปุ่ม service ต่างๆ
-	public function actionServices($id = NULL, $gogo = NULL)
-	{
-
-		if (!Yii::app()->user->isGuest) {
-
-			if (isset(Yii::app()->user->username)) {
-				$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "services", "เปิดหน้าservice");
-				$this->render('/site/servicepages/allservices');
-			} else {
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else {
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	}
-
-
 	public function actionIndex()
 	{
 		$connection = Yii::app()->db; //get connection
@@ -911,19 +1080,7 @@ class SiteController extends Controller
 
 
 
-	public function actionTest($a = NULL, $b = NULL)
-	{
 
-		// $cty_id = 1;
-		// $conn = Yii::app()->db;
-		// $sql = "SELECT * FROM corptype_tb WHERE cty_id =:cty_id";
-
-
-		// $command = $conn->createCommand($sql);
-		// $command->bindValue(":cty_id", $cty_id);
-		// $rowA = $command->queryAll();
-		// arr($rowA);
-	}
 
 
 
@@ -993,29 +1150,7 @@ class SiteController extends Controller
 		$this->render('contact', array('model' => $model));
 	}
 
-	/**
-	 * Displays the login page
-	 */
-	public function actionLogin()
-	{
-		$model = new LoginForm;
 
-		// if it is ajax validation request
-		if (isset($_POST['ajax']) && $_POST['ajax'] === 'login-form') {
-			echo preg_replace("/\xEF\xBB\xBF/", "", CActiveForm::validate($model));
-			Yii::app()->end();
-		}
-
-		// collect user input data
-		if (isset($_POST['LoginForm'])) {
-			$model->attributes = $_POST['LoginForm'];
-			// validate user input and redirect to the previous page if valid
-			if ($model->validate() && $model->login())
-				$this->redirect(Yii::app()->user->returnUrl);
-		}
-		// display the login form
-		$this->render('login', array('model' => $model));
-	}
 
 
 
@@ -1254,18 +1389,7 @@ class SiteController extends Controller
 		}
 	}
 
-	public function actionCalldbdservice3auto()
-	{
 
-		$bgdatep = $_POST['bgdatep'];
-		$eddatep = $_POST['eddatep'];
-		$newdap = $_POST['newdap'];
-		$updap = $_POST['updap'];
-		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
-		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-		$this->layout = 'nolayout';
-		$this->render('/site/servicepages/calldbdservice3auto', $data1);
-	}
 
 	public function actionCalldbdservice4()
 	{
@@ -2593,26 +2717,7 @@ class SiteController extends Controller
 		}
 	}
 
-	public function actionCallshowtextfile()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-				//echo "{$action}";
-				$data1 = array('action' => $action);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/showtextfile', $data1);
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	}
+
 
 	public function actionCallusergroupfrm()
 	{
@@ -2988,37 +3093,6 @@ class SiteController extends Controller
 				} else {
 					$username = "sys";
 				}
-				/*
-		$action = $_POST['action'];
-		$tfid = $_POST['tfid'];
-		//echo "{$action},{$tfid} <br>";
-		//$sqlstring = "SELECT * FROM gentextfile_tb WHERE gtf_id =" . $tfid;
-		//$getpathfile = GentextfileTb::model()->findBySQL($sqlstring);
-		$getpathfile = GentextfileTb::model()->findByPk($tfid);
-		$gtf_name = $getpathfile->gtf_name;
-		$gtf_path = $getpathfile->gtf_path;
-		//echo "{$action},{$tfid}, {$gtf_name}, {$gtf_path} <br>";
-		Yii::app()->Cgentextfile->gtf_name = $gtf_name;
-		Yii::app()->Cgentextfile->gtf_path = $gtf_path;
-		$uploadftxt = Yii::app()->Cgentextfile->uploadtf();
-		//echo "{$uploadftxt}";
-		if($uploadftxt=='Y'){
-			$updattf = GentextfileTb::model()->findByPk($tfid);
-			$updattf->gtf_statusupload = "y";
-			$updattf->gtf_updateby = $username;
- 			$updattf->gtf_modified = date('Y-m-d H:i:s');
-			if($updattf->save()){
-				$levremark = "uploadtextfiletosftpserver:" . $tfid . "&" . $gtf_name . "&" . $gtf_path;
-				$msgresult = Yii::app()->Clogevent->createlogevent("Upload", "UploadfiltToSFTP", "Upload", "gentextfiletb", $levremark);
-				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
-			}else{
-				echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
-			}
-		}else{
-			 echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'error')));
-		}
-		*/
-				//*********************************************************
 			} else { //if
 				$idplib = new Idplib();
 				$idplib->getIdpinfo();
@@ -3598,10 +3672,8 @@ class SiteController extends Controller
 					$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
 					$contents = file_get_contents($localFile);
 					$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
-					//echo "success";
-					//echo preg_replace("/\xEF\xBB\xBF/", "","Success");
+
 					$anb = GentextfileTb::model()->findByAttributes(array('gtf_name' => $gtfname));
-					//$anb = GentextfileTb::model()->findByPk($gtfid);
 					$anb->gtf_statusupload = 'y';
 					$anb->gtf_updateby = $username;
 					$anb->gtf_modified = date('Y-m-d H:i:s');
@@ -3622,60 +3694,6 @@ class SiteController extends Controller
 					ob_clean();
 					echo preg_replace("/\xEF\xBB\xBF/", "", "Failed");
 				}
-
-
-
-				//****** call wpdapi service ********************************************************
-				/*
-			$url = 'http://localhost/wpdapi/api/uploadfile/uploadtosftp.php?fn1=' . $gtfname ;
-			
-			$arrContextOptions=array(
-				"http" => array(
-				  "method" => "GET",
-				  "header" =>
-					  //"Consumer-Key: 8400dfa3-4fe3-43b9-b830-060d948d75cf", 
-					  "Content-Type: application/json; charset=utf-8;\r\n".
-					  "Connection: keep-alive\r\n",
-					  "ignore_errors" => true,
-					  "timeout" => (float)30.0,
-					  //"content" => $data,
-				),
-				"ssl"=>array(
-					"verify_peer"=>false,
-					"verify_peer_name"=>false,
-				),
-			);  
-			
-			$content = file_get_contents($url, false, stream_context_create($arrContextOptions));
-			
-			//echo "{$content} <br>";
-			
-			if($content){
-				//echo "Success";
-				//update gentextfile_tb
-				$anb=GentextfileTb::model()->findByAttributes(array('gtf_name'=>$gtfname));
-				//$anb = GentextfileTb::model()->findByPk($gtfid);
-				$anb->gtf_statusupload = 'y';
-				$anb->gtf_updateby = $username;
-				$anb->gtf_modified = date('Y-m-d H:i:s');
-				$anb->gtf_status = 2;
-				if($anb->save()){
-					//$msg3 = "update data is success.";
-					echo "Success";
-				}else{
-					//$msg3 = "can't update data.";
-					//echo "Upload Success but Can't update status GentextfileTb.";
-					echo "Failed";
-				}
-			}else{
-				echo "Failed";
-			}
-			*/
-				//***********************************************************************************
-				//$time_end = microtime(true);
-				//$execution_time = ($time_end - $time_start)/60;
-				//echo '<b>timeuses:</b> '.$execution_time.' Mins <br>';	
-				//*********************************************************
 			} else { //if
 				$idplib = new Idplib();
 				$idplib->getIdpinfo();
@@ -3686,102 +3704,8 @@ class SiteController extends Controller
 		}
 	}
 
-	public function actionCalluploadfiletosftpauto()
-	{
 
 
-		$username = "sys";
-
-		//$time_start = microtime(true);
-
-		$action = $_POST['action'];
-		$gtfname = $_POST['gtfname'];
-
-		$localFile = Yii::app()->Cgentextfile->localpathf . $gtfname; //'wpd25620517.txt';
-		$remoteFile = Yii::app()->Cgentextfile->remotepathf . $gtfname; //'wpd25620517.txt';
-
-		if (Yii::app()->Cgentextfile->getConnectionsftp()) {
-			$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
-			$contents = file_get_contents($localFile);
-			$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
-			//echo "success";
-			//echo preg_replace("/\xEF\xBB\xBF/", "","Success");
-			$anb = GentextfileTb::model()->findByAttributes(array('gtf_name' => $gtfname));
-			//$anb = GentextfileTb::model()->findByPk($gtfid);
-			$anb->gtf_statusupload = 'y';
-			$anb->gtf_updateby = $username;
-			$anb->gtf_modified = date('Y-m-d H:i:s');
-			$anb->gtf_status = 2;
-			if ($anb->save()) {
-				//$msg3 = "update data is success.";
-				$msgresult = Yii::app()->Clogevent->createlogeventauto("upload", "showtextfile", "uploadtextfiletosftp", "upload", "uploadtextfiletosftp");
-				ob_clean();
-				echo "Success";
-			} else {
-				//$msg3 = "can't update data.";
-				//echo "Upload Success but Can't update status GentextfileTb.";
-				ob_clean();
-				echo "Failed";
-			}
-		} else {
-			//echo "failed"; 
-			ob_clean();
-			echo preg_replace("/\xEF\xBB\xBF/", "", "Failed");
-		}
-
-
-
-		/*
-			$url = 'http://localhost/wpdapi/api/uploadfile/uploadtosftp.php?fn1=' . $gtfname ;
-			
-			$arrContextOptions=array(
-				"http" => array(
-				  "method" => "GET",
-				  "header" =>
-					  //"Consumer-Key: 8400dfa3-4fe3-43b9-b830-060d948d75cf", 
-					  "Content-Type: application/json; charset=utf-8;\r\n".
-					  "Connection: keep-alive\r\n",
-					  "ignore_errors" => true,
-					  "timeout" => (float)30.0,
-					  //"content" => $data,
-				),
-				"ssl"=>array(
-					"verify_peer"=>false,
-					"verify_peer_name"=>false,
-				),
-			);  
-			
-			$content = file_get_contents($url, false, stream_context_create($arrContextOptions));
-			
-			//echo "{$content} <br>";
-			
-			if($content){
-				//echo "Success";
-				//update gentextfile_tb
-				$anb=GentextfileTb::model()->findByAttributes(array('gtf_name'=>$gtfname));
-				//$anb = GentextfileTb::model()->findByPk($gtfid);
-				$anb->gtf_statusupload = 'y';
-				$anb->gtf_updateby = $username;
-				$anb->gtf_modified = date('Y-m-d H:i:s');
-				$anb->gtf_status = 2;
-				if($anb->save()){
-					//$msg3 = "update data is success.";
-					
-					echo "Success";
-				}else{
-					//$msg3 = "can't update data.";
-					//echo "Upload Success but Can't update status GentextfileTb.";
-					echo "Failed";
-				}
-			}else{
-				echo "Failed";
-			}
-			*/
-
-		//$time_end = microtime(true);
-		//$execution_time = ($time_end - $time_start)/60;
-		//echo '<b>timeuses:</b> '.$execution_time.' Mins <br>';	
-	}
 
 	public function actionCallupdateiden()
 	{

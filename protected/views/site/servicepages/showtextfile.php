@@ -85,6 +85,8 @@
 					));*/
 
 					//gentextfile_tb
+					// $modeltf = GentextfileTb::model()->findAll();
+					// $counttf = count($modeltf);
 					foreach ($modeltf as $rows) {
 						$gtf_id = $rows->gtf_id;
 						$gtf_name = $rows->gtf_name;
@@ -107,7 +109,7 @@
 
 					?>
 						<tr>
-							<td>dfdfdddf<a download href='<?= $link_path ?>'> <?= $gtf_name ?></a></td>
+							<td><a download href='<?= $link_path ?>'> <?= $gtf_name ?></a></td>
 							<td style="text-align:center;"><?= $gtf_countgen ?> รายการ</td>
 							<td style="text-align:center; color:green;"><?= $gtf_statusgen ?></td>
 							<td style="text-align:center; color:green;">
