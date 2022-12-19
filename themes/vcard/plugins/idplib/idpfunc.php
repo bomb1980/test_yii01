@@ -21,6 +21,8 @@ class Idplib{
 	
 	public function getIdpinfo(){
 
+		
+
 		//require '/opt/share/html/wpdcore/themes/vcard/plugins/idplib/vendor/autoload.php';
 		//$key = sprintf('file://%s/server.pem', realpath('/opt/share/html/wpdcore/themes/vcard/plugins/idplib'));
 
@@ -79,6 +81,7 @@ class Idplib{
 		
 		Yii::app()->session['accesstoken'] = $this->accesstoken;
 		Yii::app()->session['idtoken'] = $this->idtoken;
+
 		
 		
 		foreach($allclaims as $key=>$value){

@@ -53,6 +53,7 @@
 
 
 				?>
+				
 					<tr <?php if ($crop_remark == 'B') {  ?> style="background-color:#FFFFC6;" <?php } else if ($crop_remark == 'A') { ?> style="background-color:#CEFFDB;" <?php } ?>>
 
 						<td><?= $registername ?></td>
