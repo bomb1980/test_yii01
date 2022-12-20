@@ -40,6 +40,159 @@ class CropinfoTmpTb extends CActiveRecord
 	}
 
 
+	public static function getDatas($bgdatep = NULL)
+	{
+		$sql = "
+			SELECT 
+				*, 
+				date_format( registerdate, '%m/%d/%Y' ) as t 
+			FROM cropinfo_tmp_tb having t = :bgdatep  
+		";
+
+		$conn = Yii::app()->db;
+
+		$command = $conn->createCommand($sql);
+
+		$command->bindValue( ":bgdatep", $bgdatep );
+
+		return $command->queryAll();  
+	}
+
+
+	/**
+	 * @return string the associated database table name
+	 */
+	public function tableName()
+	{
+		return 'cropinfo_tmp_tb';
+	}
+
+
+
+	static function callGenAccNo($bgdatep = NULL, $eddatep = NULL, $cronjob = true )
+	{
+		$username = "sys";
+
+		if($cronjob != true) {
+
+			if (Yii::app()->user->username) {
+				$username = Yii::app()->user->username;
+			}	
+		}
+		
+		$startdate = $bgdatep . "T00:00:00+07:00";
+
+		$enddate = $eddatep . "T23:59:59+07:00";
+
+		$startdate = date_create($startdate)->format('Y-m-d') . "T00:00:00+07:00";
+
+		$enddate = date_create($enddate)->format('Y-m-d') . "T23:59:59+07:00";
+
+
+		$r = CropinfoTmpTb::getDatas($bgdatep);
+		$c = count($r);
+		echo "Count of data is update {$c} Record. <br>";
+		foreach ($r as $CropinfoTmpTb) {
+
+
+			$crop_id = $CropinfoTmpTb['crop_id'];
+			$registernumber = $CropinfoTmpTb['registernumber'];
+			$regisarr = str_split($registernumber);
+
+
+			//เลขบัตรตัวที่ 2 3 รวมกันได้รหัสจังหวัด
+			$provicecode = $regisarr[1] . $regisarr[2];
+
+			$q2 = new CDbCriteria(array(
+				'condition' => "prvi_code = :prvi_code ",
+				'params'    => array(':prvi_code' => $provicecode)
+			));
+
+			$r2 = ProviceTb::model()->find($q2);
+
+			$lastnum = 0;
+			if ($r2) {
+
+				$lastnum = $r2->prvi_remark;
+			}
+
+			$rowcountpv = $lastnum + 1;
+
+			$r2->prvi_remark = $rowcountpv;
+
+			$r2->save();
+
+			$dg12 = $provicecode;
+			$dg3 = "2";
+			$dg49 = str_pad($rowcountpv, 6, 0, STR_PAD_LEFT);
+
+			$accno = $dg12 . $dg3 . $dg49;
+
+			$sarray = str_split($accno);
+
+			//****** gen check digit ****************************
+			$dd1 =  $sarray[0] * 10;
+			$dd2 =  $sarray[1] * 9;
+			$dd3 =  $sarray[2] * 8;
+			$dd4 =  $sarray[3] * 7;
+			$dd5 =  $sarray[4] * 6;
+			$dd6 =  $sarray[5] * 5;
+			$dd7 =  $sarray[6] * 4;
+			$dd8 =  $sarray[7] * 3;
+			$dd9 =  $sarray[8] * 2;
+
+			$sumdd = $dd1 + $dd2 + $dd3 + $dd4 + $dd5 + $dd6 + $dd7 + $dd8 + $dd9;
+
+			$mod11 = $sumdd % 11;
+			if ($mod11 == 0) {
+				$div11 = 1;
+			} else if ($mod11 == 1) {
+				$div11 = 0;
+			} else {
+				$div11 = 11 - $mod11;
+			}
+			//****** end gen check digit ****************************  
+
+			$accnogen = $dg12 . $dg3 . $dg49 . $div11;
+
+			//******* update cropinfo **********************************
+			$update2 = CropinfoTmpTb::model()->findByPk($crop_id);
+			$update2->acc_no = $accnogen;
+			$update2->crop_remark = "P";
+			$update2->crop_updateby = $username;
+			$update2->crop_updatetime = date('Y-m-d H:i:s');
+			$update2->crop_status = 2;
+			if ($update2->save()) {
+				$msgerr = "update data is success.";
+				//****** insert accnumber_tb ****************************************
+				$AccnumberTb = new AccnumberTb();
+				$AccnumberTb->acc_no = $accnogen;
+				$AccnumberTb->acc_bran = "000000";
+				$AccnumberTb->acc_regis_no = $registernumber;
+				$AccnumberTb->acc_active_flag = "N";
+				$AccnumberTb->acc_using_date = date('Y-m-d H:i:s');
+				$AccnumberTb->acc_createby = $username;
+				$AccnumberTb->acc_created = date('Y-m-d H:i:s');
+				$AccnumberTb->acc_updateby = $username;
+				$AccnumberTb->acc_modified = date('Y-m-d H:i:s');
+				$AccnumberTb->acc_remark = "P";
+				$AccnumberTb->acc_status = 2;
+				if ($AccnumberTb->save()) {
+					
+					$msgerr2 = "update data is success.";
+					
+					Yii::app()->Cwpdreport->createcrop_v_bran($crop_id, $registernumber, $CropinfoTmpTb);
+				} else {
+					
+					$msgerr2 = $AccnumberTb->getErrors();
+					echo "{$msgerr2}<br>";
+				}
+			} else {
+				$msgerr = $update2->getErrors();
+				echo "{$msgerr}<br>";
+			}
+		}
+	}
 
 	static function callGooApi($bgdatep = NULL, $eddatep = NULL, $newdap = NULL, $cronjob = true, $testJob = true )
 	{
@@ -638,33 +791,8 @@ class CropinfoTmpTb extends CActiveRecord
 	}
 
 
-	public static function getDatas($bgdatep = NULL)
-	{
+	
 
-		$sql = "
-			SELECT 
-				*, 
-				date_format( registerdate, '%m/%d/%Y' ) as t 
-			FROM cropinfo_tmp_tb having t = :bgdatep  
-		";
-
-		$conn = Yii::app()->db;
-
-		$command = $conn->createCommand($sql);
-
-		$command->bindValue(":bgdatep", $bgdatep);
-
-		return $command->queryAll();  
-	}
-
-
-	/**
-	 * @return string the associated database table name
-	 */
-	public function tableName()
-	{
-		return 'cropinfo_tmp_tb';
-	}
 
 	/**
 	 * @return array validation rules for model attributes.

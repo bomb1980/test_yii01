@@ -762,6 +762,8 @@ class CDbCommandBuilder extends CComponent
 	 */
 	public function createInCondition($table,$columnName,$values,$prefix=null)
 	{
+
+		// arr($columnName);
 		if(($n=count($values))<1)
 			return '0=1';
 

@@ -1,5 +1,6 @@
 <?php
 
+//use for public function
 class CommonFnc extends CApplicationComponent
 {
 	public function init()
@@ -217,6 +218,7 @@ class CommonFnc extends CApplicationComponent
 		//header("Content-Type: image/jpg");
 		//echo $imagick->getImageBlob();
 	}
+
 
 
 	function imageResizer($fs, $width, $height)

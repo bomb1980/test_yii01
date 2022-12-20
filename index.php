@@ -1,5 +1,16 @@
 <?php
 
+function arr( $arr = [], $exit = true ) {
+      echo '<pre>';
+      print_r( $arr );
+
+      if($exit == true) {
+
+            exit;
+      }
+
+} 
+
 date_default_timezone_set('Asia/Bangkok');
 
 // change the following paths if necessary

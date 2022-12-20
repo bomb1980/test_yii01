@@ -14,6 +14,59 @@ class SiteController extends Controller
 		//}
 	}*/
 
+
+	public function actionCalldbdservice3auto()
+	{
+		$bgdatep = $_POST['bgdatep'];
+
+		$eddatep = $_POST['eddatep'];
+
+		CropinfoTmpTb::callGenAccNo($bgdatep, $eddatep, true);
+
+		$data1['model'] = CropinfoTmpTb::getDatas($bgdatep);
+
+		echo json_encode( $data1 );
+	}
+
+	public function actionCalldbdservice3()
+	{
+		if (!Yii::app()->user->isGuest) {
+
+			if (isset(Yii::app()->user->username)) {
+
+				if (Yii::app()->params['testJob']) {
+
+					$bgdatep = '09/02/2019';
+					$eddatep = '12/16/2022';
+				} else {
+					$bgdatep = $_POST['bgdatep'];
+					$eddatep = $_POST['eddatep'];
+				}
+
+				CropinfoTmpTb::callGenAccNo($bgdatep, $eddatep, false);
+
+				$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep);
+
+				$data1['model'] = CropinfoTmpTb::getDatas($bgdatep);
+
+				$this->layout = 'nolayout';
+
+
+				$this->render('/site/servicepages/calldbdservice3', $data1);
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+
+
+
 	public function actionCalldbdservice2auto()
 	{
 
@@ -23,9 +76,8 @@ class SiteController extends Controller
 		$cronjob = true;
 
 		$testJob = true;
-		// $this->callGooApi($bgdatep, $eddatep, $newdap = 1);
 
-		CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob );
+		CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob);
 	}
 
 
@@ -55,11 +107,11 @@ class SiteController extends Controller
 
 				// $this->callGooApi($bgdatep, $eddatep, $newdap = 1);
 
-				CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob );
+				CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob);
 
-				$model = CropinfoTmpTb::getDatas( $bgdatep );
-				
-				
+				$model = CropinfoTmpTb::getDatas($bgdatep);
+
+
 				$data1 = [
 					'bgdatep' => $bgdatep,
 					'eddatep' => $eddatep,
@@ -84,22 +136,23 @@ class SiteController extends Controller
 
 
 
-	function getAuthorizationHeader(){
+	function getAuthorizationHeader()
+	{
 
 		$headers = null;
-		
-		
+
+
 		if (function_exists('apache_request_headers')) {
-		    $requestHeaders = apache_request_headers();
-		    // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
-		    $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
-		    //print_r($requestHeaders);
-		    if (isset($requestHeaders['Authorization'])) {
-			  $headers = trim($requestHeaders['Authorization']);
-		    }
+			$requestHeaders = apache_request_headers();
+			// Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
+			$requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
+			//print_r($requestHeaders);
+			if (isset($requestHeaders['Authorization'])) {
+				$headers = trim($requestHeaders['Authorization']);
+			}
 		}
 		return $headers;
-	  }
+	}
 
 
 	public function actionTest($a = NULL, $b = NULL)
@@ -112,17 +165,17 @@ class SiteController extends Controller
 		// arr( $headers );
 		// HEADER: Get the access token from the header
 		if (!empty($headers)) {
-		    if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+			if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
 
-			 
 
-			if(Yii::app()->params['checkRequestHeaders']  == $matches[1] ) {
 
-				arr('login success');
+				if (Yii::app()->params['checkRequestHeaders']  == $matches[1]) {
+
+					arr('login success');
+				}
+
+				//   return $matches[1];
 			}
-
-			//   return $matches[1];
-		    }
 		}
 
 		return null;
@@ -193,27 +246,7 @@ class SiteController extends Controller
 		$this->render('login', array('model' => $model));
 	}
 
-	public function actionCalldbdservice3auto()
-	{
 
-		if (true) {
-
-			$bgdatep = date('m/d/Y');
-			$eddatep = date('m/d/Y');
-			$newdap = 1;
-			$updap = 0;
-		} else {
-			$bgdatep = $_POST['bgdatep'];
-			$eddatep = $_POST['eddatep'];
-			$newdap = $_POST['newdap'];
-			$updap = $_POST['updap'];
-		}
-
-		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
-		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-		$this->layout = 'nolayout';
-		$this->render('/site/servicepages/calldbdservice3auto', $data1);
-	}
 
 	public function actionCalluploadfiletosftpauto()
 	{
@@ -1360,35 +1393,6 @@ class SiteController extends Controller
 			$idplib->getIdpinfo();
 		}
 	}
-
-
-
-
-
-	public function actionCalldbdservice3()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$bgdatep = $_POST['bgdatep'];
-				$eddatep = $_POST['eddatep'];
-				$newdap = $_POST['newdap'];
-				$updap = $_POST['updap'];
-				//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
-				$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/calldbdservice3', $data1);
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	}
-
 
 
 	public function actionCalldbdservice4()

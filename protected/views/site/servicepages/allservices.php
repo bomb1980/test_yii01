@@ -32,10 +32,12 @@ $this->breadcrumbs = array(
                 <div class="service_text">
                     <p class="thfont5">ดึงช้อมูลสถานประกอบการที่มีการขึ้นทะเบียนใหม่ผ่าน เว็บเซอร์วิส ของกรมพัฒนาธุรกิจการค้า DBD และ Mapping เลข 13 หลัก กับ เลข 10 หลัก สถานะเป็น P .</p>
                 </div>
-                <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('1');"><i class="
-fa fa-power-off"></i> Run</button></div>
+                <!-- <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('1');"><i class="
+fa fa-power-off"></i> Run</button></div> -->
+                <div class="text-right"><a target="_blank" class="btn btn-info btn-small" href="<?php echo Yii::app()->createAbsoluteUrl('site/openservice',['id'=>1]) ?>"><i class="
+fa fa-power-off"></i> Run</a></div>
             </div>
-        
+
             <div class="service">
                 <div class="service_title_container d-flex flex-row align-items-center justify-content-start">
                     <div>
@@ -46,8 +48,11 @@ fa fa-power-off"></i> Run</button></div>
                 <div class="service_text">
                     <p class="thfont5">ทำการ ส่งออกข้อมูลสถานประกอบการที่ สถานะเป็น B ออกเป็น Textfile ตามรูปแบบที่ SAPIENS กำหนด แล้ว Upload ขึ้น SFTP เพื่อให้ SAPIENS นำเข้าข้อมูลในระบบ และเปลี่ยนสถานะเป็น A .</p>
                 </div>
-                <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('5');"><i class="
-fa fa-power-off"></i> Run</button></div>
+                <!-- <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('5');"><i class="
+fa fa-power-off"></i> Run</button></div> -->
+
+<div class="text-right"><a target="_blank" class="btn btn-info btn-small" href="<?php echo Yii::app()->createAbsoluteUrl('site/openservice',['id'=>5]) ?>"><i class="
+fa fa-power-off"></i> Run</a></div>
             </div>
 
             <!-- Service6 -->
@@ -61,8 +66,11 @@ fa fa-power-off"></i> Run</button></div>
                 <div class="service_text">
                     <p class="thfont5">ตรวจสอบช้อมูลสถานประกอบการที่มีถูกฟ้องล้มละลาย ผ่าน service ของกรมบังคับคดี ตามรายการสถานประกอบการกลุ่มเลี่่ยงของ สปส .</p>
                 </div>
-                <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('6');"><i class="
-fa fa-power-off"></i> Run</button></div>
+                <!-- <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('6');"><i class="
+fa fa-power-off"></i> Run</button></div> -->
+
+<div class="text-right"><a target="_blank" class="btn btn-info btn-small" href="<?php echo Yii::app()->createAbsoluteUrl('site/openservice',['id'=>6]) ?>"><i class="
+fa fa-power-off"></i> Run</a></div>
             </div>
             <!-- //Service6 -->
 
@@ -77,8 +85,12 @@ fa fa-power-off"></i> Run</button></div>
                 <div class="service_text">
                     <p class="thfont5">ตรวจสอบข้อมูลสถานประกอบการที่มีเลขบัญชีนายจ้างในระบบ sapains แล้วหรือไม่ ถ้ามีหากมีในระบบ sapains แล้ว ระบบ wpd จะทำการ update เลขบัญชีนายจ้าง 10 หลัก ให้ตรงกับระบบ sapains และ เปลี่ยนสถานะสถานประกอบการเป็น A.</p>
                 </div>
-                <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('7');"><i class="
-fa fa-power-off"></i> Run</button></div>
+                <!-- <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('7');"><i class="
+fa fa-power-off"></i> Run</button></div> -->
+
+
+<div class="text-right"><a target="_blank" class="btn btn-info btn-small" href="<?php echo Yii::app()->createAbsoluteUrl('site/openservice',['id'=>7]) ?>"><i class="
+fa fa-power-off"></i> Run</a></div>
             </div>
             <!-- //Service7 -->
 
@@ -93,8 +105,12 @@ fa fa-power-off"></i> Run</button></div>
                 <div class="service_text">
                     <p class="thfont5">สร้าง textfile ตามรูปแบบที่ระบบ sapiens ต้องการ และ upload ขึ้น SFTP เพื่อให้ระบบ sapiens นำไปประมวลผลต่อไป</p>
                 </div>
-                <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('8');"><i class="
-fa fa-power-off"></i> Run</button></div>
+                <!-- <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('8');"><i class="
+fa fa-power-off"></i> Run</button></div> -->
+
+
+<div class="text-right"><a target="_blank" class="btn btn-info btn-small" href="<?php echo Yii::app()->createAbsoluteUrl('site/openservice',['id'=>8]) ?>"><i class="
+fa fa-power-off"></i> Run</a></div>
             </div>
             <!-- //Service8 -->
 
@@ -110,8 +126,11 @@ fa fa-power-off"></i> Run</button></div>
                 <div class="service_text">
                     <p class="thfont5">สร้าง textfile ตามรูปแบบที่ระบบ sapiens ต้องการ และ upload ขึ้น SFTP เพื่อให้ระบบ sapiens นำไปประมวลผลต่อไป</p>
                 </div>
-                <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('9');"><i class="
-fa fa-power-off"></i> Run</button></div>
+                <!-- <div class="text-right"><button class="btn btn-info btn-small" onClick="javascript:hideallservice('9');"><i class="
+fa fa-power-off"></i> Run</button></div> -->
+
+<div class="text-right"><a target="_blank" class="btn btn-info btn-small" href="<?php echo Yii::app()->createAbsoluteUrl('site/openservice',['id'=>9]) ?>"><i class="
+fa fa-power-off"></i> Run</a></div>
             </div>
             <!-- //Service9 -->
 
@@ -157,8 +176,8 @@ fa fa-power-off"></i> Run</button></div>
     }
 
     function showallservice() {
-     
+
         $("#as1").load("<?php echo Yii::app()->createAbsoluteUrl('site/servicesb'); ?>");
-       
+
     }
 </script>
