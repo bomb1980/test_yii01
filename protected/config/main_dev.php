@@ -51,12 +51,7 @@ return array(
 			// enable cookie-based authentication
 			'allowAutoLogin' => true,
 			'class' => "CustomWebUser",
-			// 'enableSession' => false,
 			//'authTimeout' => 300, //กำหนดให้ออกจากระบบหลังจากไม่ได้ใช้งานเป็นเวลา 5 นาที //300 คือเวลาเป็นวินาทีได้มาจาก 60 วินาที × 5 นาที มื่อดูการตั้งค่าทั้งหมดจะได้ลักษณะดังนี้
-			// 'identityClass' => 'common\models\User',
-			// 'enableAutoLogin' => false,
-			// 'enableSession' => false,
-			// 'loginUrl' => '',
 		),
 		'request' => array(
 			'enableCsrfValidation' => false,
@@ -70,11 +65,8 @@ return array(
 				'<controller:\w+>/<id:\d+>' => '<controller>/view',
 				'<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
 				'<controller:\w+>/<action:\w+>' => '<controller>/<action>',
-				// 'defaults' => ['id' => 7878787],
 			),
 			'showScriptName' => false,
-			// 'suffix' => '.html',
-			// 'enablePrettyUrl' => true,
 		),
 
 		/*
@@ -88,8 +80,8 @@ return array(
 			//'connectionString' => 'mysql:host=172.20.91.51;dbname=wpddb',
 			'connectionString' => $dbhost . 'dbname=wpddb',
 			'emulatePrepare' => true,
-			'username' => 'root', //wpdusr //root //root
-			'password' => '', //CDEVwpddb@2019 //'' 
+			'username' => 'appwpd', //wpdusr //root //appwpd
+			'password' => 'APP@wpd', //CDEVwpddb@2019 //'' APP@wpd
 			'charset' => 'utf8',
 		),
 
@@ -97,8 +89,8 @@ return array(
 			//'connectionString' => 'mysql:host=172.20.91.51;dbname=wpdlogdb',
 			'connectionString' => $dbhost . 'dbname=wpdlogdb',
 			'emulatePrepare' => true,
-			'username' => 'root',
-			'password' => '',
+			'username' => 'appwpd',
+			'password' => 'APP@wpd',
 			'charset' => 'utf8',
 			'class'   => 'CDbConnection'
 		),
@@ -107,8 +99,8 @@ return array(
 			//'connectionString' => 'mysql:host=172.20.91.51;dbname=wpdreportdb',
 			'connectionString' => $dbhost . 'dbname=wpdreportdb',
 			'emulatePrepare' => true,
-			'username' => 'root',
-			'password' => '',
+			'username' => 'appwpd',
+			'password' => 'APP@wpd',
 			'charset' => 'utf8',
 			'class'   => 'CDbConnection'
 		),
@@ -117,8 +109,8 @@ return array(
 			//'connectionString' => 'mysql:host=172.20.91.51;dbname=etpdb',
 			'connectionString' => $dbhost . 'dbname=etpdb',
 			'emulatePrepare' => true,
-			'username' => 'root',
-			'password' => '',
+			'username' => 'appitr',
+			'password' => 'APP@itr',
 			'charset' => 'utf8',
 			'class'   => 'CDbConnection'
 		),
@@ -149,7 +141,6 @@ return array(
 
 	// application-level parameters that can be accessed
 	// using Yii::app()->params['paramName']
-	// using Yii::app()->params['checkRequestHeaders']
 	'params' => array(
 		// this is used in contact page
 		'adminEmail' => 'webmaster@example.com',
@@ -161,7 +152,11 @@ return array(
 		'urllogout1' => "https://idpws02uat.sso.go.th:443/oidc/logout?id_token_hint=",
 		'urllogout2' => "&post_logout_redirect_uri=https://uat2.sso.go.th/wpdcore/&state=state_2",
 		'checkRequestHeaders' => "re400Mahk1ObnovUOAzo6kNeg5oNiWEMcrZiqaec",
-		'testJob' => true,
-
+		'testJob' => false,
+		// 'testJob' => false,
+		'mailerHost' => '',
+		'mailerFrom' => '',
+		'mailerUsername' => '',
+		'mailerPassword' => '',
 	),
 );

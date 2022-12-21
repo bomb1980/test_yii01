@@ -46,7 +46,8 @@ class CropinfoTmpTb extends CActiveRecord
 			SELECT 
 				*, 
 				date_format( registerdate, '%m/%d/%Y' ) as t 
-			FROM cropinfo_tmp_tb having t = :bgdatep  
+			FROM cropinfo_tmp_tb 
+			having t = :bgdatep  
 		";
 
 		$conn = Yii::app()->db;
@@ -58,16 +59,10 @@ class CropinfoTmpTb extends CActiveRecord
 		return $command->queryAll();  
 	}
 
-
-	/**
-	 * @return string the associated database table name
-	 */
 	public function tableName()
 	{
 		return 'cropinfo_tmp_tb';
 	}
-
-
 
 	static function callGenAccNo($bgdatep = NULL, $eddatep = NULL, $cronjob = true )
 	{

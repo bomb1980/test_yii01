@@ -16,7 +16,8 @@ date_default_timezone_set('Asia/Bangkok');
 // change the following paths if necessary
 $yii=dirname(__FILE__).'/framework/yii.php';
 #$config=dirname(__FILE__).'/protected/config/main_uat.php';
-$config=dirname(__FILE__).'/protected/config/main_dev.php';
+// $config=dirname(__FILE__).'/protected/config/main_dev.php';
+$config=dirname(__FILE__).'/protected/config/bomb_dev.php';
 
 //$yiit='/ssowpd/themes/IdPOAth/vendor/autoload.php';
 //$yiit=dirname(__FILE__).'/themes/IdPOAth/vendor/autoload.php';

@@ -39,27 +39,47 @@
  */
 class BranchTmpTb extends CActiveRecord
 {
-	/**
-	 * Returns the static model of the specified AR class.
-	 * @param string $className active record class name.
-	 * @return BranchTmpTb the static model class
-	 */
+	 
 	public static function model($className=__CLASS__)
 	{
 		return parent::model($className);
 	}
 
-	/**
-	 * @return string the associated database table name
-	 */
+	 
 	public function tableName()
 	{
 		return 'branch_tmp_tb';
 	}
 
-	/**
-	 * @return array validation rules for model attributes.
-	 */
+	public static function getDatas( $bgdatep = NULL )
+	{
+
+		$sql = "
+			SELECT 
+				b.*,
+				c.registername, 
+				c.registernumber, 
+				c.acc_no, 
+				c.acc_bran, 
+				c.registerdate, 
+				c.crop_remark, 
+				c.crop_status,
+				date_format( c.registerdate, '%m/%d/%Y' ) as t 
+			FROM branch_tmp_tb b
+			JOIN cropinfo_tmp_tb c ON b.crop_id = c.crop_id
+			having t = :bgdatep  
+		";
+			
+		$conn = Yii::app()->db;
+
+		$command = $conn->createCommand($sql);
+
+		$command->bindValue( ":bgdatep", $bgdatep );
+
+		return $command->queryAll();  
+	}
+
+	 
 	public function rules()
 	{
 		// NOTE: you should only define rules for those attributes that
@@ -80,9 +100,7 @@ class BranchTmpTb extends CActiveRecord
 		);
 	}
 
-	/**
-	 * @return array relational rules.
-	 */
+	
 	public function relations()
 	{
 		// NOTE: you may need to adjust the relation name and the related
@@ -132,15 +150,8 @@ class BranchTmpTb extends CActiveRecord
 		);
 	}
 
-	/**
-	 * Retrieves a list of models based on the current search/filter conditions.
-	 * @return CActiveDataProvider the data provider that can return the models based on the search/filter conditions.
-	 */
 	public function search()
 	{
-		// Warning: Please modify the following code to remove attributes that
-		// should not be searched.
-
 		$criteria=new CDbCriteria;
 
 		$criteria->compare('brch_id',$this->brch_id);
