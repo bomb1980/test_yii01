@@ -1,10 +1,11 @@
 <?php
-class otp_email_tb{
- 
-    // database connection and table name
-    private $conn;
-    private $table_name = "otp_email_tb";
- 
+class otp_email_tb
+{
+
+	// database connection and table name
+	private $conn;
+	private $table_name = "otp_email_tb";
+
 	// object properties
 	public $oel_id;  //int(11) AI PK 
 	public $oel_registernumber; //varchar(50) 
@@ -25,13 +26,15 @@ class otp_email_tb{
 
 	public $num;
 
-    // constructor with $db as database connection
-    public function __construct($db){
-        $this->conn = $db;
-    }
-	
+	// constructor with $db as database connection
+	public function __construct($db)
+	{
+		$this->conn = $db;
+	}
+
 	// read products
-	function read(){
+	function read()
+	{
 		//select all query
 		$query = "SELECT 
 				o.oel_id,o.oel_registernumber,o.oel_accno,o.oel_registername,oel_accno,oel_registername,oel_emailaddress,
@@ -46,10 +49,11 @@ class otp_email_tb{
 		// execute query
 		$stmt->execute();
 		return $stmt;
-	} 
+	}
 
-	function update(){
-	   
+	function update()
+	{
+
 		// update query
 		$query = "UPDATE
 					" . $this->table_name . "
@@ -65,143 +69,127 @@ class otp_email_tb{
 
 				WHERE
 				oel_id = :oel_id";
-	 
+
 		// prepare query statement
 		$stmt = $this->conn->prepare($query);
-	 
-		// sanitize
-		$this->oel_id=htmlspecialchars(strip_tags($this->oel_id));
-		$this->oel_registernumber=htmlspecialchars(strip_tags($this->oel_registernumber));
-		$this->oel_accno=htmlspecialchars(strip_tags($this->oel_accno));
-		$this->oel_registername=htmlspecialchars(strip_tags($this->oel_registername));
-		$this->oel_emailaddress=htmlspecialchars(strip_tags($this->oel_emailaddress));
-		$this->oel_otp=htmlspecialchars(strip_tags($this->oel_otp));
-		$this->oel_expdatetime=htmlspecialchars(strip_tags($this->oel_expdatetime));
-		$this->oel_registerdate=htmlspecialchars(strip_tags($this->oel_registerdate)); 
-		$this->oel_answer=htmlspecialchars(strip_tags($this->oel_answer));
-		$this->oel_createby=htmlspecialchars(strip_tags($this->oel_createby));
-		$this->oel_createdate=htmlspecialchars(strip_tags($this->oel_createdate));
-		$this->oel_updateby=htmlspecialchars(strip_tags($this->oel_updateby));
-		$this->oel_updatedate=htmlspecialchars(strip_tags($this->oel_updatedate)); 
-		$this->oel_status=htmlspecialchars(strip_tags($this->oel_status)); 
-	
-	 
-		// bind new values
-		$stmt->bindParam(':oel_id',$this->oel_id);
-		$stmt->bindParam(':oel_registernumber',$this->oel_registernumber); 
-		$stmt->bindParam(':oel_accno',$this->oel_accno);
-		$stmt->bindParam(':oel_registername',$this->oel_registername);
-		$stmt->bindParam(':oel_emailaddress',$this->oel_emailaddress) ;
-		$stmt->bindParam(':oel_otp',$this->oel_otp);
-		$stmt->bindParam(':oel_expdatetime',$this->oel_expdatetime);
-		$stmt->bindParam(':oel_registerdate',$this->oel_registerdate);
-		$stmt->bindParam(':oel_emailtype',$this->oel_emailtype);
-		$stmt->bindParam(':oel_answer',$this->oel_answer);
-		$stmt->bindParam(':oel_createby',$this->oel_createby); 
-		$stmt->bindParam(':oel_createdate',$this->oel_createdate); 
-		$stmt->bindParam(':oel_updateby',$this->oel_updateby);
-		$stmt->bindParam(':oel_updatedate',$this->oel_updatedate); 
-		$stmt->bindParam(':oel_remark',$this->oel_remark);
-		$stmt->bindParam(':oel_status',$this->oel_status); 
 
-	 
+		// sanitize
+		$this->oel_id = htmlspecialchars(strip_tags($this->oel_id));
+		$this->oel_registernumber = htmlspecialchars(strip_tags($this->oel_registernumber));
+		$this->oel_accno = htmlspecialchars(strip_tags($this->oel_accno));
+		$this->oel_registername = htmlspecialchars(strip_tags($this->oel_registername));
+		$this->oel_emailaddress = htmlspecialchars(strip_tags($this->oel_emailaddress));
+		$this->oel_otp = htmlspecialchars(strip_tags($this->oel_otp));
+		$this->oel_expdatetime = htmlspecialchars(strip_tags($this->oel_expdatetime));
+		$this->oel_registerdate = htmlspecialchars(strip_tags($this->oel_registerdate));
+		$this->oel_answer = htmlspecialchars(strip_tags($this->oel_answer));
+		$this->oel_createby = htmlspecialchars(strip_tags($this->oel_createby));
+		$this->oel_createdate = htmlspecialchars(strip_tags($this->oel_createdate));
+		$this->oel_updateby = htmlspecialchars(strip_tags($this->oel_updateby));
+		$this->oel_updatedate = htmlspecialchars(strip_tags($this->oel_updatedate));
+		$this->oel_status = htmlspecialchars(strip_tags($this->oel_status));
+
+
+		// bind new values
+		$stmt->bindParam(':oel_id', $this->oel_id);
+		$stmt->bindParam(':oel_registernumber', $this->oel_registernumber);
+		$stmt->bindParam(':oel_accno', $this->oel_accno);
+		$stmt->bindParam(':oel_registername', $this->oel_registername);
+		$stmt->bindParam(':oel_emailaddress', $this->oel_emailaddress);
+		$stmt->bindParam(':oel_otp', $this->oel_otp);
+		$stmt->bindParam(':oel_expdatetime', $this->oel_expdatetime);
+		$stmt->bindParam(':oel_registerdate', $this->oel_registerdate);
+		$stmt->bindParam(':oel_emailtype', $this->oel_emailtype);
+		$stmt->bindParam(':oel_answer', $this->oel_answer);
+		$stmt->bindParam(':oel_createby', $this->oel_createby);
+		$stmt->bindParam(':oel_createdate', $this->oel_createdate);
+		$stmt->bindParam(':oel_updateby', $this->oel_updateby);
+		$stmt->bindParam(':oel_updatedate', $this->oel_updatedate);
+		$stmt->bindParam(':oel_remark', $this->oel_remark);
+		$stmt->bindParam(':oel_status', $this->oel_status);
+
+
 		// execute the query
-		if($stmt->execute()){
-			
+		if ($stmt->execute()) {
+
 			return true;
 		}
-	 
+
 		return false;
 	}
-	
-	function insertemail(){
-		/*echo $this->oel_registernumber; echo"<br>";
-		echo $this->oel_accno; echo"<br>";
-		echo $this->oel_registername; echo"<br>";
-		echo $this->oel_emailaddress; echo"<br>";
-		//$this->oel_otp=htmlspecialchars(strip_tags($this->oel_otp));
-		//$this->oel_expdatetime=htmlspecialchars(strip_tags($this->oel_expdatetime));
-		echo $this->oel_registerdate; echo"<br>";
-		echo $this->oel_emailtype; echo"<br>";
-		//$this->oel_answer=htmlspecialchars(strip_tags($this->oel_answer));
-		echo $this->oel_createby; echo"<br>";
-		echo $this->oel_createdate; echo"<br>";
-		echo $this->oel_updateby; echo"<br>";
-		echo $this->oel_updatedate; echo"<br>";
-		echo $this->oel_remark; echo"<br>";
-		echo $this->oel_status; echo"<br>";*/
 
-	 
+	function insertemail()
+	{
+
 		// query to insert record
-		$query = "INSERT INTO
-					" . $this->table_name . "
-				SET
-					oel_registernumber=:oel_registernumber,
-					oel_accno=:oel_accno,
-					oel_registername=:oel_registername,
-					oel_emailaddress=:oel_emailaddress,
-					oel_registerdate=:oel_registerdate,
-					oel_emailtype=:oel_emailtype,
-					oel_createby=:oel_createby,
-					oel_createdate=:oel_createdate,
-					oel_updateby=:oel_updateby,
-					oel_updatedate=:oel_updatedate,
-					oel_remark=:oel_remark,
-					oel_status=:oel_status
-					";
+		$query = "INSERT INTO " . $this->table_name . "
+		SET
+			oel_registernumber=:oel_registernumber,
+			oel_accno=:oel_accno,
+			oel_registername=:oel_registername,
+			oel_emailaddress=:oel_emailaddress,
+			oel_registerdate=:oel_registerdate,
+			oel_emailtype=:oel_emailtype,
+			oel_createby=:oel_createby,
+			oel_createdate=:oel_createdate,
+			oel_updateby=:oel_updateby,
+			oel_updatedate=:oel_updatedate,
+			oel_remark=:oel_remark,
+			oel_status=:oel_status
+		";
 
 
 
 		// prepare query
 		$stmt = $this->conn->prepare($query);
-	 
+
 		// sanitize
-		$this->oel_registernumber=htmlspecialchars(strip_tags($this->oel_registernumber));
-		$this->oel_accno=htmlspecialchars(strip_tags($this->oel_accno));
-		$this->oel_registername=htmlspecialchars(strip_tags($this->oel_registername));
-		$this->oel_emailaddress=htmlspecialchars(strip_tags($this->oel_emailaddress));
+		$this->oel_registernumber = htmlspecialchars(strip_tags($this->oel_registernumber));
+		$this->oel_accno = htmlspecialchars(strip_tags($this->oel_accno));
+		$this->oel_registername = htmlspecialchars(strip_tags($this->oel_registername));
+		$this->oel_emailaddress = htmlspecialchars(strip_tags($this->oel_emailaddress));
 		//$this->oel_otp=htmlspecialchars(strip_tags($this->oel_otp));
 		//$this->oel_expdatetime=htmlspecialchars(strip_tags($this->oel_expdatetime));
-		$this->oel_registerdate=htmlspecialchars(strip_tags($this->oel_registerdate));
-		$this->oel_emailtype=htmlspecialchars(strip_tags($this->oel_emailtype));
+		$this->oel_registerdate = htmlspecialchars(strip_tags($this->oel_registerdate));
+		$this->oel_emailtype = htmlspecialchars(strip_tags($this->oel_emailtype));
 		//$this->oel_answer=htmlspecialchars(strip_tags($this->oel_answer));
-		$this->oel_createby=htmlspecialchars(strip_tags($this->oel_createby));
-		$this->oel_createdate=htmlspecialchars(strip_tags($this->oel_createdate));
-		$this->oel_updateby=htmlspecialchars(strip_tags($this->oel_updateby));
-		$this->oel_updatedate=htmlspecialchars(strip_tags($this->oel_updatedate));
-		$this->oel_remark=htmlspecialchars(strip_tags($this->oel_remark));
-		$this->oel_status=htmlspecialchars(strip_tags($this->oel_status));
+		$this->oel_createby = htmlspecialchars(strip_tags($this->oel_createby));
+		$this->oel_createdate = htmlspecialchars(strip_tags($this->oel_createdate));
+		$this->oel_updateby = htmlspecialchars(strip_tags($this->oel_updateby));
+		$this->oel_updatedate = htmlspecialchars(strip_tags($this->oel_updatedate));
+		$this->oel_remark = htmlspecialchars(strip_tags($this->oel_remark));
+		$this->oel_status = htmlspecialchars(strip_tags($this->oel_status));
 
 
-	 
+
 		// bind values
 		$stmt->bindParam(":oel_registernumber", $this->oel_registernumber);
-		$stmt->bindParam(":oel_accno",$this->oel_accno);
-		$stmt->bindParam(":oel_registername",$this->oel_registername);
-		$stmt->bindParam(":oel_emailaddress",$this->oel_emailaddress);
+		$stmt->bindParam(":oel_accno", $this->oel_accno);
+		$stmt->bindParam(":oel_registername", $this->oel_registername);
+		$stmt->bindParam(":oel_emailaddress", $this->oel_emailaddress);
 		//$stmt->bindParam(":oel_otp", $this->oel_otp);
 		//$stmt->bindParam(":oel_expdatetime", $this->oel_expdatetime);
-		$stmt->bindParam(":oel_registerdate",$this->oel_registerdate);
-		$stmt->bindParam(":oel_emailtype",$this->oel_emailtype);
+		$stmt->bindParam(":oel_registerdate", $this->oel_registerdate);
+		$stmt->bindParam(":oel_emailtype", $this->oel_emailtype);
 		//$stmt->bindParam(":oel_answer", $this->oel_answer);
-		$stmt->bindParam(":oel_createby",$this->oel_createby);
-		$stmt->bindParam(":oel_createdate",$this->oel_createdate);
-		$stmt->bindParam(":oel_updateby",$this->oel_updateby);
-		$stmt->bindParam(":oel_updatedate",$this->oel_updatedate);
-		$stmt->bindParam(":oel_remark",$this->oel_remark);
-		$stmt->bindParam(":oel_status",$this->oel_status);
+		$stmt->bindParam(":oel_createby", $this->oel_createby);
+		$stmt->bindParam(":oel_createdate", $this->oel_createdate);
+		$stmt->bindParam(":oel_updateby", $this->oel_updateby);
+		$stmt->bindParam(":oel_updatedate", $this->oel_updatedate);
+		$stmt->bindParam(":oel_remark", $this->oel_remark);
+		$stmt->bindParam(":oel_status", $this->oel_status);
 
 
 		// execute query
-		if($stmt->execute()){
+		if ($stmt->execute()) {
 			return true;
 		}
-	 
+
 		return false;
-		 
 	}
-	
-	function chkemail(){
+
+	function chkemail()
+	{
 		// query to read single record
 		$query = "SELECT
 				o.oel_id,o.oel_registernumber,o.oel_accno,o.oel_registername,oel_accno,oel_registername,oel_emailaddress,
@@ -214,30 +202,26 @@ class otp_email_tb{
 				LIMIT
 					0,1";
 
-	    // prepare query statement
-		$stmt = $this->conn->prepare( $query );
-	 
+		// prepare query statement
+		$stmt = $this->conn->prepare($query);
+
 		// bind id of product to be updated
 		$stmt->bindParam(1, $this->oel_emailaddress);
 		$stmt->bindParam(2, $this->oel_registernumber);
 		$stmt->bindParam(3, $this->oel_emailtype);
-	
+
 		// execute query
 		$stmt->execute();
 
-	// 	echo "12345";
-		if($stmt->rowCount()==0){
+		// 	echo "12345";
+		if ($stmt->rowCount() == 0) {
 			return false;
-		}else{
+		} else {
 			return true;
 		}
-	 
-	
-	
-	 
 	}
 
-	
+
 	/*
 	// create product
 	function create(){
