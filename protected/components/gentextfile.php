@@ -113,6 +113,18 @@ class gentextfile extends CApplicationComponent
 	
 	//************************************************************************
 	
+	public function getConnectionsftpssv(){
+
+		$this->conn = null;
+		$this->conn = ssh2_connect($this->host, $this->port); 
+		if(ssh2_auth_pubkey_file($this->conn, $this->userssossv, $this->pub_key2, $this->pri_key2, $this->passphrase2)) {
+			return true;
+		}else{
+			return false;
+		}
+		//return $this->conn;
+	}
+
 	public function getConnectionsftp(){
 	
 		$this->conn = null;
@@ -125,17 +137,7 @@ class gentextfile extends CApplicationComponent
 		//return $this->conn;
 	}
 	
-	public function getConnectionsftpssv(){
 	
-		$this->conn = null;
-		$this->conn = ssh2_connect($this->host, $this->port); 
-		if(ssh2_auth_pubkey_file($this->conn, $this->userssossv, $this->pub_key2, $this->pri_key2, $this->passphrase2)) {
-			return true;
-		}else{
-			return false;
-		}
-		//return $this->conn;
-	}
 	
 	public function create(){
 		

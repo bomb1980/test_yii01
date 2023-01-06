@@ -39,21 +39,9 @@
  */
 class BranchTmpTb extends CActiveRecord
 {
-	 
-	public static function model($className=__CLASS__)
-	{
-		return parent::model($className);
-	}
-
-	 
-	public function tableName()
-	{
-		return 'branch_tmp_tb';
-	}
 
 	public static function getDatas( $bgdatep = NULL )
 	{
-
 		$sql = "
 			SELECT 
 				b.*,
@@ -67,6 +55,7 @@ class BranchTmpTb extends CActiveRecord
 				date_format( c.registerdate, '%m/%d/%Y' ) as t 
 			FROM branch_tmp_tb b
 			JOIN cropinfo_tmp_tb c ON b.crop_id = c.crop_id
+			WHERE b.email != ''
 			having t = :bgdatep  
 		";
 			
@@ -79,6 +68,45 @@ class BranchTmpTb extends CActiveRecord
 		return $command->queryAll();  
 	}
 
+	 
+	public static function model($className=__CLASS__)
+	{
+		return parent::model($className);
+	}
+
+
+
+	 
+	public function tableName()
+	{
+		return 'branch_tmp_tb';
+	}
+
+
+	public static function getFirstBranch( $crop_id = NULL )
+	{
+		$sql = "
+			SELECT 
+				b.*
+				 
+			FROM branch_tmp_tb b
+			
+			WHERE b.crop_id = :crop_id
+			AND b.email != ''
+			LIMIT 0, 1
+			 
+		";
+			
+		$conn = Yii::app()->db;
+
+		$command = $conn->createCommand($sql);
+
+		$command->bindValue( ":crop_id", $crop_id );
+
+		return $command->queryAll();  
+	}
+
+	
 	 
 	public function rules()
 	{

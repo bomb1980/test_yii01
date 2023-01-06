@@ -8,11 +8,1687 @@ class SiteController extends Controller
 
 	private $idtoken_logout;
 
-	/*function init(){
-		//if(Yii::app()->user->isGuest){
-			//parent::chkLogin(); 
-		//}
-	}*/
+	// function init(){
+	// 	if(Yii::app()->user->isGuest){
+	// 		parent::chkLogin(); 
+	// 	}
+	// }
+
+	public function actionCalluploadfileoldwpdtosftp()
+	{
+		$username = "sys";
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				if (isset(Yii::app()->user->username)) {
+					$username = Yii::app()->user->username;
+				}  
+
+				if( true ) {
+
+					$gtfname = '256601091.txt';
+				}
+				else {
+
+					$gtfname = $_POST['tffs_name'];
+				}
+
+				$action = 'uploadoldwpd';
+
+				$anb = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $gtfname));
+
+				
+				if($anb ) {
+					
+					$file = $anb->tffs_remark;
+					
+					if( file_exists( $file )) {
+						
+						$localFile = $file; //path local
+						$remoteFile = "/out/ssossv1/" . $anb->tffs_name; //path sftp
+						$contents = file_get_contents($localFile);
+
+						// arr("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
+						if (Yii::app()->Cgentextfile->getConnectionsftpssv()) { //getConnectionsftpssv //getConnectionsftp
+
+							$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
+							file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
+							$anb->tffs_updateby = $username;
+							$anb->tffs_modified = date('Y-m-d H:i:s');
+							$anb->tffs_status = 3;
+							if ($anb->save()) {
+
+								$levremark = "upload textfile oldwpd : " . $gtfname . " for old wpd by " . $username . " is success";
+								Yii::app()->Clogevent->createlogevent($action, "textfileoldwpd", "uploadtextfile", $gtfname, $levremark);
+								 
+								$msg = "Upload file is success.";
+							} else {
+								$msg = "Can't upload file.";
+							}
+						
+						} else {
+							$msg = "Can't connect SFTP Server.";
+						} 
+					}
+					else {
+
+						$localFile = "/opt/share/html/wpdtextfile/wpdold/" . $gtfname; //path local
+						$remoteFile = "/out/ssossv1/" . $gtfname; //path sftp
+		
+						if (Yii::app()->Cgentextfile->getConnectionsftpssv()) { //getConnectionsftpssv //getConnectionsftp
+							$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
+							$contents = file_get_contents($localFile);
+							$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
+							$anb = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $gtfname));
+							$anb->tffs_updateby = $username;
+							$anb->tffs_modified = date('Y-m-d H:i:s');
+							$anb->tffs_status = 3;
+							if ($anb->save()) {
+								$levremark = "upload textfile oldwpd : " . $gtfname . " for old wpd by " . $username . " is success";
+								$msgresult = Yii::app()->Clogevent->createlogevent($action, "textfileoldwpd", "uploadtextfile", $gtfname, $levremark);
+								 
+								$msg = "Upload file is success.";
+							} else {
+								$msg = "Can't upload file.";
+							}
+						} else {
+							$msg = "Can't connect SFTP Server.";
+						} 
+					}
+
+				}
+				else {
+
+					$localFile = "/opt/share/html/wpdtextfile/wpdold/" . $gtfname; //path local
+					$remoteFile = "/out/ssossv1/" . $gtfname; //path sftp
+	
+					if (Yii::app()->Cgentextfile->getConnectionsftpssv()) { //getConnectionsftpssv //getConnectionsftp
+						$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
+						$contents = file_get_contents($localFile);
+						$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
+						$anb = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $gtfname));
+						$anb->tffs_updateby = $username;
+						$anb->tffs_modified = date('Y-m-d H:i:s');
+						$anb->tffs_status = 3;
+						if ($anb->save()) {
+							$levremark = "upload textfile oldwpd : " . $gtfname . " for old wpd by " . $username . " is success";
+							$msgresult = Yii::app()->Clogevent->createlogevent($action, "textfileoldwpd", "uploadtextfile", $gtfname, $levremark);
+							 
+							$msg = "Upload file is success.";
+						} else {
+							$msg = "Can't upload file.";
+						}
+					} else {
+						$msg = "Can't connect SFTP Server.";
+					} 
+				}
+
+
+				echo $msg;
+			} else { 
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else { //if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	} //function
+
+	public function actionGettextfileforsapiens2()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				$action = 'gettextfileforsapiens2';
+				 
+
+				$data1 = array('action' => $action);
+				$this->layout = 'nolayout';
+				$this->render('/site/servicepages/gettextfileforsapiens2', $data1);
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	public function actionCallwpddataforsapiens()
+	{
+
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+				 
+				$tffs_id = isset( $_POST['tffs_id'] )? $_POST['tffs_id']: NULL;
+
+				$this->actionCallwpddataforsapiensauto( $tffs_id, Yii::app()->user->username );
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+
+		// exit;
+		// if (!Yii::app()->user->isGuest) {
+		// 	if (isset(Yii::app()->user->username)) {
+		// 		$action = $_POST['action'];
+		// 		$bgdatewt1 = $_POST['bgdatewt1'];
+		// 		$tffs_id = $_POST['tffs_id'];
+		// 		$tffs_name = $_POST['tffs_name'];
+		// 		$actionby = 'm';
+		// 		$data1 = array('action' => $action, 'bgdatewt1' => $bgdatewt1, 'tffs_id' => $tffs_id, 'tffs_name' => $tffs_name, 'actionby' => $actionby);
+		// 		$this->layout = 'nolayout';
+		// 		$this->render('/site/servicepages/callwpddataforsapiens', $data1);
+		// 	} else {
+		// 		$idplib = new Idplib();
+		// 		$idplib->getIdpinfo();
+		// 	}
+		// } else {
+		// 	$idplib = new Idplib();
+		// 	$idplib->getIdpinfo();
+		// }
+	}
+
+	// รันฟังชั่นทุกวัน เรียกบริษัทที่สร้างในวันนั้นๆ แล้ว เขียนข้อมูลทับที่ไฟล์ล่าสุดที่ถูกสร้างเป็นสัปดาห์
+	public function actionCallwpddataforsapiensauto( $id = NULL, $un1 = NULL )
+	{
+		set_time_limit(0);
+		ini_set("max_execution_time", "0");
+		ini_set("memory_limit", "9999M");
+
+		$un1 = empty($un1) ? "sys": $un1;
+		$action = 'getandwritedata';
+		$bgdatewt1 = date('m/d/Y');
+		if( !empty( $id ) ) {
+
+			$qry = new CDbCriteria(array(
+				'condition' => "tffs_status < 3 AND tffs_id = :tffs_id",
+				'params'    => array(':tffs_id' => $id ),
+				'order'		=> "tffs_id DESC",
+				'limit'		=> 1
+			));
+		}
+		else {
+
+			$qry = new CDbCriteria(array(
+				'condition' => "tffs_status < 3 ",
+				'params'    => array(),
+				'order'		=> "tffs_id DESC",
+				'limit'		=> 1
+			));
+		}
+		
+		$modelarray = Textfileforsapiens2Tb::model()->findAll($qry);
+
+		foreach ($modelarray as $ka => $vt) {
+
+			$tffs_id = $vt->tffs_id;
+
+			$tffs_name = $vt->tffs_name;
+
+			$this->layout = 'nolayout';
+
+			
+
+			$myfile =  $vt->tffs_remark;
+
+			if( file_exists( $myfile )) {
+
+				file_put_contents($myfile, '');
+
+				$fp = fopen($myfile, 'a') or die("Unable to open file!"); //อ่านไฟล์ขึ้นมาเพื่อเขียนต่อ
+				 
+			}
+			else {
+
+				
+				$myfile = $_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $vt->tffs_name;
+				file_put_contents($myfile, '');
+	
+				$fp = fopen($myfile, 'a') or die("Unable to open file!"); //อ่านไฟล์ขึ้นมาเพื่อเขียนต่อ
+			}
+
+			$sql = "
+				SELECT 
+					*
+				FROM cropinfo_tmp_tb 
+				WHERE registerdate <= :registerdate 
+				AND registerdate > ADDDATE( :registerdate, INTERVAL -7 day )
+			";
+
+			$conn = Yii::app()->db;
+
+			$command = $conn->createCommand($sql);
+
+			$command->bindValue(":registerdate", $vt->tffs_created);
+
+			$model = $command->queryAll();
+
+			echo "Count of data : " . count($model) . " Record.<br>";
+
+			$rowno = 0;
+			foreach ($model as $kc => $vc) { //เริ่มดึงข้อมูลกิจการแบบวนลูป
+
+
+				$crop_id = $vc['crop_id'];
+				$registernumber = $vc['registernumber'];
+				if (strstr($vc['registername'], 'จำกัด')) {
+					$registername = substr($vc['registername'], 0, strpos($vc['registername'], 'จำกัด'));
+				} else {
+					$registername = $vc['registername'];
+				}
+
+				$registerdate = $vc['registerdate'];
+
+				$authorizedcapital = $vc['authorizedcapital'];
+
+
+				$emsd = date_create($registerdate)->format('d');
+				$emsm = date_create($registerdate)->format('m');
+				$emsy = date_create($registerdate)->format('Y') + 543;
+
+
+				$regis_date = str_pad($emsd, 2, 0, STR_PAD_LEFT) . str_pad($emsm, 2, 0, STR_PAD_LEFT) . str_pad($emsy, 2, 0, STR_PAD_LEFT);  //จัดรูปแบบวันที่ขึ้นทะเบียน
+
+
+				$qbrch = new CDbCriteria(array(
+					'condition' => "crop_id = :crop_id",
+					'params' => array(':crop_id' => "{$crop_id}"),
+					'limit' => 1,
+					'order' => "brch_id ASC",
+
+				));
+
+				$resultbrch = BranchTmpTb::model()->findAll($qbrch);
+
+				$ordernumber = 0;
+				$housenumber = '-';
+				$buildingname = '-';
+				$buildingnumber = '-';
+				$buildingfloor = '-';
+				$village = '-';
+				$moo = '-';
+				$soi = '-';
+				$road = '-';
+				$tumbon = '-';
+				$tumboncode = '-';
+				$ampur = '-';
+				$ampurcode = '-';
+				$province = '-';
+				$provincecode = '-';
+				$zipcode = '-';
+				$p1 = '-';
+				foreach ($resultbrch as $kb => $vb) {
+
+					$ordernumber = $vb->ordernumber;
+					$housenumber = $vb->housenumber;
+					$buildingname = $vb->buildingname;
+					$buildingnumber = $vb->buildingnumber;
+					$buildingfloor = $vb->buildingfloor;
+					$village = $vb->village;
+					$moo = $vb->moo;
+					$soi = $vb->soi;
+					$road = $vb->road;
+					$tumbon = $vb->tumbon;
+					$tumboncode = $vb->tumboncode;
+					$ampur = $vb->ampur;
+					$ampurcode = $vb->ampurcode;
+					$province = $vb->province;
+					$provincecode = $vb->provincecode;
+					$zipcode = $vb->zipcode;
+					$p1 = str_replace("-", "", $vb->phonenumber);
+				}
+
+				//---เริ่มเขียนข้อมูลบรรทัดแรก------------------------------------------------------
+
+				$txt = "";
+				$f1 = iconv("utf-8", "tis-620", $registernumber); //WA-RIG
+				$f2 = iconv("utf-8", "tis-620", '2'); //WA-CODE
+				$f3 = iconv("utf-8", "tis-620", 'A'); //WA-TYPE
+				$f4 = iconv("utf-8", "tis-620", '01'); //WA-NUMBER
+				$f5 = iconv("utf-8", "tis-620//IGNORE//TRANSLIT", $registername);
+				//IGNORE//TRANSLIT
+				//$f5 = iconv("utf-8","tis-620//TRANSLIT",$registername); //WA-NAME
+				$f6 = iconv("utf-8", "tis-620", $regis_date); //WA-DDMMYYYY
+				$f7 = iconv("utf-8", "tis-620", '1'); //WA-XX
+				$f8 = iconv("utf-8", "tis-620", $authorizedcapital); //WA-AMOUNT
+				$f9 = iconv("utf-8", "tis-620", $provincecode); //WA-TCODE1
+				$f10 = iconv("utf-8", "tis-620", $ampurcode); //WA-TCODE2
+				$f11 = iconv("utf-8", "tis-620", $tumboncode); //WA-TCODE3
+				$f12 = iconv("utf-8", "tis-620", ""); //FILLER
+
+				$txt .= str_pad($f1, 15);
+				$txt .= str_pad($f2, 1);
+				$txt .= str_pad($f3, 1);
+				$txt .= str_pad($f4, 2);
+				$txt .= str_pad($f5, 100);
+				$txt .= str_pad($f6, 8);
+				$txt .= str_pad($f7, 1);
+				$txt .= str_pad($f8, 16);
+				$txt .= str_pad($f9, 2);
+				$txt .= str_pad($f10, 2);
+				$txt .= str_pad($f11, 2);
+				$txt .= str_pad($f12, 46);
+
+				$txt .= "\r" . PHP_EOL;
+				fwrite($fp, $txt);
+
+				//-------------------------------------------------------------------------
+
+
+				if ($housenumber != '-') {
+					$housenumber = $housenumber;
+				} else {
+					$housenumber = "";
+				}
+
+				if ($buildingname != '-') {
+					$buildingname = " " . $buildingname;
+				} else {
+					$buildingname = "";
+				}
+
+				if ($buildingnumber != '-') {
+					$buildingnumber = " " . $buildingnumber;
+				} else {
+					$buildingnumber = "";
+				}
+
+				if ($buildingfloor != '-') {
+					$buildingfloor = " " . $buildingfloor;
+				} else {
+					$buildingfloor = "";
+				}
+
+				if ($village != '-') {
+					$village = " " . $village;
+				} else {
+					$village = "";
+				}
+
+				if ($moo != '-') {
+					$moo = " ม." . $moo;
+				} else {
+					$moo = "";
+				}
+
+				if ($soi != '-') {
+					$soi = " ซ." . $soi;
+				} else {
+					$soi = "";
+				}
+
+				if ($road != '-') {
+					$road = " ถ." . $road;
+				} else {
+					$road = "";
+				}
+
+				if ($tumbon != '-') {
+					if ($provincecode != '10') {
+						$tumbon = " ต." . $tumbon;
+					} else {
+						$tumbon = " แขวง" . $tumbon;
+					}
+				} else {
+					$tumbon = "";
+				}
+
+				if ($ampur != '-') {
+					if ($provincecode != '10') {
+						$ampur = " อ." . $ampur;
+					} else {
+						$ampur = " " . $ampur;
+					}
+				} else {
+					$ampur = "";
+				}
+
+				if ($province != '-') {
+					if ($provincecode != '10') {
+						$province = " จ." . $province;
+					} else {
+						$province = " " . $province;
+					}
+				} else {
+					$province = "";
+				}
+
+				if ($zipcode != '-') {
+					$zipcode = " " . $zipcode;
+				} else {
+					$zipcode = "";
+				}
+
+
+				//---เริ่มบรรทัดที่2--------------------------------------------------------------
+
+				$txt = "";
+				$p1 = iconv("utf-8", "tis-620", $registernumber); //WP-RIG
+				$p2 = iconv("utf-8", "tis-620", 2); //WP-CODE
+				$p3 = iconv("utf-8", "tis-620", 'P'); //WP-TYPE
+				$p4 = iconv("utf-8", "tis-620", '01'); //WP-NUMBER
+				$p5 = iconv("utf-8", "tis-620",  $housenumber . $moo . $soi . $road . $tumbon . $ampur . $province . $zipcode); //WP-NUMBER
+
+
+				$txt .= str_pad($p1, 15);
+				$txt .= str_pad($p2, 1);
+				$txt .= str_pad($p3, 1);
+				$txt .= str_pad($p4, 2);
+				$txt .= str_pad($p5, 177);
+
+				$txt .= "\r" . PHP_EOL;
+				fwrite($fp, $txt);
+
+				$qcomm = new CDbCriteria(array(
+					'condition' => "crop_id = :crop_id ",
+					'params'    => array(':crop_id' => "{$crop_id}")
+				));
+				$resultcom = CommitteeTmpTb::model()->findAll($qcomm);
+
+				foreach ($resultcom as $kp => $vp) {
+					$registernumber = $vp->registernumber;
+
+					$committeetype = $vp->committeetype;
+					$ordernumber = $vp->ordernumber;
+
+					$identity = $vp->identity;
+					$title = $vp->title;
+					$firstname = $vp->firstname;
+					$lastname = $vp->lastname;
+					$wkl_type = $committeetype;
+					$wkl_number = str_pad($ordernumber, 2, 0, STR_PAD_LEFT); //กำหนดรูปแบบให้เป็น 2 ตัวอักษร
+					$wkl_name = $title . $firstname . " " . $lastname . " " . $identity;
+					//---เริ่มเขียนบรรทัดที่ 3 WKL -------------------------------------------------------
+					$txt = "";
+					$kl1 = iconv("utf-8", "tis-620", $registernumber); //WKL-RIG
+					$kl2 = iconv("utf-8", "tis-620", 2); //WKL-CODE
+					$kl3 = iconv("utf-8", "tis-620", $wkl_type); //WKL-TYPE
+					$kl4 = iconv("utf-8", "tis-620", $wkl_number); //WKL-NUMBER
+					$kl5 = iconv("utf-8", "tis-620", $wkl_name); //WKL-NAME
+
+					$txt .= str_pad($kl1, 15);
+					$txt .= str_pad($kl2, 1);
+					$txt .= str_pad($kl3, 1);
+					$txt .= str_pad($kl4, 2);
+					$txt .= str_pad($kl5, 177);
+
+					$txt .= "\r" . PHP_EOL;
+					fwrite($fp, $txt);
+				}
+
+				//---เขียนบรรทัดที่ 4------------------------------------------------------------------
+				$txt = "";
+				$m1 = iconv("utf-8", "tis-620", $registernumber); //WM-RIG
+				$m2 = iconv("utf-8", "tis-620", '2'); //WM-CODE
+				$m3 = iconv("utf-8", "tis-620", 'M'); //WM-TYPE
+				$m4 = iconv("utf-8", "tis-620", '01'); //WM-NUMBER
+				$m5 = iconv("utf-8", "tis-620", 'ไม่มี'); //WM-NAME
+
+				$txt .= str_pad($m1, 15);
+				$txt .= str_pad($m2, 1);
+				$txt .= str_pad($m3, 1);
+				$txt .= str_pad($m4, 2);
+				$txt .= str_pad($m5, 177);
+
+				$txt .= "\r" . PHP_EOL;
+				fwrite($fp, $txt);
+
+
+				$rowno += 1;
+			}
+
+			fclose($fp);
+
+			$cif2 = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_id' => $tffs_id));
+			if ($cif2) {
+				$cif2->tffs_numrec = $rowno;
+				$cif2->tffs_updateby = $un1;
+				$cif2->tffs_modified = date('Y-m-d H:i:s');
+				$cif2->tffs_status = 2;
+				$cif2->tffs_remark = $myfile;
+				if ($cif2->save()) {
+					echo "เขียนข้อมูล ณ วันที่ : ". $vt->tffs_created ." ชื่อไฟล์ : " . $myfile . " สำเร็จ <br> 
+					จำนวนรายการที่เขียนในเท็กไฟล์ทั้งหมด : {$rowno} รายการ. <br>";
+					$levremark = "เขียนข้อมูลลง textfile รายเดือน ชื่อ : " . $tffs_name . " ใช้ข้อมูลจากวันที่ : " . $bgdatewt1 . " เป็นข้อมูลล่าสุด.";
+					$datalog = $tffs_name . "," . $bgdatewt1;
+					Yii::app()->Clogevent->createlogevent("writedatatotextfile", "callwpddataforsapiens", "oldwpd", $datalog, $levremark);
+				} else {
+					echo "ไม่สามารถบันทึกปรับปรุงจำนวน รายการที่เขียนได้. <br>";
+				}
+			}
+
+			return 'done';
+
+
+			// return $this->render('/site/servicepages/callwpddataforsapiens', $data1);
+		}
+
+		$tffs_name = "-";
+		$levremark = "write data to textfile : " . $tffs_name . " for old wpd by sys is error";
+		Yii::app()->Clogevent->createlogevent($action, "writetextfileoldwpd", "error", $tffs_name, $levremark);
+		echo $levremark;
+	}
+
+
+	public function actionCalldbdservice2auto()
+	{
+
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+
+		$cronjob = true;
+		$testJob = true;
+
+		CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob);
+	}
+
+
+	public function actionCalldbdservice2()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				if (Yii::app()->params['testJob']) {
+
+					$bgdatep = '12/16/2022';
+					$eddatep = '12/16/2022';
+					$cronjob = false;
+					$testJob = true;
+				} else {
+
+					$bgdatep = $_POST['bgdatep'];
+					$eddatep = $_POST['eddatep'];
+					$cronjob = true;
+					$testJob = true;
+				}
+
+
+				CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob);
+
+				$model = CropinfoTmpTb::getDatas($bgdatep);
+
+				$data1 = [
+					'bgdatep' => $bgdatep,
+					'eddatep' => $eddatep,
+					'newdap' => 1,
+					'updap' => 0,
+					'model' => $model,
+					'countmedel' => count($model),
+				];
+
+				$this->layout = 'nolayout';
+
+				$this->render('/site/servicepages/calldbdservice2', $data1);
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+	
+
+
+	public function actionWritedatatotextfile()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+				$action = $_POST['action'];
+				$tffs_id = $_POST['tffs_id'];
+				$tffs_name = $_POST['tffs_name'];
+				$data1 = array('action' => $action, 'tffs_id' => $tffs_id, 'tffs_name' => $tffs_name);
+				$this->layout = 'nolayout';
+				$this->render('/site/servicepages/writedatatotextfile', $data1);
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	
+
+	public function actionOpenservice($id = NULL, $sub_id = NULL)
+	{
+
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				$snum = isset($_POST['snum']) ? $_POST['snum'] : 99999;
+				if (!empty($id)) {
+
+					$snum = $id;
+				}
+
+				$lremark = "เปิดเมนูย่อยservice:" . $snum;
+
+				Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
+
+				if ($snum == 8) { //Gen Textfile Old WPD
+
+					// arr('dafdfs');
+					$this->render('/site/servicepages/service8');
+				} else if ($snum == 6) { //Call LED Webservice
+
+					$this->layout = 'nolayout';
+
+					$render = [];
+					$render['mltf'] = LedtextfileTb::getDatas2();
+					if (empty($sub_id)) {
+
+						if ($render['mltf']) {
+
+							$sub_id = $render['mltf'][0]['ltf_id'];
+						} else {
+
+							$sub_id = 1;
+						}
+					}
+					$datas['tbrn1'] = $this->render('/site/searchpages/gettxtfilesiskcrop', $render, true);
+
+
+					$render = [];
+					$render['ajaxUrl'] = Yii::app()->createAbsoluteUrl("site/listdatariskcrop3/parent_id/" . $sub_id);
+					$datas['tbrn2'] = $this->render('/site/searchpages/getriskcrop', $render, true);
+
+
+
+					$this->layout = '';
+					$this->render('/site/servicepages/service6', $datas);
+				} else if ($snum == 1) { //Call DBD WebService
+
+					$this->render('/site/servicepages/dbd_webservice');
+				} else if ($snum == 5) { //Export textfile & Upload to SFTP
+
+					$this->render('/site/servicepages/service5');
+				} else if ($snum == 7) { //Data Cleansing
+
+					$this->render('/site/servicepages/service7');
+				} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
+
+					$this->render('/site/servicepages/service9');
+				} else {
+
+					$this->render('/site/servicepages/service' . $snum);
+				}
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+
+
+
+
+	public function actionAddtextfileforsapiensauto()
+	{
+
+		if (true) {
+
+			$action = 'gentextfileoldwpd';
+			$tfnt = '25660109.txt';
+		} else {
+			$action = $_POST['action'];
+			$tfnt = $_POST['tfnt'];
+		}
+
+		$mypath = $_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $tfnt;
+
+		//== create textfile ======
+		$myfile = fopen($mypath, "w") or die("Unable to open file!");
+		fclose($myfile);
+
+
+		// arr($myfile);
+		//== insert to table ======
+		$search_ndt = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $tfnt));
+		if (!$search_ndt) { //not have file
+			$insert_ndt = new Textfileforsapiens2Tb();
+			$insert_ndt->tffs_name = $tfnt;
+			$insert_ndt->tffs_numrec = 0;
+			$insert_ndt->tffs_createby = 'sys';
+			$insert_ndt->tffs_created = date('Y-m-d H:i:s');
+			$insert_ndt->tffs_updateby = 'sys';
+			$insert_ndt->tffs_modified = date('Y-m-d H:i:s');
+			$insert_ndt->tffs_remark = $mypath;
+			$insert_ndt->tffs_status = 1;
+
+			// $msg = $insert_ndt->getErrors();
+
+			// arr($msg);
+
+			//create textfileforsapiens2_tb
+			if ($insert_ndt->save()) {
+				$msg = "create and insert textfile is success.";
+				//== insert log event ======================
+				$levremark = "create textfile : " . $tfnt . " for old wpd by sys is success.";
+				$msgresult = Yii::app()->Clogevent->createlogevent($action, "service8", "oldwpd", $tfnt, $levremark);
+				//==========================================
+			} else {
+				$msg = $insert_sp->getErrors();
+			}
+		} else {
+			$msg = "The file  \"" . $tfnt . "\" is already exists in the system.";
+		}
+		echo $msg;
+	}
+
+	public function actionCalluploadfileoldwpdtosftpauto()
+	{
+
+		$localpath_local = "/opt/share/html/wpdtextfile/wpdold/"; //"/opt/share/html/wpdtextfile/";
+		$remotepath_local = "/out/ssossv1/"; //"/in/"; "/out/ssossv1"; "/out/ssossv2";
+
+		$action = $_POST['action'];
+
+		//search tffs_id and tffs_name---------------------------------------------------------------------------
+		$qry = new CDbCriteria(array(
+			'condition' => "tffs_status < :tffs_status ",
+			'params'    => array(':tffs_status' => 3),
+			'order'		=> "tffs_id DESC",
+			'limit'		=> 1
+		));
+		$modelarray = Textfileforsapiens2Tb::model()->findAll($qry);
+		//var_dump($modelarray); exit;
+		if ($modelarray) {
+			$countmedel = count($modelarray);
+			foreach ($modelarray as $rows) {
+				$tffs_id = $rows->tffs_id;
+				$tffs_name = $rows->tffs_name;
+			} //for
+			$gtfname = $tffs_name; //findname status = 2
+
+			//echo "{$action},{$gtfname}"; exit;
+
+			$localFile = $localpath_local . $gtfname; //path local
+			$remoteFile = $remotepath_local . $gtfname; //path sftp
+
+			if (Yii::app()->Cgentextfile->getConnectionsftpssv()) { ////getConnectionsftpssv //getConnectionsftp
+				$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
+				$contents = file_get_contents($localFile);
+				$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
+				//update table-------------------------------------------------------------------------
+				$anb = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $gtfname));
+				$anb->tffs_updateby = "sys";
+				$anb->tffs_modified = date('Y-m-d H:i:s');
+				$anb->tffs_status = 3;
+				if ($anb->save()) {
+					//insert_log------------------------------------------------------------------------
+					$levremark = "upload textfile oldwpd : " . $gtfname . " for old wpd by sys is success";
+					$msgresult = Yii::app()->Clogevent->createlogevent($action, "textfileoldwpd", "uploadtextfile", $gtfname, $levremark);
+					//----------------------------------------------------------------------------------
+					$msg = "upload textfile is Success";
+				} else {
+					$msg = "upload textfile is Failed";
+				}
+				//---------------------------------------------------------------------------------------
+			} else {
+				$msg = "upload textfile is Failed";
+			} //if
+
+		} else { //if
+			$msg = "upload textfile is Failed";
+		} //if
+
+		echo $msg;
+	} //function
+
+
+
+
+
+
+	///site/services หลังจากกดปุ่มรัน service ต่างๆ 
+	public function actionOpenSubservice($id = NULL)
+	{
+		$this->actionOpenservice(6, $id);
+	}
+
+
+
+	public function actionAddtextfileforsapiens()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+				//*********************************************************
+				$action = $_POST['action'];
+				$tfnt = $_POST['tfnt'];
+
+				$textfilename = $tfnt;
+
+				$mypath = $_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $textfilename;
+
+				//== create textfile ======
+				$myfile = fopen($_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $textfilename, "w") or die("Unable to open file!");
+				fclose($myfile);
+				//== insert to table ======
+				$insert_ndt = new Textfileforsapiens2Tb();
+				$insert_ndt->tffs_name = $textfilename;
+				$insert_ndt->tffs_numrec = 0;
+				$insert_ndt->tffs_createby = Yii::app()->user->username;
+				$insert_ndt->tffs_created = date('Y-m-d H:i:s');
+				$insert_ndt->tffs_updateby = Yii::app()->user->username;
+				$insert_ndt->tffs_modified = date('Y-m-d H:i:s');
+				$insert_ndt->tffs_remark = $mypath;
+				$insert_ndt->tffs_status = 1;
+				if ($insert_ndt->save()) {
+					$msg = "insert is success.";
+					//echo preg_replace("/\xEF\xBB\xBF/", "","Y");
+					//echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
+					//== insert log event ======================
+					$levremark = "create textfile : " . $tfnt . " for old wpd";
+					$msgresult = Yii::app()->Clogevent->createlogevent($action, "service8", "oldwpd", $tfnt, $levremark);
+					//==========================================
+				} else { //if
+					$msg = $insert_sp->getErrors();
+					//echo preg_replace("/\xEF\xBB\xBF/", "","N");
+					//echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => $msg)));
+				}
+
+				echo $msg;
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	public function actionCallshowrptled33($id = NULL)
+	{
+
+		// arr( $id );
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				$arr = LedriskcropTb::getDatas(NULL, $id);
+
+				foreach ($arr as $ka => $va) {
+
+
+					$usrprint = Yii::app()->user->firstname . "  " . Yii::app()->user->lastname . " , " . Yii::app()->user->address . " , " . Yii::app()->user->username;
+
+					$data1 = array('lrc_accno' => $va['lrc_accno'], 'lrc_registernumber' => $va['lrc_registernumber'], 'usrprint' => $usrprint);
+
+					$this->layout = 'nolayout';
+					$this->pageTitle = 'report';
+					return $this->render('/site/reportpages/reportsled33sub', $data1);
+				}
+
+				echo 'ไม่พบไฟล์';
+
+				return;
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+
+
+	public function actionListDataRiskCrop3($parent_id = NULL)
+	{
+
+
+		// arr( $_REQUEST);
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+
+				$conn = Yii::app()->db; //get connection
+
+				// $fn = $conn->schema->getTable('ledriskcrop_tb')->getColumnNames(); //fieldname get
+
+				$sql = "
+					SELECT 
+						c.*,
+						CONCAT( 'adsfdsdfdsfsdd' ) as gogo_link
+					FROM ledriskcrop_tb c
+				";
+
+				if (!empty($parent_id)) {
+
+					$sql .= "WHERE c.parent_id = :parent_id";
+				}
+
+
+				// arr($_REQUEST['columns']);
+
+				if (!empty($_REQUEST['search']['value'])) {
+					$keep = [];
+					foreach ($_REQUEST['columns'] as $kc => $vc) {
+
+
+						if (!empty($vc['searchable'])) {
+
+							$keep[] = $vc['data'] . " LIKE :search";
+						}
+					}
+
+					if (!empty($keep)) {
+
+						$sql .= " AND ( " . implode(' OR ', $keep) . " )";
+					}
+				}
+
+				$sql .= " ORDER BY lrc_id ASC";
+
+
+				// arr( $sql );
+				if (true) {
+
+					$sqlT = "
+						SELECT 
+							COUNT( * ) as t 
+						FROM (
+							" . $sql . "
+						) as new_tb
+					";
+
+					$command = $conn->createCommand($sqlT);
+
+					if (!empty($_REQUEST['search']['value'])) {
+
+						$command->bindValue(":search", '%' .  $_REQUEST['search']['value'] . '%');
+					}
+
+					if (!empty($parent_id)) {
+
+						$command->bindValue(":parent_id", $parent_id);
+					}
+
+					$noOfRecords = 0;
+
+					$gogo['recordsTotal'] = $noOfRecords;
+
+					$gogo['recordsFiltered'] = $noOfRecords;
+
+					foreach ($command->queryAll() as $ka => $va) {
+						$noOfRecords = $va['t'];
+
+						$gogo['recordsTotal'] = $noOfRecords;
+
+						$gogo['recordsFiltered'] = $noOfRecords;
+					}
+				}
+
+				if (true) {
+
+					$start = 0;
+					if (!empty($_REQUEST['start']))
+						$start = (int)$_REQUEST['start'];
+
+					$length = 10;
+					if (!empty($_REQUEST['length']))
+						$length = (int)$_REQUEST['length'];
+
+					$sql .= " LIMIT " . $start . ", " . $length . "";
+
+					$command = $conn->createCommand($sql);
+
+					if (!empty($_REQUEST['search']['value'])) {
+
+						$command->bindValue(":search", '%' .  $_REQUEST['search']['value'] . '%');
+					}
+
+					if (!empty($parent_id)) {
+
+						$command->bindValue(":parent_id", $parent_id);
+					}
+
+					$keep = [];
+					foreach ($command->queryAll() as $ka => $va) {
+
+						$va['gogo_link'] = '
+						<a style="text-decoration:none;"  href="' . Yii::app()->createAbsoluteUrl('site/callshowrptled33/' . $va['lrc_id'] . '') . '" target="_blank"><button style="padding-left:5px; padding-right:5px;"><span style="font-size:20px;"><i class="fa fa-print"></i></span></button></a>
+						
+						';
+
+						$keep[] = $va;
+					}
+
+					$gogo['data'] = $keep;
+				}
+
+				echo json_encode($gogo);
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+
+
+	public function actionChkriskcrop($id = NULL)
+	{
+
+		$time_start = microtime(true);
+
+		$ltf_name = NULL;
+
+		$json['html'] = 'เรียกไฟล์ไม่สำเร็จ';
+		$json['location'] = Yii::app()->createAbsoluteUrl('site/opensubservice/' . $id);
+
+
+		// 'http://testyii01/site/opensubservice/' . $id;
+		// $json['updateSuccess'] = '0';
+
+		$conn = Yii::app()->db;
+
+		$LedtextfileTb = LedtextfileTb::getDatas2($id);
+
+		foreach ($LedtextfileTb as $kf => $vf) {
+
+
+			// arr( $vf );
+
+			$file = trim($vf->ltf_path);
+
+
+			if (!file_exists($file)) {
+				$json['html'] = 'ไม่มีไฟล์นี้ในระบบ';
+
+				break;
+			}
+
+
+			$ltf_name = $vf->ltf_name;
+
+			$test = file_get_contents($file);
+
+			// arr( $test );
+
+			set_time_limit(0);
+			ini_set("max_execution_time", "0");
+			ini_set("memory_limit", "9999M");
+
+
+			$lines = explode("\n", $test);
+			// $max_line = count( $lines );
+
+			foreach ($lines as $ke => $ve) {
+
+				$arraystr = explode(';', $ve);
+
+				if (count($arraystr) < 10) {
+
+					continue;
+				}
+
+				$t0 = "";
+				if (!empty($arraystr[0])) {
+					$t0 = trim($arraystr[0]); // เลขประกันสังคม 10 หลัก
+				}
+
+				$t1 = "";
+				if (!empty($arraystr[1])) {
+					$t1 = trim($arraystr[1]); // เลขสาขา 6 หลัก
+				}
+
+				$t3 = "";
+				if (!empty($arraystr[3])) {
+					$t3 = trim($arraystr[3]); // ชื่อสถานประกอบการ
+				}
+
+
+				$t4 = "";
+				if (!empty($arraystr[4])) {
+					$t4 = trim($arraystr[4]); // bran_code สปส เร่งรัดหนี้
+				}
+
+
+				$t5 = "";
+				if (!empty($arraystr[5])) {
+					$t5 = trim($arraystr[5]); // bran_code สปส รับผิดชอบ
+				}
+
+
+				$t6 = "";
+				if (!empty($arraystr[6])) {
+					$t6 = trim($arraystr[6]); // ที่อยู่
+				}
+
+
+				$t7 = "";
+				if (!empty($arraystr[7])) {
+					$t7 = trim($arraystr[7]); // อำเภอ
+				}
+
+
+				$t8 = "";
+				if (!empty($arraystr[8])) {
+					$t8 = trim($arraystr[8]); // จังหวัด
+				}
+
+
+				$t9 = "";
+				if (!empty($arraystr[9])) {
+					$t9 = trim($arraystr[9]); // รหัสไปรษณีย์ 
+				}
+
+
+				$t8f = iconv('tis-620', 'utf-8', $t8); // จังหวัด
+
+
+				if (isset($arraystr[2])) {
+
+					$t2 = trim($arraystr[2]);
+				}
+
+				if (empty($t2)) {
+					continue;
+				}
+
+				$t2 = iconv('tis-620', 'utf-8', $t2); // จังหวัด
+
+
+				if (strlen($t2) != 13) { //ถ้าตัวเลขทะเบียน เท่ากับ 13 หลัก
+
+					continue;
+				}
+
+				$sqlUnion[] = "(
+					SELECT
+						'" .  $t2 . "' as lrc_registernumber, 
+						'" .  $t0 . "' as lrc_accno, 
+						'" . iconv('tis-620', 'utf-8', $t1) . "' as lrc_bran, 
+						'" . addslashes(iconv('tis-620', 'utf-8', $t3))  . "' as lrc_registername, 
+						'" . $t4 . "' as lrc_ssocode1, 
+						'" . $t5 . "' as lrc_ssocode2, 
+						'" . addslashes(iconv('tis-620', 'utf-8', $t6)) . "' as lrc_address, 
+						'" . iconv('tis-620', 'utf-8', $t7) . "' as lrc_amphur, 
+						'" . $t8f . "' as lrc_province, 
+						'" . $t9 . "' as lrc_zipcode, 
+						'" . Yii::app()->user->username . "' as lrc_createby, 
+						now() as lrc_created, 
+						'" . Yii::app()->user->username . "' as lrc_updateby, 
+						now() as lrc_modified, 
+						'-' as lrc_remark, 
+						1 as lrc_status,
+						" . $vf->ltf_id . " as parent_id
+					)";
+
+				// 
+
+				if (count($sqlUnion) == 1000) {
+
+					$sql = "
+						REPLACE INTO ledriskcrop_tb ( 
+							lrc_registernumber, lrc_accno, lrc_bran, lrc_registername, lrc_ssocode1, lrc_ssocode2, lrc_address, lrc_amphur, lrc_province, lrc_zipcode, lrc_createby, lrc_created, lrc_updateby, lrc_modified, lrc_remark, lrc_status, parent_id, code ) 
+						SELECT 
+							lrc_registernumber, lrc_accno, lrc_bran, lrc_registername, lrc_ssocode1, lrc_ssocode2, lrc_address, lrc_amphur, lrc_province, lrc_zipcode, lrc_createby, lrc_created, lrc_updateby, lrc_modified, lrc_remark, lrc_status, parent_id,
+							MD5( CONCAT( lrc_registernumber, lrc_address, lrc_amphur, lrc_province, lrc_zipcode, lrc_registername ) ) as code
+						FROM ( " . implode(' UNION ', $sqlUnion) . " ) as new_tb 
+						HAVING code NOT IN (
+							SELECT code FROM ledriskcrop_tb 
+						)
+
+					";
+
+					$command = $conn->createCommand($sql);
+
+					$command->execute();
+
+					$sqlUnion = [];
+				}
+			}
+
+			if (!empty($sqlUnion)) {
+
+				$sql = "
+					REPLACE INTO ledriskcrop_tb ( 
+						lrc_registernumber, lrc_accno, lrc_bran, lrc_registername, lrc_ssocode1, lrc_ssocode2, lrc_address, lrc_amphur, lrc_province, lrc_zipcode, lrc_createby, lrc_created, lrc_updateby, lrc_modified, lrc_remark, lrc_status, parent_id, code ) 
+					SELECT 
+						lrc_registernumber, lrc_accno, lrc_bran, lrc_registername, lrc_ssocode1, lrc_ssocode2, lrc_address, lrc_amphur, lrc_province, lrc_zipcode, lrc_createby, lrc_created, lrc_updateby, lrc_modified, lrc_remark, lrc_status, parent_id,
+						MD5( CONCAT( lrc_registernumber, lrc_address, lrc_amphur, lrc_province, lrc_zipcode, lrc_registername ) ) as code
+					FROM ( " . implode(' UNION ', $sqlUnion) . " ) as new_tb 
+					HAVING code NOT IN (
+						SELECT code FROM ledriskcrop_tb 
+					)
+				";
+
+				$command = $conn->createCommand($sql);
+
+				$command->execute();
+
+				$sqlUnion = [];
+			}
+
+			$sql = "
+				UPDATE ledtextfile_tb f
+				LEFT JOIN (
+					SELECT 
+						parent_id, 
+						count(*) as t 
+					FROM ledriskcrop_tb 
+					GROUP by parent_id
+
+				) as new_tb ON f.ltf_id = new_tb.parent_id
+				SET 
+					f.ltf_statusud = IF( new_tb.t > 0, 'Y', 'N' ),
+					f.ltf_countud = IFNULL(new_tb.t, 0)
+			";
+
+			$command = $conn->createCommand($sql);
+
+			// $command->bindValue(":ltf_id", $id);
+
+
+			$command->execute();
+
+
+
+
+			$time_end = microtime(true);
+
+			$execution_time = ($time_end - $time_start);
+
+
+			$json['html'] = '<b> ตรวจสอบไฟล์ :</b> ' . $ltf_name  . ' เรียบร้อย <br> <b> เพิ่มรายการจำนวน :</b> 99 รายการ <br> <b>ใช้เวลา :</b> ' . $execution_time . ' sec. <br>';
+
+
+
+			$LedtextfileTb = LedtextfileTb::getDatas2($id);
+
+			foreach ($LedtextfileTb as $kf => $vf) {
+
+				$json['html'] = '<b> ตรวจสอบไฟล์ :</b> ' . $ltf_name  . ' เรียบร้อย <br> <b> เพิ่มรายการจำนวน :</b> ' . number_format($vf->ltf_countud) . ' รายการ <br> <b>ใช้เวลา :</b> ' . $execution_time . ' sec. <br>';
+			}
+		}
+
+
+		echo json_encode($json);
+	}
+
+
+
+	public function actionChkriskcrop___________($id = NULL)
+	{
+
+		$LedtextfileTb = LedtextfileTb::getDatas($id);
+
+		foreach ($LedtextfileTb as $kf => $vf) {
+
+
+			$file = $vf->ltf_path;
+
+			if (!file_exists($file)) {
+
+				exit;
+			}
+
+
+			$test = file_get_contents($file);
+
+			set_time_limit(0);
+			ini_set("max_execution_time", "0");
+			ini_set("memory_limit", "9999M");
+
+			foreach (explode("\n", $test) as $ke => $ve) {
+
+				$arraystr = explode(';', $ve);
+
+				$t0 = "";
+				if (!empty($arraystr[0])) {
+					$t0 = trim($arraystr[0]); // เลขประกันสังคม 10 หลัก
+				}
+
+				$t1 = "";
+				if (!empty($arraystr[1])) {
+					$t1 = trim($arraystr[1]); // เลขสาขา 6 หลัก
+				}
+
+				$t3 = "";
+				if (!empty($arraystr[3])) {
+					$t3 = trim($arraystr[3]); // ชื่อสถานประกอบการ
+				}
+
+
+				$t4 = "";
+				if (!empty($arraystr[4])) {
+					$t4 = trim($arraystr[4]); // bran_code สปส เร่งรัดหนี้
+				}
+
+
+				$t5 = "";
+				if (!empty($arraystr[5])) {
+					$t5 = trim($arraystr[5]); // bran_code สปส รับผิดชอบ
+				}
+
+
+				$t6 = "";
+				if (!empty($arraystr[6])) {
+					$t6 = trim($arraystr[6]); // ที่อยู่
+				}
+
+
+				$t7 = "";
+				if (!empty($arraystr[7])) {
+					$t7 = trim($arraystr[7]); // อำเภอ
+				}
+
+
+				$t8 = "";
+				if (!empty($arraystr[8])) {
+					$t8 = trim($arraystr[8]); // จังหวัด
+				}
+
+
+				$t9 = "";
+				if (!empty($arraystr[9])) {
+					$t9 = trim($arraystr[9]); // รหัสไปรษณีย์ 
+				}
+
+				$t3f = iconv('tis-620', 'utf-8', $t3); // ชื่อสถานประกอบการ
+
+				// arr($t3f );
+
+				$t7f = iconv('tis-620', 'utf-8', $t7); // อำเภอ
+				$t8f = iconv('tis-620', 'utf-8', $t8); // จังหวัด
+
+				$t2 = trim($arraystr[2]);
+
+				if (empty($t2)) {
+					continue;
+				}
+
+
+				$t2 = iconv('tis-620', 'utf-8', $t2); // จังหวัด
+
+				if (strlen($t2) != 13) { //ถ้าตัวเลขทะเบียน เท่ากับ 13 หลัก
+
+					continue;
+				}
+
+				$selq = LedriskcropTb::model()->findByAttributes(array('lrc_registernumber' => $t2));
+				if (empty($selq)) {
+					$LedriskcropTb = new LedriskcropTb();
+					$LedriskcropTb->lrc_accno = $t0;
+					$LedriskcropTb->lrc_bran = $t1;
+					$LedriskcropTb->lrc_registernumber = $t2;
+					$LedriskcropTb->lrc_registername = $t3f;
+					$LedriskcropTb->lrc_ssocode1 = $t4;
+					$LedriskcropTb->lrc_ssocode2 = $t5;
+					$LedriskcropTb->lrc_address = iconv('tis-620', 'utf-8', $t6);
+					$LedriskcropTb->lrc_amphur = iconv('tis-620', 'utf-8', $t7);
+					$LedriskcropTb->lrc_province = $t8f;
+					$LedriskcropTb->lrc_zipcode = $t9;
+					$LedriskcropTb->lrc_createby = Yii::app()->user->username;
+					$LedriskcropTb->lrc_created = date('Y-m-d H:i:s');
+					$LedriskcropTb->lrc_updateby = Yii::app()->user->username;
+					$LedriskcropTb->lrc_modified = date('Y-m-d H:i:s');
+					$LedriskcropTb->lrc_remark = "-";
+					$LedriskcropTb->lrc_status = 1;
+
+
+					if (!$LedriskcropTb->save()) {
+					} else {
+					}
+				}
+
+
+				// exit;
+			}
+		}
+
+
+
+
+
+		exit;
+
+
+
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				if (true) {
+
+					$ltf_name = 'T8000_W640421.txt';
+					$minrec = 0;
+					$linecount = 0;
+
+
+					$handle = fopen('D:/wamp/www/test_yii01/keep/T8000_W640421.txt', "r");
+					$time_start = microtime(true);
+					while (!feof($handle)) {
+						$line = fgets($handle);
+						$linecount++;
+					}
+					fclose($handle);
+
+					// exit;
+				} else {
+
+					$ltf_name = $_POST['ltf_name'];
+					$minrec = 0;
+					$linecount = 0;
+					$handle = fopen(Yii::app()->Cgentextfile->localpathled . $ltf_name, "r");
+					$time_start = microtime(true);
+					while (!feof($handle)) {
+						$line = fgets($handle);
+						$linecount++;
+					}
+					fclose($handle);
+				}
+
+
+				$time_end = microtime(true);
+				$execution_time = ($time_end - $time_start) / 60;
+
+				$linecount = $linecount; //5000;
+
+				$lrc_bran_arr = array();
+				$lrc_registername_arr = array();
+				$lrc_ssocode1_arr = array();
+				$lrc_ssocode2_arr = array();
+				$lrc_address_arr = array();
+				$lrc_amphur_arr = array();
+				$lrc_province_arr = array();
+				$lrc_zipcode_arr = array();
+
+				$line = -1;
+				$min = $minrec; //บรรทัดเริ่มต้น บรรทัดแรกสุด คือ 0
+				$max = $linecount; //$min + 1000;//42632; //บรรทัดสุดท้ายที่จะให้ดึง
+
+				if (($myfile = fopen('D:/wamp/www/test_yii01/keep/T8000_W640421.txt', "r")) !== FALSE) {
+
+					$time_start = microtime(true);
+
+					$rownum = 0;
+
+					$numofintsert = 0;
+					while (!feof($myfile)) {
+
+						$line++;
+						if (($line >= $min && $line <= $max)) {
+							$datastr  = fgets($myfile);
+							$arraystr = explode(";", $datastr);
+
+							$t0 = "";
+							if (!empty($arraystr[0])) {
+								$t0 = trim($arraystr[0]); // เลขประกันสังคม 10 หลัก
+							}
+
+							$t1 = "";
+							if (!empty($arraystr[1])) {
+								$t1 = trim($arraystr[1]); // เลขสาขา 6 หลัก
+							}
+
+
+
+
+
+							$t3 = "";
+							if (!empty($arraystr[3])) {
+								$t3 = trim($arraystr[3]); // ชื่อสถานประกอบการ
+							}
+
+
+							$t4 = "";
+							if (!empty($arraystr[4])) {
+								$t4 = trim($arraystr[4]); // bran_code สปส เร่งรัดหนี้
+							}
+
+
+							$t5 = "";
+							if (!empty($arraystr[5])) {
+								$t5 = trim($arraystr[5]); // bran_code สปส รับผิดชอบ
+							}
+
+
+							$t6 = "";
+							if (!empty($arraystr[6])) {
+								$t6 = trim($arraystr[6]); // ที่อยู่
+							}
+
+
+							$t7 = "";
+							if (!empty($arraystr[7])) {
+								$t7 = trim($arraystr[7]); // อำเภอ
+							}
+
+
+							$t8 = "";
+							if (!empty($arraystr[8])) {
+								$t8 = trim($arraystr[8]); // จังหวัด
+							}
+
+
+							$t9 = "";
+							if (!empty($arraystr[9])) {
+								$t9 = trim($arraystr[9]); // รหัสไปรษณีย์ 
+							}
+
+							$t3f = iconv('tis-620', 'utf-8', $t3); // ชื่อสถานประกอบการ
+							$t6f = iconv('tis-620', 'utf-8', $t6); // ที่อยู่
+							$t7f = iconv('tis-620', 'utf-8', $t7); // อำเภอ
+							$t8f = iconv('tis-620', 'utf-8', $t8); // จังหวัด
+
+
+							$t2 = "";
+							if (!empty($arraystr[2])) {
+								$t2 = trim($arraystr[2]); // เลขทะเบียนพาณิชย์ 13 หลัก
+
+
+								if (strlen($t2) == 13) { //ถ้าตัวเลขทะเบียน เท่ากับ 13 หลัก
+									if (is_numeric($t2) && $t2 > 0 && $t2 == round($t2, 0)) { //ถ้าเป็นตัวเลขทั้งหมด
+										$lrc_bran_arr[] = $t1;
+										$lrc_registername_arr[] = $t3f;
+										$lrc_ssocode1_arr[] = $t4;
+										$lrc_ssocode2_arr[] = $t5;
+										$lrc_address_arr[] = $t6f;
+										$lrc_amphur_arr[] = $t7f;
+										$lrc_province_arr[] = $t8f;
+										$lrc_zipcode_arr[] = $t9;
+
+
+
+										$rownum += 1;
+
+										// arr( $t2 );
+
+										$selq = LedriskcropTb::model()->findByAttributes(array('lrc_registernumber' => $t2));
+										if (empty($selq)) {
+											$LedriskcropTb = new LedriskcropTb();
+											$LedriskcropTb->lrc_accno = $t0;
+											$LedriskcropTb->lrc_bran = $t1;
+											$LedriskcropTb->lrc_registernumber = $t2;
+											$LedriskcropTb->lrc_registername = $t3f;
+											$LedriskcropTb->lrc_ssocode1 = $t4;
+											$LedriskcropTb->lrc_ssocode2 = $t5;
+											$LedriskcropTb->lrc_address = $t6f;
+											$LedriskcropTb->lrc_amphur = $t7f;
+											$LedriskcropTb->lrc_province = $t8f;
+											$LedriskcropTb->lrc_zipcode = $t9;
+											$LedriskcropTb->lrc_createby = Yii::app()->user->username;
+											$LedriskcropTb->lrc_created = date('Y-m-d H:i:s');
+											$LedriskcropTb->lrc_updateby = Yii::app()->user->username;
+											$LedriskcropTb->lrc_modified = date('Y-m-d H:i:s');
+											$LedriskcropTb->lrc_remark = "-";
+											$LedriskcropTb->lrc_status = 1;
+
+											// exit;
+											if ($LedriskcropTb->save()) {
+												$numofintsert += 1;
+											}
+										}
+									}
+								}
+							}
+						}
+
+
+						arr('afdddads');
+					}
+
+					fclose($myfile);
+
+					$qltf = LedtextfileTb::model()->findByAttributes(array('ltf_name' => $ltf_name));
+					$qltf->ltf_countud = $numofintsert;
+					$qltf->ltf_statusud = "Y";
+					$qltf->ltf_updateby = Yii::app()->user->username;
+					$qltf->ltf_modified = date('Y-m-d H:i:s');
+					$qltf->ltf_status = 2;
+
+					$qltf->save();
+
+
+					$time_end = microtime(true);
+					$execution_time = ($time_end - $time_start) / 60;
+					echo '<b> ตรวจสอบไฟล์ :</b> ' . $ltf_name  . ' เรียบร้อย <br>';
+					echo '<b> เพิ่มรายการจำนวน :</b> ' . $numofintsert  . ' รายการ <br>';
+					echo '<b>ใช้เวลา :</b> ' . $execution_time . ' Mins <br>';
+				}
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+
+
+
+
+
+
 
 	public function actionCalldbdservice4()
 	{
@@ -30,13 +1706,13 @@ class SiteController extends Controller
 
 					$bgdatep = $_POST['bgdatep'];
 					$eddatep = $_POST['eddatep'];
-					$newdap = $_POST['newdap'];
-					$updap = $_POST['updap'];
+					$newdap = 1;
+					$updap = 0;
 				}
 
 				$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-
-				$data1['model'] = BranchTmpTb::getDatas( $bgdatep );
+				//branch_tmp_tb
+				$data1['model'] = BranchTmpTb::getDatas($bgdatep);
 				$this->layout = 'nolayout';
 				$this->render('/site/servicepages/calldbdservice4', $data1);
 			} else {
@@ -48,6 +1724,325 @@ class SiteController extends Controller
 			$idplib->getIdpinfo();
 		}
 	}
+
+
+
+	public function actionLoadtxtlog()
+	{
+?>
+		<table id="txtlog" class="thfont5">
+			<?php
+			if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] != "off") {
+				$protocol = "https://";
+			} else {
+				$protocol = "http://";
+			}
+			$url = $protocol . $_SERVER["HTTP_HOST"];
+
+			$logpath =  $_SERVER['DOCUMENT_ROOT'] . "/wpdcore/ledtextfile/sapiens"; //server local
+			//$logpath = Yii::app()->Cgentextfile->localpathled ; //server uat						
+			$fileList = glob($logpath . '/log_*.TXT');
+			foreach ($fileList as $filename) {
+
+				//echo $filename, '<br>'; 
+				$arrfile = explode("/", $filename);
+				//echo end($arrfile), '<br/>';
+				//echo($logpath ."/" . end($arrfile));
+				$file_url =  str_replace($_SERVER['DOCUMENT_ROOT'], '', $url . $filename);
+
+			?>
+				<tr>
+					<td id="<?php echo ($filename) ?>"><i class="icon fa-file-text"></i> <span style="color:#3333FF; cursor:pointer;" onClick="javascript:getfile('<?php echo end($arrfile) ?>','<?php echo ($file_url) ?>');"><?php echo end($arrfile) ?></span></td>
+
+				</tr>
+			<?php
+			}
+
+			?>
+		</table>
+<?php
+	}
+
+	public function actionGetriskcrop2()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				$q = new CDbCriteria(array(
+					'condition' => "lrpt_status = 1",
+					'params'    => array(':lrpt_status' => 1)
+				));
+
+				//ledrpt_tb
+				$mLedrptTb = LedrptTb::model()->findAll($q);
+
+				$time_start = microtime(true);
+
+				$rc = 0;
+				$scc = 0;
+				$sce = 0;
+				$sc = 0;
+				foreach ($mLedrptTb as $rows) {
+					$registernumber = trim($rows->lrpt_registernumber);
+
+					//ledriskcrop_tb
+					$mrc = LedriskcropTb::model()->findByAttributes(array('lrc_registernumber' => $registernumber, 'lrc_status' => 1)); //, 
+					if ($mrc) {
+
+						$mrc->lrc_updateby = Yii::app()->user->username;
+						$mrc->lrc_modified = date('Y-m-d H:i:s');
+						$mrc->lrc_status = 2;
+						if ($mrc->save()) {
+							$scc = $scc + 1; //จำนวนสำเร็จ
+							$sc = 0; //สถานะ error
+						} else {
+							$sce = $sce + 1; //จำนวน error
+							$sc = 1; //สถานะ error
+						}
+					}
+					$rc += 1;
+				} //for
+				$time_end = microtime(true);
+				$execution_time = ($time_end - $time_start) / 60;
+				if ($sc === 0) {
+					echo "ปรับปรุงข้อมูลสำเร็จ, ใช้เวลา : {$execution_time} นาที, จำนวนรายการทั้งหมด : {$rc} รายการ สำเร็จ : {$scc} รายการ, ล้มเหลว : {$sce} รายการ";
+				} else {
+					echo "มีปัญหาในการปรับปรุงข้อมูล , ใช้เวลา : {$execution_time} นาที, จำนวนรายการทั้งหมด : {$rc} รายการ สำเร็จ : {$scc} รายการ, ล้มเหลว : {$sce} รายการ";
+				}
+
+				$this->layout = 'nolayout';
+
+				$datas['html'] = $this->render('/site/searchpages/getriskcrop', NULL, true);
+
+				echo json_encode($datas);
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+	public function actionGetriskcrop()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+				$this->layout = 'nolayout';
+				$this->render('/site/searchpages/getriskcrop');
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else { //if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	} //function
+
+	public function actionChkmasleddata()
+	{
+
+		set_time_limit(0);
+		ini_set("max_execution_time", "0");
+		ini_set("memory_limit", "9999M");
+
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+
+				$q = new CDbCriteria(array(
+					'condition' => "lrpt_status = :lrpt_status ",
+					'params'    => array(':lrpt_status' => 1)
+				));
+				$mLedrptTb = LedrptTb::model()->findAll($q);
+				$c = count($mLedrptTb);
+				if ($c != 0) {
+					$time_start = microtime(true);
+					$rc = 0;
+					$scc = 0;
+					$sce = 0;
+					$sc = 0;
+					foreach ($mLedrptTb as $rows) {
+						$accno = $rows->lrpt_accno;
+						$registernumber = trim($rows->lrpt_registernumber);
+						//echo "{$registernumber}, {$accno} <br>";
+						//เปรียบเทียบข้อมูลกับ ข้อมูลกลุ่มเสี่ยง
+						$mrc = LedriskcropTb::model()->findByAttributes(array('lrc_registernumber' => $registernumber, 'lrc_status' => 1)); //, 
+						if ($mrc) {
+							//echo "y,{$registernumber} <br>";
+							//เปลี่ยนสถานะกลุ่มเสี่ยง
+							$mrc->lrc_updateby = Yii::app()->user->username;
+							$mrc->lrc_modified = date('Y-m-d H:i:s');
+							$mrc->lrc_status = 2;
+							if ($mrc->save()) {
+								$msg = "update data is success.";
+								$scc = $scc + 1; //จำนวนสำเร็จ
+								$sc = 0; //สถานะ error
+							} else {
+								$msg = $mrc->getErrors();
+								$sce = $sce + 1; //จำนวน error
+								$sc = 1; //สถานะ error
+							} //if  
+						} //if
+						$rc += 1;
+					} //for
+					$time_end = microtime(true);
+					$execution_time = ($time_end - $time_start) / 60;
+					if ($sc === 0) {
+						echo "ปรับปรุงข้อมูลสำเร็จ, ใช้เวลา : {$execution_time} นาที, จำนวนรายการทั้งหมด : {$rc} รายการ สำเร็จ : {$scc} รายการ, ล้มเหลว : {$sce} รายการ";
+					} else {
+						echo "มีปัญหาในการปรับปรุงข้อมูล , ใช้เวลา : {$execution_time} นาที, จำนวนรายการทั้งหมด : {$rc} รายการ สำเร็จ : {$scc} รายการ, ล้มเหลว : {$sce} รายการ";
+					}
+				} //if
+
+
+				//*********************************************************
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else { //if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	} //function
+
+
+
+
+	public function actionGettxtfilesiskcrop()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+				//*********************************************************
+				$this->layout = 'nolayout';
+				$this->render('/site/searchpages/gettxtfilesiskcrop');
+				//*********************************************************
+			} else { //if
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else { //if
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	} //function
+
+
+
+
+	public function actionSendemail3()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+				//*********************************************************
+
+				if (!Yii::app()->params['testJob']) {
+
+					$data1 = [
+						'action' => 'sendemail3',
+						'bgdatep' => '09/02/2019',
+						'eddatep' => '12/22/2022',
+						'newdap' => '1',
+						'updap' => '0',
+					];
+				} else {
+
+					$data1 = [
+						'action' => $_POST['action'],
+						'bgdatep' =>  $_POST['bgdatep'],
+						'eddatep' => $_POST['eddatep'],
+						'newdap' => '1',
+						'updap' => '0',
+					];
+				}
+
+
+				$this->layout = 'nolayout';
+
+				$data1['retp'] = OtpEmailTb::getNoAnswerMail($data1);
+
+				// arr($retp);
+
+				$cetp = count($data1['retp']); //จำนวนรายการอีเมล์ที่ยังไม่ได้ตอบกลับ
+
+				if ($cetp > 0) {
+					echo "จำนวน email  ที่ยังไม่มีการตอบกลับภายใน 30 นับจากวันที่ " . $data1['eddatep'] . " มีจำนวน  : {$cetp} รายการ ";
+				} else {
+					echo "ไม่พบรายการ ส่งเมล์ ตามเงื่อนไข";
+				}
+
+				$this->render('/site/servicepages/callotpdata3', $data1);
+				//*********************************************************	
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+
+	public function actionCallotpdata()
+	{
+		if (!Yii::app()->user->isGuest) {
+			if (isset(Yii::app()->user->username)) {
+
+				if (Yii::app()->params['testJob']) {
+
+					$data1 = [
+						'action' => 'openotpdata',
+						'bgdatep' => '09/02/2019',
+						'eddatep' => '09/02/2019',
+						'newdap' => 1,
+						'updap' => 0,
+						'model' => BranchTmpTb::getDatas('09/02/2019'),
+					];
+				} else {
+
+					$data1 = [
+						'action' => $_POST['action'],
+						'bgdatep' => $_POST['bgdatep'],
+						'eddatep' => $_POST['eddatep'],
+						'newdap' => 1,
+						'updap' => 0,
+						'model' => BranchTmpTb::getDatas($_POST['bgdatep']),
+					];
+				}
+
+				$this->layout = 'nolayout';
+
+				$this->render('/site/servicepages/callotpdata', $data1);
+			} else {
+				$idplib = new Idplib();
+				$idplib->getIdpinfo();
+			}
+		} else {
+			$idplib = new Idplib();
+			$idplib->getIdpinfo();
+		}
+	}
+
+
+	public function actionCalldbdservice4auto()
+	{
+
+		$bgdatep = $_POST['bgdatep'];
+		$eddatep = $_POST['eddatep'];
+		$newdap = 1;
+		$updap = 0;
+		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
+		$data1['model'] = BranchTmpTb::getDatas($bgdatep);
+		$this->layout = 'nolayout';
+		$this->render('/site/servicepages/calldbdservice4', $data1);
+	}
+
+
 
 	public function actionCalldbdservice3auto()
 	{
@@ -96,68 +2091,7 @@ class SiteController extends Controller
 		}
 	}
 
-	public function actionCalldbdservice2auto()
-	{
 
-		$bgdatep = $_POST['bgdatep'];
-		$eddatep = $_POST['eddatep'];
-
-		$cronjob = true;
-		$testJob = true;
-
-		CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob);
-	}
-
-	public function actionCalldbdservice2()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-
-				if (false) {
-
-					$bgdatep = $_POST['bgdatep'];
-					$eddatep = $_POST['eddatep'];
-
-					$cronjob = true;
-
-					$testJob = true;
-				} else {
-
-					$bgdatep = '12/16/2022';
-					$eddatep = '12/16/2022';
-
-					$cronjob = false;
-
-					$testJob = true;
-				}
-
-				// $this->callGooApi($bgdatep, $eddatep, $newdap = 1);
-
-				CropinfoTmpTb::callGooApi($bgdatep, $eddatep, 1, $cronjob, $testJob);
-
-				$model = CropinfoTmpTb::getDatas($bgdatep);
-
-				$data1 = [
-					'bgdatep' => $bgdatep,
-					'eddatep' => $eddatep,
-					'newdap' => 1,
-					'updap' => 0,
-					'model' => $model,
-					'countmedel' => count($model),
-				];
-
-				$this->layout = 'nolayout';
-
-				$this->render('/site/servicepages/calldbdservice2', $data1);
-			} else {
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else {
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	}
 
 	function getAuthorizationHeader()
 	{
@@ -350,94 +2284,6 @@ class SiteController extends Controller
 		}
 	}
 
-	///site/services หลังจากกดปุ่มรัน service ต่างๆ 
-	public function actionOpenservice($id = NULL)
-	{
-		//open page directly from url 
-		if (!empty($id)) {
-
-			if (!Yii::app()->user->isGuest) {
-				if (isset(Yii::app()->user->username)) {
-
-					$snum = $id;
-					$lremark = "เปิดเมนูย่อยservice:" . $snum;
-					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
-					// $this->layout = 'nolayout';
-
-					if ($snum == 1) { //Call DBD WebService
-
-
-						$this->render('/site/servicepages/dbd_webservice');
-					} else if ($snum == 5) { //Export textfile & Upload to SFTP
-
-						$this->render('/site/servicepages/service5');
-					} else if ($snum == 6) { //Call LED Webservice
-
-						$this->render('/site/servicepages/service6');
-					} else if ($snum == 7) { //Data Cleansing
-
-						$this->render('/site/servicepages/service7');
-					} else if ($snum == 8) { //Gen Textfile Old WPD
-
-						$this->render('/site/servicepages/service8');
-					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
-
-						$this->render('/site/servicepages/service9');
-					} else {
-
-						$this->render('/site/servicepages/service' . $snum);
-					}
-				} else { //if
-					$idplib = new Idplib();
-					$idplib->getIdpinfo();
-				}
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else {
-
-			if (!Yii::app()->user->isGuest) {
-				if (isset(Yii::app()->user->username)) {
-
-					$snum = $_POST['snum'];
-					$lremark = "เปิดเมนูย่อยservice:" . $snum;
-					$msgresult = Yii::app()->Clogevent->createlogevent("open", "servicepage", "openservicepage", "subservice", $lremark);
-					$this->layout = 'nolayout';
-
-					if ($snum == 1) { //Call DBD WebService
-
-						$this->render('/site/servicepages/service1');
-					} else if ($snum == 5) { //Export textfile & Upload to SFTP
-
-						$this->render('/site/servicepages/service5');
-					} else if ($snum == 6) { //Call LED Webservice
-
-						$this->render('/site/servicepages/service6');
-					} else if ($snum == 7) { //Data Cleansing
-
-						$this->render('/site/servicepages/service7');
-					} else if ($snum == 8) { //Gen Textfile Old WPD
-
-						$this->render('/site/servicepages/service8');
-					} else if ($snum == 9) { //RD service(ภงด. กรมสรรพากร)
-
-						$this->render('/site/servicepages/service9');
-					} else {
-
-						$this->render('/site/servicepages/service' . $snum);
-					}
-				} else { //if
-					$idplib = new Idplib();
-					$idplib->getIdpinfo();
-				}
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		}
-	}
-
 
 
 	// public function behaviors()
@@ -448,609 +2294,6 @@ class SiteController extends Controller
 	// 		],
 	// 	];
 	// }
-
-
-
-
-
-	private function callGooApi($bgdatep = NULL, $eddatep = NULL, $newdap = NULL, $cronjob = true)
-	{
-		// exit;
-
-
-		if ($cronjob == true) {
-
-			$username = "sys";
-		} else {
-
-			$username = "sys";
-			if (Yii::app()->user->username) {
-				$username = Yii::app()->user->username;
-			}
-		}
-
-		$startdate = $bgdatep . "T00:00:00+07:00";
-
-		//  '<br>';
-		$enddate = $eddatep . "T23:59:59+07:00";
-
-		$startdate = date_create($startdate)->format('Y-m-d') . "T00:00:00+07:00";
-
-		//  '<br>';
-		$enddate = date_create($enddate)->format('Y-m-d') . "T23:59:59+07:00";
-
-
-		$rundate = date_create($bgdatep)->format('Ymd');
-
-		//  '<br>';
-
-		//  "data formate : {$startdate}, {$enddate} <br>";
-		// exit;
-
-		$qlrs = new CDbCriteria(array(
-			'condition' => "lrs_remark = :lrs_remark ",
-			'params'    => array(':lrs_remark' => $rundate)
-		));
-
-
-		//wpdlogdb.logrunservice_tb 
-		$rlrs = LogrunserviceTb::model()->findAll($qlrs);
-
-		if ($newdap == 1) {
-
-			if (true) {
-
-				$testData['CorpInfoList']['corpInfo'][0] = [
-					'cpower' => 'cpower',
-					'tsic' => 87878,
-					'corpType' => 1,
-					'tsicName' => 87878,
-					'corpTypeName' => 87878,
-					'registerNumber' => '3100203295971',
-					'registerName' => 87878,
-					'registerDate' => '2022-12-16 22:22:01',
-					'updatedDate' => '2022-01-01 22:22:01',
-					'updatedEntry' => '1',
-					'branches' => [
-						'branch' =>  [
-							[
-								'name' => 'aaaaaaaaa',
-								'orderNumber' => 1,
-								'houseId' => 99,
-								'houseNumber' => 99,
-								'buildingName' => 'dsddssdsdsd',
-								'buildingNumber' => '0515',
-								'buildingFloor' => '4',
-								'village' => '45',
-								'moo' => '9',
-								'Soi' => 'โรงเหล้า',
-								'Road' => 'รถไฟ',
-								'tumbon' => 'บางซื่อ',
-								'ampur' => 'บางซื่อ',
-								'province' => 'กทม.',
-								'tumbonCode' => '12345',
-								'ampurCode' => '1036',
-								'provinceCode' => '12345',
-								'zipCode' => '10800',
-								'phoneNumber' => '08563787',
-								'faxNumber' => '08563787',
-								'email' => 'bombbomb1980@gmail.com',
-							],
-						]
-					],
-					'committees' => [
-						'committee' => [
-							[
-								'committeeType' => '1',
-								'orderNumber' => 99,
-								'identityType' => 1,
-								'identity' => 99,
-								'title' => 'นาย',
-								'firstName' => 'ปิยพงษ์',
-								'lastName' => 'ไวถนอมทรัพย์',
-								'englishTitle' => 'mr.',
-								'englishFirstName' => 'piyapong',
-								'englishLastName' => 'waitanomthap',
-								'nationality' => 'th',
-								'dateOfBirth' => '1980-11-16',
-							],
-						]
-					],
-				];
-
-				$testData = json_encode($testData);
-
-				$data = json_decode($testData);
-			} else {
-
-				//https://wsg.sso.go.th:443/corpinfo-webservice-v5/CorpInfoWebService?wsdl
-				//https://wsg.sso.go.th/corpinfo-webservice-v2/CorpInfoWebService?wsdl
-				$fullPathToWsdl = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'CorpInfoWebServiceV5.wsdl';
-
-				//   arr($fullPathToWsdl);
-				$client = new SoapClient($fullPathToWsdl, [
-					'stream_context' => stream_context_create([
-						'ssl' => [
-							'verify_peer' => false,
-							'verify_peer_name' => false,
-						],
-					]),
-				]);
-
-				$params = array(
-					"subscribeId" => '6211003', //usersso
-					"pincode" => 'P@ssw0rd', //pinsso
-					"corpInfoFilter" => array("corpType" => '*', "tsic" => '*', "province" => '*'),
-					"registerDateRange" => array("startDate" => $startdate, "endDate" => $enddate),
-					"changeDateRange" => null, //$changeDateRange, 
-					"newEntry" => true, //true
-					"changedEntry" => false, //false,
-					"recordOffset" => 0,
-					"recordLimit" => 1000
-					//registerNumber => "0103555016414"
-				);
-
-				$data = $client->GetCorpInfoService($params);
-			}
-
-			$CorpInfoList = [];
-
-			if (property_exists($data->CorpInfoList, "corpInfo")) {
-				if (is_array($data->CorpInfoList->corpInfo)) {
-
-					$CorpInfoList = $data->CorpInfoList->corpInfo;
-				} else {
-
-					$CorpInfoList[] = $data->CorpInfoList->corpInfo;
-				}
-				$rowno = 1;
-				$dupstate = 0; //ค่าเริ่มต้น
-				foreach ($CorpInfoList as $ko => $vo) {
-
-					$ciftm = CropinfoTmpTb::model()->findByAttributes(array('registernumber' => $vo->registerNumber));
-
-					$lastcrop_id = NULL;
-
-					if ($ciftm) {
-
-						continue;
-						// $lastcrop_id = $ciftm->crop_id ;
-
-						// arr($lastcrop_id );
-					}
-
-					$tsic = "-";
-					if (property_exists($vo, "tsic")) {
-						$tsic = $vo->tsic;
-					}
-
-
-					$tsicName = "-";
-					if (property_exists($vo, "tsicName")) {
-						$tsicName = $vo->tsicName;
-					}
-
-					$corpType = "-";
-					if (property_exists($vo, "corpType")) {
-						$corpType = $vo->corpType;
-					}
-
-					$registerNumber = '-';
-					if (property_exists($vo, "registerNumber")) {
-						$registerNumber = $vo->registerNumber;
-					}
-
-
-					if (property_exists($vo, "registerDate")) {
-						$registerDate = $vo->registerDate;
-						// arr($registerDate); exit;
-
-						$registerDate =  date_create($registerDate)->format('Y-m-d H:i:s'); //date('Y-m-d H:i:s');
-					} else {
-						$registerDate =  date_create('1900-01-01T00:00:00+07:00')->format('Y-m-d H:i:s');  //date('Y-m-d H:i:s');
-					}
-
-					$updatedDate =  date('Y-m-d H:i:s'); //date('Y-m-d H:i:s');
-					if (property_exists($vo, "updatedDate")) {
-						$updatedDate = $vo->updatedDate;
-					}
-
-					//cropinfo_tmp_tb
-					$CropinfoMasTb = new CropinfoTmpTb();
-
-					$CropinfoMasTb->corptype = isset($vo->corpType) ? $vo->corpType : '-';
-					$CropinfoMasTb->corptypename = isset($vo->corpTypeName) ? $vo->corpTypeName : '-';
-					$CropinfoMasTb->registernumber = $registerNumber;
-					$CropinfoMasTb->registername = isset($vo->registerName) ? $vo->registerName : '-';
-					$CropinfoMasTb->cpower = isset($vo->cpower) ? $vo->cpower : '-';
-					$CropinfoMasTb->statuscode = isset($vo->statusCode) ? $vo->statusCode : '-';
-					$CropinfoMasTb->accountingdate = isset($vo->accountingdate) ? $vo->accountingdate : '-';
-					$CropinfoMasTb->authorizedcapital =  isset($vo->authorizedCapital) ? $vo->authorizedCapital : 0;
-					$CropinfoMasTb->updateentry =  isset($vo->updatedEntry) ? $vo->updatedEntry : '-';
-					$CropinfoMasTb->updateddate = $updatedDate;
-					$CropinfoMasTb->acc_no = "0000000000";
-					$CropinfoMasTb->acc_bran = "000000";
-					$CropinfoMasTb->tsic = $tsic;
-					$CropinfoMasTb->tsicname = $tsicName;
-					$CropinfoMasTb->registerdate = $registerDate;
-					$CropinfoMasTb->crop_remark = "N";
-					$CropinfoMasTb->crop_createby = $username;
-					$CropinfoMasTb->crop_createtime = date('Y-m-d H:i:s');
-					$CropinfoMasTb->crop_updateby = $username;
-					$CropinfoMasTb->crop_updatetime = date('Y-m-d H:i:s');
-					$CropinfoMasTb->crop_status = 1;
-
-					$lastcrop_id = NULL;
-					if ($CropinfoMasTb->save()) {
-
-						$lastcrop_id = $CropinfoMasTb->crop_id;
-					}
-
-					if ($lastcrop_id) {
-
-						if (!empty($vo->committees->committee)) {
-
-							if (is_array($vo->committees->committee)) {
-
-								$gogo = $vo->committees->committee;
-							} else {
-								$gogo = [];
-
-								$gogo[] = $vo->committees->committee;
-							}
-
-
-							$crow = 1;
-							foreach ($gogo as $kg => $vg) {
-
-								$committeeType = "-";
-								if (property_exists($vg, "committeeType")) {
-									$committeeType = $vg->committeeType;
-								}
-
-
-								$orderNumber = '-';
-								if (property_exists($vg, "orderNumber")) {
-									$orderNumber = $vg->orderNumber;
-								}
-
-
-								$identityType = "-";
-								if (property_exists($vg, "identityType")) {
-									$identityType = $vg->identityType;
-								}
-
-								$identity = "-";
-								if (property_exists($vg, "identity")) {
-									$identity = $vg->identity;
-								}
-
-								$title = "-";
-								if (property_exists($vg, "title")) {
-									$title = $vg->title;
-								}
-
-
-
-								$firstName = "-";
-								if (property_exists($vg, "firstName")) {
-									$firstName = $vg->firstName;
-								}
-
-
-
-								$lastName = '-';
-								if (property_exists($vg, "lastName")) {
-									$lastName = $vg->lastName;
-								}
-
-
-								$englishTitle = "-";
-								if (property_exists($vg, "englishTitle")) {
-									$englishTitle = $vg->englishTitle;
-								}
-
-
-
-								$englishFirstName = "-";
-								if (property_exists($vg, "englishFirstName")) {
-									$englishFirstName = $vg->englishFirstName;
-								}
-
-
-
-
-								$englishLastName = "-";
-								if (property_exists($vg, "englishLastName")) {
-									$englishLastName = $vg->englishLastName;
-								}
-
-
-
-								$nationality = "-";
-								if (property_exists($vg, "nationality")) {
-									$nationality = $vg->nationality;
-								}
-
-
-								if (property_exists($vg, "dateOfBirth")) {
-									$dateOfBirth = date_create($vg->dateOfBirth)->format('Y-m-d H:i:s');
-								} else {
-									$dateOfBirth = date_create('1901-01-01T00:00:00+07:00')->format('Y-m-d H:i:s');
-								}
-
-
-								//committee_tmp_tb
-								$CommitteeMasTb = new CommitteeTmpTb();
-								//* @property integer $cmit_id
-								$CommitteeMasTb->crop_id = $lastcrop_id;
-								$CommitteeMasTb->registernumber = $registerNumber;
-								$CommitteeMasTb->tsic = $tsic;
-								$CommitteeMasTb->corptype = $corpType;
-								$CommitteeMasTb->committeetype = $committeeType;
-								$CommitteeMasTb->ordernumber = $orderNumber;
-								$CommitteeMasTb->typeno = $identityType;
-								$CommitteeMasTb->identity = $identity;
-								$CommitteeMasTb->birthday = $dateOfBirth;
-								$CommitteeMasTb->title = $title;
-								$CommitteeMasTb->firstname = $firstName;
-								$CommitteeMasTb->lastname = $lastName;
-								$CommitteeMasTb->englishtitle = $englishTitle;
-								$CommitteeMasTb->englishfirstname12 =  $englishFirstName;
-								$CommitteeMasTb->englishlastname = $englishLastName;
-								$CommitteeMasTb->nation = $nationality;
-								$CommitteeMasTb->cmit_remark = "-";
-								$CommitteeMasTb->cmit_createby = $username;
-								$CommitteeMasTb->cmit_createtime = date('Y-m-d H:i:s');
-								$CommitteeMasTb->cmit_updateby = $username;
-								$CommitteeMasTb->cmit_updatetime = date('Y-m-d H:i:s');
-								$CommitteeMasTb->cmit_status = 1;
-
-								$CommitteeMasTb->save();
-							}
-						}
-
-						// if (property_exists($vo, "branches")) {
-						if (!empty($vo->branches->branch)) {
-
-
-
-							if (is_array($vo->branches->branch)) {
-
-								$gogo = $vo->branches->branch;
-							} else {
-
-								$gogo = [];
-								$gogo[] = $vo->branches->branch;
-							}
-
-							$brow = 1;
-							foreach ($gogo as $kg => $vg) {
-
-								$name = "-";
-								if (property_exists($vg, "name")) {
-									$name = $vg->name;
-								}
-
-								$orderNumber = 0;
-								if (property_exists($vg, "orderNumber")) {
-									$orderNumber = $vg->orderNumber;
-								}
-
-								$houseId = "-";
-								if (property_exists($vg, "houseId")) {
-									$houseId = $vg->houseId;
-								}
-
-
-								$houseNumber = "-";
-
-								if (property_exists($vg, "houseNumber")) {
-									$houseNumber = $vg->houseNumber;
-								}
-
-
-								$buildingName = "-";
-								if (property_exists($vg, "buildingName")) {
-									$buildingName = $vg->buildingName;
-								}
-
-
-
-								$buildingNumber = "-";
-								if (property_exists($vg, "buildingNumber")) {
-									$buildingNumber = $vg->buildingNumber;
-								}
-
-
-								$buildingFloor = "-";
-								if (property_exists($vg, "buildingFloor")) {
-									$buildingFloor = $vg->buildingFloor;
-								}
-
-
-
-								$village = "-";
-								if (property_exists($vg, "village")) {
-									$village = $vg->village;
-								}
-
-
-
-								$moo = '-';
-								if (property_exists($vg, "moo")) {
-									$moo = $vg->moo;
-								}
-
-
-								$Soi = '-';
-								if (property_exists($vg, "Soi")) {
-									$Soi = $vg->Soi;
-								}
-
-
-								$Road = "-";
-								if (property_exists($vg, "Road")) {
-									$Road = $vg->Road;
-								}
-
-
-
-								$tumbon = '-';
-								if (property_exists($vg, "tumbon")) {
-									$tumbon = $vg->tumbon;
-								}
-
-
-
-								$ampur = "-";
-								if (property_exists($vg, "ampur")) {
-									$ampur = $vg->ampur;
-								}
-
-
-
-								$province = "-";
-								if (property_exists($vg, "province")) {
-									$province = $vg->province;
-								}
-
-
-
-								$tumbonCode = "-";
-								if (property_exists($vg, "tumbonCode")) {
-									$tumbonCode = $vg->tumbonCode;
-								}
-
-
-								$ampurCode = "-";
-								if (property_exists($vg, "ampurCode")) {
-									$ampurCode = $vg->ampurCode;
-								}
-
-
-								$provinceCode = "-";
-
-								if (property_exists($vg, "provinceCode")) {
-									$provinceCode = $vg->provinceCode;
-								}
-
-
-
-								$zipCode = "-";
-								if (property_exists($vg, "zipCode")) {
-									$zipCode = $vg->zipCode;
-								}
-
-
-
-								$phoneNumber = "-";
-								if (property_exists($vg, "phoneNumber")) {
-									$phoneNumber = $vg->phoneNumber;
-								}
-
-
-								$faxNumber = "-";
-								if (property_exists($vg, "faxNumber")) {
-									$faxNumber = $vg->faxNumber;
-								}
-
-
-								$email = "-";
-								if (property_exists($vg, "email")) {
-									$email = $vg->email;
-								}
-
-
-								//ค้นหา สปส รับผิดชอบ ----------------------------------------------------------
-
-								$SSO_BRAN_CODE = '-';
-								if ($ampurCode != "-") {
-
-									$qldd1 = new CDbCriteria(array(
-										'condition' => "ZONE_AMPUR_CODE = :ZONE_AMPUR_CODE ORDER BY ZONE_AMPUR_CODE DESC LIMIT 0,1 ",
-										'params'    => array(':ZONE_AMPUR_CODE' => $ampurCode)  //  $statusgt
-									));
-									$dd1 = WpdSpnLtSsobran::model()->findAll($qldd1);
-
-
-									foreach ($dd1 as $rows) {
-										$SSO_BRAN_CODE = $rows->SSO_BRAN_CODE;
-									}
-								}
-
-
-								$BranchMasTb = new BranchTmpTb();
-
-								$BranchMasTb->brch_remark = $SSO_BRAN_CODE;
-								$BranchMasTb->crop_id = $lastcrop_id;
-								$BranchMasTb->registernumber = $registerNumber;
-								$BranchMasTb->tsic = $tsic;
-								$BranchMasTb->corptype = $corpType;
-								$BranchMasTb->ordernumber = $orderNumber;
-								$BranchMasTb->name = $name;
-								$BranchMasTb->houseid = $houseId;
-								$BranchMasTb->housenumber = $houseNumber;
-								$BranchMasTb->buildingname = $buildingName;
-								$BranchMasTb->buildingnumber = $buildingNumber;
-								$BranchMasTb->buildingfloor = $buildingFloor;
-								$BranchMasTb->village = $village;
-								$BranchMasTb->moo = $moo;
-								$BranchMasTb->soi = $Soi;
-								$BranchMasTb->road = $Road;
-								$BranchMasTb->tumbon = $tumbon;
-								$BranchMasTb->tumboncode = $tumbonCode;
-								$BranchMasTb->ampur = $ampur;
-								$BranchMasTb->ampurcode = $ampurCode;
-								$BranchMasTb->province = $province;
-								$BranchMasTb->provincecode = $provinceCode;
-								$BranchMasTb->zipcode = $zipCode;
-								$BranchMasTb->phonenumber = $phoneNumber;
-								$BranchMasTb->faxnumber = $faxNumber;
-								$BranchMasTb->email = $email;
-								$BranchMasTb->brch_createby = $username;
-								$BranchMasTb->brch_createtime = date('Y-m-d H:i:s');
-								$BranchMasTb->brch_updateby = $username;
-								$BranchMasTb->brch_updatetime = date('Y-m-d H:i:s');
-								$BranchMasTb->brch_status = 1;
-
-								$BranchMasTb->save();
-							}
-						}
-					}
-				}
-			}
-
-
-			$countcorpinfo = count($CorpInfoList);
-
-
-
-			//logrunservice_tb
-			$LogrunserviceTb = new LogrunserviceTb();
-			//* @property integer $lrs_id
-			$LogrunserviceTb->lrs_servicename = "service1";
-			$LogrunserviceTb->lrs_rundate = date('Y-m-d H:i:s');
-			$LogrunserviceTb->lrs_resultrecord = $countcorpinfo;
-			$LogrunserviceTb->lrs_createby = $username;
-			$LogrunserviceTb->lrs_created = date('Y-m-d H:i:s');
-			$LogrunserviceTb->lrs_updateby = $username;
-			$LogrunserviceTb->lrs_modified = date('Y-m-d H:i:s');
-			$LogrunserviceTb->lrs_remark = $rundate;
-			$LogrunserviceTb->lrs_status = "1";
-
-			if ($LogrunserviceTb->save()) {
-				$lremark = "runserviceดึงข้อมูลจากdbd:service1&" . $rundate . "&จำนวนrecord=" . $countcorpinfo;
-				$msgresult = Yii::app()->Clogevent->createlogevent("runservice", "servicepage", "runservice1", "service1", $lremark);
-			} else {
-				$msgerror =  $LogrunserviceTb->getErrors();
-				echo "{$msgerror}";
-			}
-		}
-	}
-
-
-
 
 
 
@@ -1419,18 +2662,7 @@ class SiteController extends Controller
 
 
 
-	public function actionCalldbdservice4auto()
-	{
 
-		$bgdatep = $_POST['bgdatep'];
-		$eddatep = $_POST['eddatep'];
-		$newdap = $_POST['newdap'];
-		$updap = $_POST['updap'];
-		//echo 'ส่งข้อมูลสำเร็จ.' . $bgdatep . ',' . $eddatep . ',' . $newdap . ',' . $updap;
-		$data1 = array('bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-		$this->layout = 'nolayout';
-		$this->render('/site/servicepages/calldbdservice4auto', $data1);
-	}
 
 
 	public function actionCallwpdservice1()
@@ -4372,41 +5604,9 @@ class SiteController extends Controller
 		}
 	} //function 
 
-	public function actionGettxtfilesiskcrop()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$this->layout = 'nolayout';
-				$this->render('/site/searchpages/gettxtfilesiskcrop');
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
 
-	public function actionGetriskcrop()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$this->layout = 'nolayout';
-				$this->render('/site/searchpages/getriskcrop');
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
+
+
 
 	public function actionDownloadtxtfileledfrmsftp()
 	{
@@ -4473,224 +5673,8 @@ class SiteController extends Controller
 			$idplib = new Idplib();
 			$idplib->getIdpinfo();
 		}
-	} //function
+	}
 
-
-	public function actionChkriskcrop()
-	{
-
-		set_time_limit(0);
-		ini_set("max_execution_time", "0");
-		ini_set("memory_limit", "9999M");
-
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-
-				$action = $_POST['action'];
-				$ltf_name = $_POST['ltf_name'];
-				//echo "{$action},{$ltf_name}";
-				//**** นับจำนวนบรรทัดทั้งหมดใน textfile ******** //
-				$minrec = 0;
-				$linecount = 0;
-				$handle = fopen(Yii::app()->Cgentextfile->localpathled . $ltf_name, "r");
-				$time_start = microtime(true);
-				while (!feof($handle)) {
-					$line = fgets($handle);
-					$linecount++;
-				}
-				fclose($handle);
-				//echo $linecount; echo "<br>";
-				$time_end = microtime(true);
-				$execution_time = ($time_end - $time_start) / 60;
-				//echo '<b>Total Execution Time:</b> '.$execution_time.' Mins'; echo "<br>";
-				//**** นับจำนวนบรรทัดทั้งหมดใน textfile ******** //	
-				//********
-				$linecount = $linecount; //5000;
-				//********
-
-				//echo "{$action},{$ltf_name}, {$execution_time}, {$linecount} ";
-				//*************************** ประกาศตัวแปร array ********
-				$lrc_id_arr = array();
-				$lrc_accno_arr = array();
-				$lrc_bran_arr = array();
-				$lrc_registernumber_arr = array();
-				$lrc_registername_arr = array();
-				$lrc_ssocode1_arr = array();
-				$lrc_ssocode2_arr = array();
-				$lrc_address_arr = array();
-				$lrc_amphur_arr = array();
-				$lrc_province_arr = array();
-				$lrc_zipcode_arr = array();
-				/*$lrc_createby
-			$lrc_created
-			$lrc_updateby
-			$lrc_modified
-			$lrc_remark
-			$lrc_status*/
-				//***************************************************
-				$line = -1;
-				$min = $minrec; //บรรทัดเริ่มต้น บรรทัดแรกสุด คือ 0
-				$max = $linecount; //$min + 1000;//42632; //บรรทัดสุดท้ายที่จะให้ดึง
-
-				if (($myfile = fopen(Yii::app()->Cgentextfile->localpathled . $ltf_name, "r")) !== FALSE) {
-					$time_start = microtime(true);
-					$rownum = 0;
-					$rowempty = 0;
-					$rowlength = 0;
-					$rownonum = 0;
-					$rowduplicate = 0;
-					$numofintsert = 0;
-					while (!feof($myfile)) {
-						$line++;
-						if (($line >= $min && $line <= $max)) {
-							$datastr  = fgets($myfile);
-							$arraystr = explode(";", $datastr);
-							if (!empty($arraystr[0])) {
-								$t0 = trim($arraystr[0]); // เลขประกันสังคม 10 หลัก
-							} else {
-								$t0 = "";
-							}
-							if (!empty($arraystr[1])) {
-								$t1 = trim($arraystr[1]); // เลขสาขา 6 หลัก
-							} else {
-								$t1 = "";
-							}
-							if (!empty($arraystr[2])) {
-								$t2 = trim($arraystr[2]); // เลขทะเบียนพาณิชย์ 13 หลัก
-							} else {
-								$t2 = "";
-							}
-							if (!empty($arraystr[3])) {
-								$t3 = trim($arraystr[3]); // ชื่อสถานประกอบการ
-							} else {
-								$t3 = "";
-							}
-							if (!empty($arraystr[4])) {
-								$t4 = trim($arraystr[4]); // bran_code สปส เร่งรัดหนี้
-							} else {
-								$t4 = "";
-							}
-							if (!empty($arraystr[5])) {
-								$t5 = trim($arraystr[5]); // bran_code สปส รับผิดชอบ
-							} else {
-								$t5 = "";
-							}
-							if (!empty($arraystr[6])) {
-								$t6 = trim($arraystr[6]); // ที่อยู่
-							} else {
-								$t6 = "";
-							}
-							if (!empty($arraystr[7])) {
-								$t7 = trim($arraystr[7]); // อำเภอ
-							} else {
-								$t7 = "";
-							}
-							if (!empty($arraystr[8])) {
-								$t8 = trim($arraystr[8]); // จังหวัด
-							} else {
-								$t8 = "";
-							}
-							if (!empty($arraystr[9])) {
-								$t9 = trim($arraystr[9]); // รหัสไปรษณีย์ 
-							} else {
-								$t9 = "";
-							}
-
-							$t3f = iconv('tis-620', 'utf-8', $t3); // ชื่อสถานประกอบการ
-							$t6f = iconv('tis-620', 'utf-8', $t6); // ที่อยู่
-							$t7f = iconv('tis-620', 'utf-8', $t7); // อำเภอ
-							$t8f = iconv('tis-620', 'utf-8', $t8); // จังหวัด
-
-							$crop_address = $t6f . " " .  $t7f . " " . $t8f . " " . $t9;
-
-							if (!empty($t2)) { //ถ้าเลข 13 หลัก เป็นค่าว่าง หรือ null
-								$lent2 = strlen($t2);
-								if ($lent2 == 13) { //ถ้าตัวเลขทะเบียน เท่ากับ 13 หลัก
-									if (is_numeric($t2) && $t2 > 0 && $t2 == round($t2, 0)) { //ถ้าเป็นตัวเลขทั้งหมด
-										$lrc_accno_arr[] = $t0;
-										$lrc_bran_arr[] = $t1;
-										$lrc_registernumber_arr[] = $t2;
-										$lrc_registername_arr[] = $t3f;
-										$lrc_ssocode1_arr[] = $t4;
-										$lrc_ssocode2_arr[] = $t5;
-										$lrc_address_arr[] = $t6f;
-										$lrc_amphur_arr[] = $t7f;
-										$lrc_province_arr[] = $t8f;
-										$lrc_zipcode_arr[] = $t9;
-
-										//echo "{$rownum}, {$line}, {$t0}, {$t1}, {$t2}, {$t3f}, {$t4}, {$t5}, {$t6f}, {$t7f}, {$t8f}, {$t9}"; echo "<br>";
-
-										$rownum += 1;
-
-										$selq = LedriskcropTb::model()->findByAttributes(array('lrc_registernumber' => $t2));
-										if (empty($selq)) {
-											$LedriskcropTb = new LedriskcropTb();
-											$LedriskcropTb->lrc_accno = $t0;
-											$LedriskcropTb->lrc_bran = $t1;
-											$LedriskcropTb->lrc_registernumber = $t2;
-											$LedriskcropTb->lrc_registername = $t3f;
-											$LedriskcropTb->lrc_ssocode1 = $t4;
-											$LedriskcropTb->lrc_ssocode2 = $t5;
-											$LedriskcropTb->lrc_address = $t6f;
-											$LedriskcropTb->lrc_amphur = $t7f;
-											$LedriskcropTb->lrc_province = $t8f;
-											$LedriskcropTb->lrc_zipcode = $t9;
-											$LedriskcropTb->lrc_createby = Yii::app()->user->username;
-											$LedriskcropTb->lrc_created = date('Y-m-d H:i:s');
-											$LedriskcropTb->lrc_updateby = Yii::app()->user->username;
-											$LedriskcropTb->lrc_modified = date('Y-m-d H:i:s');
-											$LedriskcropTb->lrc_remark = "-";
-											$LedriskcropTb->lrc_status = 1;
-											if ($LedriskcropTb->save()) {
-												$msg = "insert data is success.";
-												$numofintsert += 1;
-											} else { //if
-												$msg = $LedriskcropTb->getErrors();
-											} //if
-											//echo "{$msg} <br>";
-										} //if
-									} //if
-								} //if
-							} //if
-
-						} //if
-
-					} //while
-
-					fclose($myfile);
-
-					//update status text file ***************
-					$qltf = LedtextfileTb::model()->findByAttributes(array('ltf_name' => $ltf_name));
-					$qltf->ltf_countud = $numofintsert;
-					$qltf->ltf_statusud = "Y";
-					$qltf->ltf_updateby = Yii::app()->user->username;
-					$qltf->ltf_modified = date('Y-m-d H:i:s');
-					$qltf->ltf_status = 2;
-					if ($qltf->save()) {
-						$msg3 = "update data is success.";
-					} else {
-						$msg3 = $qltf->getErrors();
-					}
-					//***************************************
-
-					$time_end = microtime(true);
-					$execution_time = ($time_end - $time_start) / 60;
-					echo '<b> ตรวจสอบไฟล์ :</b> ' . $ltf_name  . ' เรียบร้อย <br>';
-					echo '<b> เพิ่มรายการจำนวน :</b> ' . $numofintsert  . ' รายการ <br>';
-					echo '<b>ใช้เวลา :</b> ' . $execution_time . ' Mins <br>';
-				} //if
-
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
 
 
 	public function actionListdatariskcrop2()
@@ -4928,12 +5912,10 @@ class SiteController extends Controller
 	public function actionListdatariskcrop()
 	{
 
+
 		if (!Yii::app()->user->isGuest) {
 			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
 
-
-				$action = $_POST['action'];
 				$tbn1 = $_POST['tbn1']; //tablename
 				$udb1 = $_POST['udb1']; //databasename
 				$txtsql = $_POST['txtsql']; //sql command ที่ user key
@@ -4946,44 +5928,17 @@ class SiteController extends Controller
 					$conn = Yii::app()->db3; //get connection
 				}
 
-				//var_dump($_POST);
-
-				$dbtb = $udb1 . "." . $tbn1;
-
-				//echo "{$action},{$tbn1},{$udb1},{$txtsql}"; exit;
-
-				$draw = $_POST['draw']; //ลำดับที่ตารางที่จะเอาข้อมููลไปเขียน
 				$columns = $_POST['columns']; //array columns 
-				$columnsdata = $_POST['columns'][1]['data']; //ลำดับที่ collums เริ่มต้นที่ 0
-				$colname = $_POST['columns'][1]['name']; //ชื่อ column
-				$colsch = $_POST['columns'][1]['searchable']; //เปิดให้ search true or false
-				$colord = $_POST['columns'][1]['orderable']; //อนุญาติให้จัดเรียง true or false
-				$colschtxt = $_POST['columns'][1]['search']['value']; //ข้อความค้นหาในคอลัมน์ 1
-				$colschtype = $_POST['columns'][1]['search']['regex']; //ประเภทการค้นหาในคอลัมน์ true or false
-				$countcolumns = count($columns);  //จำนวนคอลัมน์ที่กำหนดไว้ในส่วน header
-				$ordercol = $_POST['order'][0]['column']; //การจัดเรียงเริ่มต้น
-				$ordertype = $_POST['order'][0]['dir']; //ประเภทของการจัดเรียง
-				$start = $_POST['start']; //จำนวน record เริ่มต้นต่อ 1 หน้า 0
-				$length = $_POST['length']; //จำนวน record สุดท้าย / หน้า 10
 
-				$page = 1;
-				if (!empty($_POST['page'])) $page = $_POST['page'];  //เลขหน้าที่คลิกเข้ามา กรณีไม่มีข้อมูลจะไม่มีเลขหน้า
-
-				$searchtxt = $_POST['search']['value']; //คำค้นหารวมที่พิมพ์เข้ามา
-				$searchtype = $_POST['search']['regex']; //การค้นหา true or false
 
 				$orderb = "";
 				if (strstr($txtsql, 'order')) { //ค้นหาว่ามีคำว่า order หรือปล่าว
 					$orderb = substr($txtsql, strpos($txtsql, 'order'), strlen($txtsql));
-				} else {
-					$orderb = "";
 				}
 
 				$Condition = ""; //ตรวจสอบว่ามีคำว่า where หรือปล่าว
 				if (strstr($txtsql, 'where')) {
 					$Condition = substr($txtsql, strpos($txtsql, 'where'), strlen($txtsql));
-				} else {
-					$Condition = "";
 				}
 
 				if (strstr($Condition, 'order')) { //ตัดคำหลัง order ออกไป
@@ -4998,9 +5953,9 @@ class SiteController extends Controller
 					for ($i = 0, $ien = count($columns); $i < $ien; $i++) {
 						if ($_POST['columns'][$i]['search']['value'] != "") {
 							$Condition = $Condition . " AND " . $fn[$i - 1] . " LIKE '%" . $_POST['columns'][$i]['search']['value'] . "%'";
-						} //if
-					} //for
-				} else { //if
+						}
+					}
+				} else {
 					$fistno = 1;
 					for ($i = 0, $ien = count($columns); $i < $ien; $i++) {
 						if ($_POST['columns'][$i]['search']['value'] != "") {
@@ -5009,10 +5964,10 @@ class SiteController extends Controller
 								$fistno += 1;
 							} else {
 								$Condition = $Condition . " AND " . $fn[$i - 1] . " LIKE '%" . $_POST['columns'][$i]['search']['value'] . "%'";
-							} //if
-						} //if
-					} //for
-				} //if
+							}
+						}
+					}
+				}
 
 				if ($Condition != "") {
 					if ($_POST['search']['value'] != "") {
@@ -5025,9 +5980,9 @@ class SiteController extends Controller
 								$Condition = $Condition . " OR " . $fn[$i] . " LIKE '%" . $_POST['search']['value'] . "%'";
 								$firstnos += 1;
 							}
-						} //for
-					} //if
-				} else { //if
+						}
+					}
+				} else {
 					if ($_POST['search']['value'] != "") {
 						$firstnos = 1;
 						for ($i = 0, $ien = count($columns) - 1; $i < $ien; $i++) {
@@ -5041,8 +5996,8 @@ class SiteController extends Controller
 								$Condition = $Condition . " OR " . $fn[$i] . " LIKE '%" . $_POST['search']['value'] . "%'";
 								$firstnos += 1;
 							}
-						} //for
-					} //if
+						}
+					}
 				}
 
 				if ($orderb != "") {
@@ -5051,34 +6006,35 @@ class SiteController extends Controller
 					$Condition = $Condition;
 				}
 
-
-
-				$page = 1;
-				if (!empty($_POST['page'])) $page = (int)$_POST['page'];
-
 				$recordsPerPage = 10;
-				if (!empty($_POST['length'])) $recordsPerPage = (int)$_POST['length'];
+				if (!empty($_POST['length']))
+					$recordsPerPage = (int)$_POST['length'];
 
 				$start = 0;
-				if (!empty($_POST['start'])) $start = (int)$_POST['start'];
+				if (!empty($_POST['start']))
+					$start = (int)$_POST['start'];
 
 				$noOfRecords = 0;
 
 				$sql = "SET @rownum := 0;";
 				$command = $conn->createCommand($sql)->execute();
 
-				//$sql = "SELECT * FROM " . $udb1 . "." . $tbn1;
-
 				$sqldbtball = $udb1 . "." . $tbn1 . ".*"; //wpddb.ledrpt_tb.*
+
 				$sqldbtb = $udb1 . "." . $tbn1;
 
-				//echo "{$sqldbtball}"; exit;
-
-
 				$sql = "
-		   SELECT * FROM (SELECT @rownum := @rownum+1 AS NUMBER, " . $sqldbtball . " FROM  " . $sqldbtb . " " . $Condition . " ) AS TBL
-			  WHERE NUMBER BETWEEN :rowstart AND :rowend ;
-		  ";
+					SELECT 
+						*
+					FROM (
+						SELECT 
+							@rownum := @rownum+1 AS NUMBER, 
+							" . $sqldbtball . " 
+						FROM  " . $sqldbtb . " " . $Condition . " 
+					) AS TBL
+			  		WHERE NUMBER BETWEEN :rowstart 
+					AND :rowend;
+				";
 
 
 				$command = $conn->createCommand($sql);
@@ -5087,80 +6043,32 @@ class SiteController extends Controller
 
 				$rows = $command->queryAll();
 
-				//var_dump($rows);exit;
-
-				$arr = array();
-				foreach ($rows as $dataitem) {
-
-					/*$strbtn ='
-				<div class="btn-group" role="group">
-					<button type="button" class="btn btn-icon btn-info waves-effect waves-classic" title="แสดงโปรไฟล์"><i class="icon md-file" aria-hidden="true"></i>test</button>
-				</div>
-				';
-			$dataitem['btn'] = $strbtn ;
-			*/
-
-					$arr[] = array_values($dataitem);
-				}
-
-				$jsondata = json_encode($rows); //$arr
-
-				//var_dump($jsondata);exit;
+				$test['data'] = $rows;
 
 				$sql = "SELECT COUNT(*) As ct FROM " . $sqldbtb . " " . $Condition;
 
 				$command = $conn->createCommand($sql);
+
 				$rows = $command->queryAll();
-				$noOfRecords =  $rows[0]['ct'];
 
-				echo '{"recordsTotal":' . $noOfRecords . ',"recordsFiltered":' . $noOfRecords . ',"data":' . $jsondata . '}';
+				$noOfRecords = $rows[0]['ct'];
 
-				//*********************************************************
-			} else { //if
+				$test['recordsTotal'] = $noOfRecords;
+
+				$test['recordsFiltered'] = $noOfRecords;
+
+				echo json_encode($test);
+			} else {
 				$idplib = new Idplib();
 				$idplib->getIdpinfo();
 			}
-		} else { //if
+		} else {
 			$idplib = new Idplib();
 			$idplib->getIdpinfo();
 		}
 	} //function
 
-	public function actionLoadtxtlog()
-	{
-?>
-		<table id="txtlog" class="thfont5">
-			<?php
-			if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] != "off") {
-				$protocol = "https://";
-			} else {
-				$protocol = "http://";
-			}
-			$url = $protocol . $_SERVER["HTTP_HOST"];
 
-			$logpath =  $_SERVER['DOCUMENT_ROOT'] . "/wpdcore/ledtextfile/sapiens"; //server local
-			//$logpath = Yii::app()->Cgentextfile->localpathled ; //server uat						
-			$fileList = glob($logpath . '/log_*.TXT');
-			foreach ($fileList as $filename) {
-
-				//echo $filename, '<br>'; 
-				$arrfile = explode("/", $filename);
-				//echo end($arrfile), '<br/>';
-				//echo($logpath ."/" . end($arrfile));
-				$file_url =  str_replace($_SERVER['DOCUMENT_ROOT'], '', $url . $filename);
-
-			?>
-				<tr>
-					<td id="<?php echo ($filename) ?>"><i class="icon fa-file-text"></i> <span style="color:#3333FF; cursor:pointer;" onClick="javascript:getfile('<?php echo end($arrfile) ?>','<?php echo ($file_url) ?>');"><?php echo end($arrfile) ?></span></td>
-
-				</tr>
-			<?php
-			}
-
-			?>
-		</table>
-<?php
-	}
 
 	public function actionOpenfileonftp()
 	{
@@ -5280,125 +6188,7 @@ class SiteController extends Controller
 	}
 
 
-	public function actionChkmasleddata()
-	{
 
-		set_time_limit(0);
-		ini_set("max_execution_time", "0");
-		ini_set("memory_limit", "9999M");
-
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-				//echo "{$action}";
-				//get data from ledrpt_tb
-				$q = new CDbCriteria(array(
-					'condition' => "lrpt_status = :lrpt_status ",
-					'params'    => array(':lrpt_status' => 1)
-				));
-				$mLedrptTb = LedrptTb::model()->findAll($q);
-				$c = count($mLedrptTb);
-				if ($c != 0) {
-					$time_start = microtime(true); //เริ่มจับเวลา
-					$rc = 0;
-					$scc = 0;
-					$sce = 0;
-					$sc = 0;
-					foreach ($mLedrptTb as $rows) {
-						$accno = $rows->lrpt_accno;
-						$registernumber = trim($rows->lrpt_registernumber);
-						//echo "{$registernumber}, {$accno} <br>";
-						//เปรียบเทียบข้อมูลกับ ข้อมูลกลุ่มเสี่ยง
-						$mrc = LedriskcropTb::model()->findByAttributes(array('lrc_registernumber' => $registernumber, 'lrc_status' => 1)); //, 
-						if ($mrc) {
-							//echo "y,{$registernumber} <br>";
-							//เปลี่ยนสถานะกลุ่มเสี่ยง
-							$mrc->lrc_updateby = Yii::app()->user->username;
-							$mrc->lrc_modified = date('Y-m-d H:i:s');
-							$mrc->lrc_status = 2;
-							if ($mrc->save()) {
-								$msg = "update data is success.";
-								$scc = $scc + 1; //จำนวนสำเร็จ
-								$sc = 0; //สถานะ error
-							} else {
-								$msg = $mrc->getErrors();
-								$sce = $sce + 1; //จำนวน error
-								$sc = 1; //สถานะ error
-							} //if  
-						} //if
-						$rc += 1;
-					} //for
-					$time_end = microtime(true);
-					$execution_time = ($time_end - $time_start) / 60;
-					if ($sc === 0) {
-						echo "ปรับปรุงข้อมูลสำเร็จ, ใช้เวลา : {$execution_time} นาที, จำนวนรายการทั้งหมด : {$rc} รายการ สำเร็จ : {$scc} รายการ, ล้มเหลว : {$sce} รายการ";
-					} else {
-						echo "มีปัญหาในการปรับปรุงข้อมูล , ใช้เวลา : {$execution_time} นาที, จำนวนรายการทั้งหมด : {$rc} รายการ สำเร็จ : {$scc} รายการ, ล้มเหลว : {$sce} รายการ";
-					}
-				} //if
-
-
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
-
-	public function actionCallshowrptled33()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$lrc_id = $_GET['lrc_id'];
-				$lrc_accno = $_GET['lrc_accno'];
-				$lrc_registernumber = $_GET['lrc_registernumber'];
-				//echo "{$lrc_id},{$lrc_accno}";exit;
-
-				//ค้นหาชื่อบริษัท
-				$mrc = LedriskcropTb::model()->findByAttributes(array('lrc_registernumber' => $lrc_registernumber));
-				if ($mrc) {
-					$lrc_registername = $mrc->lrc_registername;
-				} else {
-					$lrc_registername = "-";
-				}
-
-				//ค้นหาชื่อ user
-				$musr = Users::model()->findByAttributes(array('username' => Yii::app()->user->username));
-				if ($musr) {
-					$firstname = $musr->firstname;
-					$lastname = $musr->lastname;
-					$address = $musr->address;
-					$username = $musr->username;
-
-					$usrprint = $firstname . "  " . $lastname . " , " . $address . " , " . $username;
-				} else {
-					$usrprint = "-";
-				}
-
-
-
-				$data1 = array('lrc_id' => $lrc_id, 'lrc_accno' => $lrc_accno, 'lrc_registernumber' => $lrc_registernumber, 'lrc_registername' => $lrc_registername, 'usrprint' => $usrprint);
-
-				$this->layout = 'nolayout';
-				$this->pageTitle = 'report';
-				$this->render('/site/reportpages/reportsled33sub', $data1);
-
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
 
 	public function actionCallsearchledall()
 	{
@@ -6625,207 +7415,6 @@ class SiteController extends Controller
 		$this->render('/site/servicepages/schsapiensforclensingauto', $data1);
 	} //function
 
-	public function actionGettextfileforsapiens2()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-
-				$data1 = array('action' => $action);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/gettextfileforsapiens2', $data1);
-				//*********************************************************	
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
-
-	public function actionAddtextfileforsapiens()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-				$tfnt = $_POST['tfnt'];
-
-				$textfilename = $tfnt;
-
-				$mypath = $_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $textfilename;
-
-				//== create textfile ======
-				$myfile = fopen($_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $textfilename, "w") or die("Unable to open file!");
-				fclose($myfile);
-				//== insert to table ======
-				$insert_ndt = new Textfileforsapiens2Tb();
-				$insert_ndt->tffs_name = $textfilename;
-				$insert_ndt->tffs_numrec = 0;
-				$insert_ndt->tffs_createby = Yii::app()->user->username;
-				$insert_ndt->tffs_created = date('Y-m-d H:i:s');
-				$insert_ndt->tffs_updateby = Yii::app()->user->username;
-				$insert_ndt->tffs_modified = date('Y-m-d H:i:s');
-				$insert_ndt->tffs_remark = $mypath;
-				$insert_ndt->tffs_status = 1;
-				if ($insert_ndt->save()) {
-					$msg = "insert is success.";
-					//echo preg_replace("/\xEF\xBB\xBF/", "","Y");
-					//echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => 'success')));
-					//== insert log event ======================
-					$levremark = "create textfile : " . $tfnt . " for old wpd";
-					$msgresult = Yii::app()->Clogevent->createlogevent($action, "service8", "oldwpd", $tfnt, $levremark);
-					//==========================================
-				} else { //if
-					$msg = $insert_sp->getErrors();
-					//echo preg_replace("/\xEF\xBB\xBF/", "","N");
-					//echo preg_replace("/\xEF\xBB\xBF/", "",CJSON::encode(array('status' => $msg)));
-				}
-
-				echo $msg;
-				//=========================
-
-				//===========================================
-
-				//*********************************************************	
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
-
-
-	public function actionAddtextfileforsapiensauto()
-	{
-
-		$action = $_POST['action'];
-		$tfnt = $_POST['tfnt'];
-
-		$textfilename = $tfnt;
-
-		$mypath = $_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $textfilename;
-
-		//== create textfile ======
-		$myfile = fopen($_SERVER['DOCUMENT_ROOT'] . "/wpdtextfile/wpdold/" . $textfilename, "w") or die("Unable to open file!");
-		fclose($myfile);
-		//== insert to table ======
-		$search_ndt = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $tfnt));
-		if (!$search_ndt) { //not have file
-			$insert_ndt = new Textfileforsapiens2Tb();
-			$insert_ndt->tffs_name = $textfilename;
-			$insert_ndt->tffs_numrec = 0;
-			$insert_ndt->tffs_createby = 'sys';
-			$insert_ndt->tffs_created = date('Y-m-d H:i:s');
-			$insert_ndt->tffs_updateby = 'sys';
-			$insert_ndt->tffs_modified = date('Y-m-d H:i:s');
-			$insert_ndt->tffs_remark = $mypath;
-			$insert_ndt->tffs_status = 1;
-			if ($insert_ndt->save()) {
-				$msg = "create and insert textfile is success.";
-				//== insert log event ======================
-				$levremark = "create textfile : " . $tfnt . " for old wpd by sys is success.";
-				$msgresult = Yii::app()->Clogevent->createlogevent($action, "service8", "oldwpd", $tfnt, $levremark);
-				//==========================================
-			} else { //if
-				$msg = $insert_sp->getErrors();
-			} //if
-		} else { //if
-			$msg = "The file  \"" . $tfnt . "\" is already exists in the system.";
-		}
-		//=========================
-		echo $msg;
-	} //function
-
-	public function actionWritedatatotextfile()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-				$tffs_id = $_POST['tffs_id'];
-				$tffs_name = $_POST['tffs_name'];
-				$data1 = array('action' => $action, 'tffs_id' => $tffs_id, 'tffs_name' => $tffs_name);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/writedatatotextfile', $data1);
-				//*********************************************************	
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
-
-	public function actionCallwpddataforsapiens()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-				$bgdatewt1 = $_POST['bgdatewt1'];
-				$tffs_id = $_POST['tffs_id'];
-				$tffs_name = $_POST['tffs_name'];
-				$actionby = 'm';
-				$data1 = array('action' => $action, 'bgdatewt1' => $bgdatewt1, 'tffs_id' => $tffs_id, 'tffs_name' => $tffs_name, 'actionby' => $actionby);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/callwpddataforsapiens', $data1);
-				//*********************************************************	
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
-
-	public function actionCallwpddataforsapiensauto()
-	{
-		$action = $_POST['action'];
-		$bgdatewt1 = $_POST['bgdatewt1'];
-		$actionby = 'a';
-		//search tffs_id and tffs_name---------------------------------------------------------------------------
-		$qry = new CDbCriteria(array(
-			'condition' => "tffs_status < :tffs_status ",
-			'params'    => array(':tffs_status' => 3),
-			'order'		=> "tffs_id DESC",
-			'limit'		=> 1
-		));
-		$modelarray = Textfileforsapiens2Tb::model()->findAll($qry);
-		//var_dump($modelarray); exit;
-		if ($modelarray) {
-			$countmedel = count($modelarray);
-			foreach ($modelarray as $rows) {
-				$tffs_id = $rows->tffs_id;
-				$tffs_name = $rows->tffs_name;
-			} //for
-
-			//echo "{$action}, {$bgdatewt1}, {$countmedel}, {$tffs_id}, {$tffs_name}"; exit;
-
-			$data1 = array('action' => $action, 'bgdatewt1' => $bgdatewt1, 'tffs_id' => $tffs_id, 'tffs_name' => $tffs_name, 'actionby' => $actionby);
-			$this->layout = 'nolayout';
-			$this->render('/site/servicepages/callwpddataforsapiens', $data1);
-		} else { //if
-			//== insert log event ======================
-			$tffs_name = "-";
-			$levremark = "write data to textfile : " . $tffs_name . " for old wpd by sys is error";
-			$msgresult = Yii::app()->Clogevent->createlogevent($action, "writetextfileoldwpd", "error", $tffs_name, $levremark);
-			//==========================================
-			echo $levremark;
-		} //if
-		//-------------------------------------------------------------------------------------------------------
-
-	} //function
 
 	public function actionDeletefileoldwpd()
 	{
@@ -6866,124 +7455,6 @@ class SiteController extends Controller
 		}
 	} //function
 
-	public function actionCalluploadfileoldwpdtosftp()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				if (isset(Yii::app()->user->username)) {
-					$username = Yii::app()->user->username;
-				} else {
-					$username = "sys";
-				}
-
-				$localpath_local = "/opt/share/html/wpdtextfile/wpdold/"; //"/opt/share/html/wpdtextfile/";
-				$remotepath_local = "/out/ssossv1/"; //"/in/"; "/out/ssossv1"; "/out/ssossv2";
-
-				$action = $_POST['action'];
-				$gtfname = $_POST['tffs_name'];
-
-				//echo "{$action},{$gtfname}"; exit;
-
-				$localFile = $localpath_local . $gtfname; //path local
-				$remoteFile = $remotepath_local . $gtfname; //path sftp
-
-				if (Yii::app()->Cgentextfile->getConnectionsftpssv()) { //getConnectionsftpssv //getConnectionsftp
-					$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
-					$contents = file_get_contents($localFile);
-					$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
-					//update table-------------------------------------------------------------------------
-					$anb = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $gtfname));
-					$anb->tffs_updateby = Yii::app()->user->username;
-					$anb->tffs_modified = date('Y-m-d H:i:s');
-					$anb->tffs_status = 3;
-					if ($anb->save()) {
-						//insert_log------------------------------------------------------------------------
-						$levremark = "upload textfile oldwpd : " . $gtfname . " for old wpd by " . Yii::app()->user->username . " is success";
-						$msgresult = Yii::app()->Clogevent->createlogevent($action, "textfileoldwpd", "uploadtextfile", $gtfname, $levremark);
-						//----------------------------------------------------------------------------------
-						//echo "Success";
-						$msg = "Upload file is success.";
-					} else {
-						//echo "Failed";
-						$msg = "Can't upload file.";
-					}
-					//---------------------------------------------------------------------------------------
-				} else {
-					//echo preg_replace("/\xEF\xBB\xBF/", "","Failed");
-					$msg = "Can't connect SFTP Server.";
-				} //if
-				echo $msg;
-				//*********************************************************
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
-
-	public function actionCalluploadfileoldwpdtosftpauto()
-	{
-
-		$localpath_local = "/opt/share/html/wpdtextfile/wpdold/"; //"/opt/share/html/wpdtextfile/";
-		$remotepath_local = "/out/ssossv1/"; //"/in/"; "/out/ssossv1"; "/out/ssossv2";
-
-		$action = $_POST['action'];
-
-		//search tffs_id and tffs_name---------------------------------------------------------------------------
-		$qry = new CDbCriteria(array(
-			'condition' => "tffs_status < :tffs_status ",
-			'params'    => array(':tffs_status' => 3),
-			'order'		=> "tffs_id DESC",
-			'limit'		=> 1
-		));
-		$modelarray = Textfileforsapiens2Tb::model()->findAll($qry);
-		//var_dump($modelarray); exit;
-		if ($modelarray) {
-			$countmedel = count($modelarray);
-			foreach ($modelarray as $rows) {
-				$tffs_id = $rows->tffs_id;
-				$tffs_name = $rows->tffs_name;
-			} //for
-			$gtfname = $tffs_name; //findname status = 2
-
-			//echo "{$action},{$gtfname}"; exit;
-
-			$localFile = $localpath_local . $gtfname; //path local
-			$remoteFile = $remotepath_local . $gtfname; //path sftp
-
-			if (Yii::app()->Cgentextfile->getConnectionsftpssv()) { ////getConnectionsftpssv //getConnectionsftp
-				$sftp = ssh2_sftp(Yii::app()->Cgentextfile->conn);
-				$contents = file_get_contents($localFile);
-				$putfile = file_put_contents("ssh2.sftp://" . intval($sftp) . "$remoteFile", $contents);
-				//update table-------------------------------------------------------------------------
-				$anb = Textfileforsapiens2Tb::model()->findByAttributes(array('tffs_name' => $gtfname));
-				$anb->tffs_updateby = "sys";
-				$anb->tffs_modified = date('Y-m-d H:i:s');
-				$anb->tffs_status = 3;
-				if ($anb->save()) {
-					//insert_log------------------------------------------------------------------------
-					$levremark = "upload textfile oldwpd : " . $gtfname . " for old wpd by sys is success";
-					$msgresult = Yii::app()->Clogevent->createlogevent($action, "textfileoldwpd", "uploadtextfile", $gtfname, $levremark);
-					//----------------------------------------------------------------------------------
-					$msg = "upload textfile is Success";
-				} else {
-					$msg = "upload textfile is Failed";
-				}
-				//---------------------------------------------------------------------------------------
-			} else {
-				$msg = "upload textfile is Failed";
-			} //if
-
-		} else { //if
-			$msg = "upload textfile is Failed";
-		} //if
-
-		echo $msg;
-	} //function
 
 	public function actionCallcanceldatafrmdbd()
 	{
@@ -7394,31 +7865,7 @@ class SiteController extends Controller
 		}
 	} //function
 
-	public function actionCallotpdata()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-				$bgdatep = $_POST['bgdatep'];
-				$eddatep = $_POST['eddatep'];
-				$newdap = $_POST['newdap'];
-				$updap = $_POST['updap'];
 
-				//echo "{$action},{$bgdatep},{$eddatep},{$newdap},{$updap}";
-				$data1 = array('action' => $action, 'bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/callotpdata', $data1);
-				//*********************************************************	
-			} else { //if
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			}
-		} else { //if
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		}
-	} //function
 
 
 	public function actionCallegaservice()
@@ -7775,33 +8222,7 @@ class SiteController extends Controller
 		}
 	} //function
 
-	public function actionSendemail3()
-	{
-		if (!Yii::app()->user->isGuest) {
-			if (isset(Yii::app()->user->username)) {
-				//*********************************************************
-				$action = $_POST['action'];
-				$bgdatep = $_POST['bgdatep'];
-				$eddatep = $_POST['eddatep'];
-				$newdap = $_POST['newdap'];
-				$updap = $_POST['updap'];
 
-				//echo "{$action},{$bgdatep},{$eddatep},{$newdap},{$updap}"; exit;
-
-				$data1 = array('action' => $action, 'bgdatep' => $bgdatep, 'eddatep' => $eddatep, 'newdap' => $newdap, 'updap' => $updap);
-				$this->layout = 'nolayout';
-				$this->render('/site/servicepages/callotpdata3', $data1);
-				//*********************************************************	
-			} else {
-				$idplib = new Idplib();
-				$idplib->getIdpinfo();
-			} //if
-		} else {
-			$idplib = new Idplib();
-			$idplib->getIdpinfo();
-		} //if
-
-	} //function
 
 	public function actionSendemail3auto()
 	{

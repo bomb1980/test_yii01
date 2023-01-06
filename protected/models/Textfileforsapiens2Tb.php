@@ -1,9 +1,6 @@
 <?php
 
 /**
- * This is the model class for table "textfileforsapiens2_tb".
- *
- * The followings are the available columns in table 'textfileforsapiens2_tb':
  * @property integer $tffs_id
  * @property string $tffs_name
  * @property integer $tffs_numrec

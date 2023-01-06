@@ -34,6 +34,33 @@ class LedriskcropTb extends CActiveRecord
 		return parent::model($className);
 	}
 
+	public static function getDatas($parent_id = NULL, $lrc_id = NULL ) {
+
+		$filters = array(
+			'condition' => "",
+			'params'    => [],
+			'order' =>  "lrc_id DESC"
+		);
+
+		if( !empty( $parent_id ) ) {
+			$keep[] = "parent_id = :parent_id";
+			$filters['params'][':parent_id'] = $parent_id;
+		}
+
+		if( !empty( $lrc_id ) ) {
+			$keep[] = "lrc_id = :lrc_id";
+			$filters['params'][':lrc_id'] = $lrc_id;
+		}
+		
+		if( !empty( $keep ) ) {
+
+			$filters['condition'] = implode( ' AND ', $keep );
+		}
+		$qltf = new CDbCriteria($filters);
+
+		return self::model()->findAll($qltf);
+	}
+
 	/**
 	 * @return string the associated database table name
 	 */

@@ -1,12 +1,12 @@
 <?php
-class WpdApi extends CApplicationComponent 
+class WpdApi extends CApplicationComponent
 {
-	
+
 	public $dbnameselect;
 	public $tablenameselect;
-	
+
 	public $corpinfo_temp_params = array();
-	
+
 	// object properties
 	public $crop_id; // INT NOT NULL AUTO_INCREMENT PRIMARY KEY COMMENT 'ลำดับ' ,
 	public $registernumber; // VARCHAR( 13 ) NOT NULL COMMENT 'เลขทะเบียนนิติบุคคล' ,
@@ -30,19 +30,20 @@ class WpdApi extends CApplicationComponent
 	public $crop_updateby; // VARCHAR( 100 ) NOT NULL COMMENT 'แก้ไขโดย' ,
 	public $crop_updatetime; // DATETIME NOT NULL COMMENT 'วันที่แก้ไข' ,
 	public $crop_status; // TINYINT( 1 ) NOT NULL DEFAULT '1' COMMENT 'สถานะ 1.ใช้งานปกติ' ,
-	
-	public function getVar1(){
+
+	public function getVar1()
+	{
 		return $this->registernumber; //ใช้งาน porperties ใน class นี้
 	}
-	
+
 	public function getVersion()
-    {
+	{
 		$mystring = ' Day Jakkrit CMyClass v.0.0.1 ';
-        return $mystring;
-    }
-	
+		return $mystring;
+	}
+
 	public function create_corpinfo_temp()
-    {
+	{
 		// Set the POST data
 		$postdata = json_encode(
 			array(
@@ -69,42 +70,40 @@ class WpdApi extends CApplicationComponent
 				'crop_status' => '1'
 			)
 		);
-	
+
 		$opts = array(
-			"http" => array (
+			"http" => array(
 				"method" => "POST",
-				 "header" =>
-					"Content-Type: application/xml; charset=utf-8;\r\n".
+				"header" =>
+				"Content-Type: application/xml; charset=utf-8;\r\n" .
 					"Connection: close\r\n",
-					"ignore_errors" => true,
-					"timeout" => (float)30.0,
-					"content" => $postdata,
-					//'Content-type: application/xwww-form-urlencoded',
+				"ignore_errors" => true,
+				"timeout" => (float)30.0,
+				"content" => $postdata,
+				//'Content-type: application/xwww-form-urlencoded',
 			),
-			"ssl"=>array(
-				"verify_peer"=>false,
-				"verify_peer_name"=>false,
+			"ssl" => array(
+				"verify_peer" => false,
+				"verify_peer_name" => false,
 			),
 		);
- 
-	
+
+
 		$url = 'http://localhost/wpdapi/api/cropinfo_temp/create.php';
 		//https://wpd.sso.go.th/
-	
+
 		$content = file_get_contents($url, false, stream_context_create($opts));
 
 		//echo "<pre>";
 		//	echo $content;
 		//echo "</pre> <br>";
-	
+
 		$content2 = json_decode($content);
 
-		$thismsg = $content2->message; 
-	
-		//echo "{$thismsg}, <br>";
-		
-		return $thismsg;
+		$thismsg = $content2->message;
 
+		//echo "{$thismsg}, <br>";
+
+		return $thismsg;
 	}
-	
 }

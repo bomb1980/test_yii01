@@ -29,6 +29,34 @@ class LedtextfileTb extends CActiveRecord
 		return parent::model($className);
 	}
 
+	public static function getDatas2($ltf_id = NULL ) {
+
+		$filters = array(
+			'condition' => "ltf_status >= 1",
+			'params'    => [],
+			'order' =>  "ltf_modified DESC"
+		);
+
+		if( !empty( $ltf_id ) ) {
+			$filters['condition'] .= " AND ltf_id = :ltf_id";
+			$filters['params'][':ltf_id'] = $ltf_id;
+		}
+
+		$qltf = new CDbCriteria($filters);
+
+		return self::model()->findAll($qltf);
+	}
+
+	public static function getDatas($ltf_id = NULL ) {
+
+		$qltf = new CDbCriteria(array(
+			'condition' => "ltf_id = :ltf_id ",
+			'params'    => array(':ltf_id' => $ltf_id),
+			'order' =>  "ltf_modified DESC"
+		));
+		return self::model()->findAll($qltf);
+	}
+
 	/**
 	 * @return string the associated database table name
 	 */

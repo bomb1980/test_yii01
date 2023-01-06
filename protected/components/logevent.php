@@ -4,11 +4,135 @@ class logevent extends CApplicationComponent
 
 	public $accnosapains;
 
-	public function sendmail($ema, $accno, $brnno, $cropname, $txtsubject = NULL, $txtbody = NULL, $txtsendform = NULL)
+	
+
+	public function instetp($regisnum = NULL, $crop_id = NULL, $rows = array(), $new_version = false)
 	{
 
-		$ema = 'bombbomb1980@gmail.com';
+		if (!empty($rows)) {
 
+			$registername = $rows['registername'];
+			$registernumber = $rows['registernumber'];
+			$acc_no = $rows['acc_no'];
+			$registerdate = $rows['registerdate'];
+			$crop_remark = $rows['crop_remark'];
+			$corpemail = $rows['email'];
+			$brnremark = $rows['brch_remark'];
+
+			$etpdata = OtpEmailTb::getDatas($registernumber);
+			
+			if ($etpdata) {
+				return true;
+			} else {
+
+				$otp_email_tb = new OtpEmailTb();
+				$otp_email_tb->oel_registernumber = $rows['registernumber']; //varchar(50) 
+				$otp_email_tb->oel_accno = $rows['acc_no']; //varchar(50) 
+				$otp_email_tb->oel_registername = $rows['registername']; //varchar(500) 
+				$otp_email_tb->oel_emailaddress = $rows['email']; //varchar(200) 
+				$otp_email_tb->oel_registerdate = $rows['registerdate']; //datetime 
+				$otp_email_tb->oel_emailtype = 1; //varchar(10) 
+				$otp_email_tb->oel_createby = 'wpd'; //varchar(150) 
+				$otp_email_tb->oel_updateby = 'wpd'; //varchar(150) 
+				$otp_email_tb->oel_remark = $rows['brch_remark']; //text 
+				$otp_email_tb->oel_status = $rows['crop_remark']; //varchar(10)
+				$otp_email_tb->oel_createdate = date('Y-m-d H:i:s'); //datetime 
+				$otp_email_tb->oel_updatedate = date('Y-m-d H:i:s'); //datetime
+				if( $otp_email_tb->save() ) {
+					return true;
+
+				}
+
+			}
+
+			return false;
+		} else {
+
+			if (!empty($crop_id)) {
+
+				$model = CropinfoTmpTb::model()->findAllByAttributes(array('crop_id' => $crop_id));
+			} else {
+
+				$model = CropinfoTmpTb::model()->findAllByAttributes(array('registernumber' => $regisnum));
+			}
+
+			$registername = NULL;
+			$registernumber = NULL;
+			$acc_no = NULL;
+			$registerdate = NULL;
+			$crop_remark = NULL;
+			$corpemail = NULL;
+			$brnremark = NULL;
+
+			foreach ($model as $rows) {
+				$registername = $rows->registername;
+				$registernumber = $rows->registernumber;
+				$acc_no = $rows->acc_no;
+				$registerdate = $rows->registerdate;
+				$crop_remark = $rows->crop_remark;
+				$getFirstBranch = BranchTmpTb::getFirstBranch($rows->crop_id);
+
+				foreach ($getFirstBranch as $ka => $va) {
+
+					$corpemail = $va['email'];
+					
+					$brnremark = $va['brch_remark'];
+				}
+			}
+		}
+
+		$postdata = json_encode(
+			array(
+				'oel_registernumber' => $registernumber,
+				'oel_accno' => $acc_no,
+				'oel_registername' => $registername,
+				'oel_emailaddress' => $corpemail,
+				'oel_registerdate' => $registerdate,
+				'oel_emailtype' => 1,
+				'oel_createby' => Yii::app()->user->username,
+				'oel_createdate' => date('Y-m-d H:i:s'),
+				'oel_updateby' => Yii::app()->user->username,
+				'oel_updatedate' => date('Y-m-d H:i:s'),
+				'oel_remark' => $brnremark,
+				'oel_status' => $crop_remark
+			)
+		);
+
+		$opts = array(
+			"http" => array(
+				"method" => "POST",
+				"header" =>
+				"Content-Type: application/xml; charset=utf-8;\r\n" .
+					"Connection: close\r\n",
+				"ignore_errors" => true,
+				"timeout" => (float)30.0,
+				"content" => $postdata,
+				//'Content-type: application/xwww-form-urlencoded',
+			),
+			"ssl" => array(
+				"verify_peer" => false,
+				"verify_peer_name" => false,
+			),
+		);
+
+		// $url = 'https://c2wpdwspro001/etp/otp_email_tb/insertemail.php';
+		//'https://www.sso.go.th/etp/otp_email_tb/insertemail.php';
+		$url = Yii::app()->params['servicepath'] . '/otp_email_tb/insertemail.php';
+
+		$content = file_get_contents($url, false, stream_context_create($opts)); //เรียกใช้ services
+
+		$content_jsdc = json_decode($content);
+
+		if (isset($content_jsdc->message)) {
+
+			return $content_jsdc->message;
+		}
+
+		return false;
+	}
+
+	public function sendmail($ema, $accno, $brnno, $cropname, $txtsubject = NULL, $txtbody = NULL, $txtsendform = NULL)
+	{
 		if (empty($txtsubject)) {
 
 			$txtsubject = "แจ้งผลการขี้นทะเบียนนายจ้างประกันสังคม";
@@ -25,8 +149,9 @@ class logevent extends CApplicationComponent
 
 		if (Yii::app()->params['testJob']) {
 
+			$ema = 'bombbomb1980@gmail.com';
 			$mailer = new PHPMailer();
-			$mailer->IsSMTP(); 
+			$mailer->IsSMTP();
 			$mailer->Host = Yii::app()->params['mailerHost'];
 			$mailer->Port = 25; //587; //25
 			$mailer->SMTPAuth = TRUE;
@@ -38,9 +163,12 @@ class logevent extends CApplicationComponent
 			$mailer->Body = iconv('utf-8', 'tis-620', $txtbody);
 			$mailer->Subject = iconv('utf-8', 'tis-620', $txtsubject);
 			$mailer->AddAddress($ema);
-			$mailer->Send();
+			// if (!$mailer->Send()) {
+
+			// 	return false;
+			// }
 		} else {
-			
+
 			$mailer = new PHPMailer();
 			$mailer->IsSMTP(); // $mailer->Mailer = "mail"; ////$mailer->IsSMTP();
 			$mailer->Host = 'smtp.sso.go.th'; //'smtp.gmail.com'; //'smtp.sso.go.th'
@@ -52,103 +180,89 @@ class logevent extends CApplicationComponent
 			$mailer->Body = iconv('utf-8', 'tis-620', $txtbody);
 			$mailer->Subject = iconv('utf-8', 'tis-620', $txtsubject);
 			$mailer->AddAddress($ema); //$ema
-			$mailer->Send();
+			if (!$mailer->Send()) {
+
+				return false;
+			}
 		}
-
-		if (!$mailer->Send()) {
-
-			return false;
-		}
-
-		arr('afsdfdfs');
-
-		return true;
 
 		$Sendemailcorp = new Sendemailcorp();
-
 		$Sendemailcorp->crop_name = $accno;
 		$Sendemailcorp->crop_email = $ema;
 		$Sendemailcorp->access_code = $brnno;
 		$Sendemailcorp->status = 2;
 		$Sendemailcorp->created = date('Y-m-d H:i:s');
 		$Sendemailcorp->modified = date('Y-m-d H:i:s');
-		$Sendemailcorp->save();
+
+		if ($Sendemailcorp->save()) {
+
+			return true;
+		}
+
+		return false;
 	}
 
-
-
-
-
-	public function sendmail__($ema, $accno, $brnno, $cropname)
-	{
-		// arr('addfdfsdsf');
+	public function sendmail3($ema, $accno, $brnno, $cropname)
+	{ //use for production
 
 		$txtsubject = "แจ้งผลการขี้นทะเบียนนายจ้างประกันสังคม";
-		$txtbody = "&nbsp;&nbsp;&nbsp;สำนักงานประกันสังคม ได้กำหนดเลขที่บัญชีนายจ้างให้ท่านคือ {$accno} สถานประกอบการชื่อ  {$cropname} เมื่อท่านมีการจ้างลูกจ้าง ให้ท่านใช้เลขที่บัญชีนายจ้างตามที่แจ้ง และ ติดต่อขึ้นทะเบียนลูกจ้าง/ผู้ประกันตน ภายใน 30 วันนับจากวันที่เริ่มจ้างงาน  ที่ สปส. ณ ที่ตั้ง สำนักงานใหญ่ของท่าน กรณีมีข้อสงสัยสอบถามรายละเอียดได้ที่สายด่วน 1506 <br>&nbsp;&nbsp;&nbsp;หากยังไม่ดำเนินกิจการหรือไม่มีลูกจ้าง ขอความร่วมมือท่านตอบแบบสำรวจอิเล็กทรอนิกส์ ตามข้อมูลจริง เนื่องจากข้อมูลดังกล่าวจะถูกนำมาใช้ในการวิเคราะห์เพื่อประโยชน์ต่อการคุ้มครองสิทธิที่พึงมีพึงได้ตามกฎหมาย และขอขอบคุณมา ณ โอกาสนี้ : <br> CLICK เพื่อตอบแบบสำรวจ (<a href='https://www.sso.go.th/etp/addressform.php?emadd={$ema}&et=1'>ตอบแบบสอบถาม อิเล็กทรอนิกส์</a>)";
+		$txtbody = "&nbsp;&nbsp;&nbsp;สำนักงานประกันสังคม ได้กำหนดเลขที่บัญชีนายจ้างให้ท่านคือ {$accno} สถานประกอบการชื่อ  {$cropname} เมื่อท่านมีการจ้างลูกจ้าง ให้ท่านใช้เลขที่บัญชีนายจ้างตามที่แจ้ง และ ติดต่อขึ้นทะเบียนลูกจ้าง/ผู้ประกันตน ภายใน 30 วันนับจากวันที่เริ่มจ้างงาน  ที่ สปส. ณ ที่ตั้ง สำนักงานใหญ่ของท่าน กรณีมีข้อสงสัยสอบถามรายละเอียดได้ที่สายด่วน 1506 <br>&nbsp;&nbsp;&nbsp;หากยังไม่ดำเนินกิจการหรือไม่มีลูกจ้าง ขอความร่วมมือท่านตอบแบบสำรวจอิเล็กทรอนิกส์ ตามข้อมูลจริง เนื่องจากข้อมูลดังกล่าวจะถูกนำมาใช้ในการวิเคราะห์เพื่อประโยชน์ต่อการคุ้มครองสิทธิที่พึงมีพึงได้ตามกฎหมาย และขอขอบคุณมา ณ โอกาสนี้ : <br> CLICK เพื่อตอบแบบสำรวจ (<a href='https://www.sso.go.th/etp/addressform2.php?emadd={$ema}&et=2'>ตอบแบบสอบถาม อิเล็กทรอนิกส์</a>)";
 		$txtsendform = "สำนักงานประกันสังคม";
 
-		$mailer = new PHPMailer();
-		$mailer->IsSMTP(); // $mailer->Mailer = "mail"; ////$mailer->IsSMTP();
-		$mailer->Host = 'smtp.sso.go.th'; //'smtp.gmail.com'; //'smtp.sso.go.th'
-		$mailer->Port = 25; //587; //25
-		$mailer->SMTPAuth = FALSE;
-		$mailer->From = 'no-reply@sso.go.th'; //'day.jakkrit@gmail.com'; //'no-reply@sso.go.th';
-		$mailer->IsHTML(true);
-		$mailer->FromName = iconv('utf-8', 'tis-620', $txtsendform);
-		$mailer->Body = iconv('utf-8', 'tis-620', $txtbody);
-		$mailer->Subject = iconv('utf-8', 'tis-620', $txtsubject);
-		$mailer->AddAddress($ema); //$ema
+		if (Yii::app()->params['testJob']) {
 
-		/*
-		$mailer->AddAddress($contact_email);
-		$mailer->AddAddress = $contact_email;
-		$mailer->AddAddress $_POST['email']; (taken from the html form)
-		*/
-		/*
-		$mailer->WordWrap = 50; // set word wrap to 50 characters
-		$mailer->IsHTML(true); // set email format to HTML
-		$mailer->Subject = $_POST['subject'];
-		$message = "Hi[name]".$_POST['fullname']." \r\n <br>Email Adrress :".$_POST['email']." \r\n <br> \r \n".$_POST['query'];
-		$mailer->Body = $message;
-		*/
+			$ema = 'bombbomb1980@gmail.com';
+			$mailer = new PHPMailer();
+			$mailer->IsSMTP();
+			$mailer->Host = Yii::app()->params['mailerHost'];
+			$mailer->Port = 25; //587; //25
+			$mailer->SMTPAuth = TRUE;
+			$mailer->From = Yii::app()->params['mailerFrom'];
+			$mailer->Username = Yii::app()->params['mailerUsername'];
+			$mailer->Password = Yii::app()->params['mailerPassword'];
+			$mailer->IsHTML(true);
+			$mailer->FromName = iconv('utf-8', 'tis-620', $txtsendform);
+			$mailer->Body = iconv('utf-8', 'tis-620', $txtbody);
+			$mailer->Subject = iconv('utf-8', 'tis-620', $txtsubject);
+			$mailer->AddAddress($ema);
+			// if (!$mailer->Send()) {
 
-		$mailer->Send();
-
-
-		arr('afddfdasfsdf');
-
-
-
-		if (!$mailer->Send()) {
-			//echo "Message was not sent<br/ >";
-			//echo "Mailer Error: " . $mailer->ErrorInfo;
-			return false;
-		} else {
-			//****** insert data ****************************************
-			$Sendemailcorp = new Sendemailcorp();
-
-			$Sendemailcorp->crop_name = $accno;
-			$Sendemailcorp->crop_email = $ema;
-			$Sendemailcorp->access_code = $brnno;
-			$Sendemailcorp->status = 2;
-			$Sendemailcorp->created = date('Y-m-d H:i:s');
-			$Sendemailcorp->modified = date('Y-m-d H:i:s');
-
-			if ($Sendemailcorp->save()) {
-				//echo CJSON::encode(array('status' => 'success'));
-				//echo preg_replace("/\xEF\xBB\xBF/", "","yes <br>");
-				//echo "Message has been sent";
-				return true;
-			} else {
-				//echo CJSON::encode(array('status' => 'error'));
-				//echo CJSON::encode($Users->getErrors());
-				//echo preg_replace("/\xEF\xBB\xBF/", "","no <br>");
+			// 	return false;
+			// }
+		}
+		else {
+			$mailer = new PHPMailer();
+			$mailer->IsSMTP(); // $mailer->Mailer = "mail"; ////$mailer->IsSMTP();
+			$mailer->Host = 'smtp.sso.go.th'; //'smtp.gmail.com'; //'smtp.sso.go.th'
+			$mailer->Port = 25; //587; //25
+			$mailer->SMTPAuth = FALSE;
+			$mailer->From = 'no-reply@sso.go.th'; //'day.jakkrit@gmail.com'; //'no-reply@sso.go.th';
+			$mailer->IsHTML(true);
+			$mailer->FromName = iconv('utf-8', 'tis-620', $txtsendform);
+			$mailer->Body = iconv('utf-8', 'tis-620', $txtbody);
+			$mailer->Subject = iconv('utf-8', 'tis-620', $txtsubject);
+			$mailer->AddAddress($ema); //$ema
+			if (!$mailer->Send()) {
+				 
 				return false;
-			}
-			//*********************************************************
-		} //if
+			} 
+		}
 
-	}
+		$Sendemailcorp = new Sendemailcorp();
+		$Sendemailcorp->crop_name = $accno;
+		$Sendemailcorp->crop_email = $ema;
+		$Sendemailcorp->access_code = $brnno;
+		$Sendemailcorp->status = 3;
+		$Sendemailcorp->created = date('Y-m-d H:i:s');
+		$Sendemailcorp->modified = date('Y-m-d H:i:s');
+
+		if ($Sendemailcorp->save()) {
+			
+			return true;
+		} 
+
+		return false;
+	}  
 
 
 
@@ -218,163 +332,6 @@ class logevent extends CApplicationComponent
 
 		return $msg;
 	}
-
-	public function sendmail3($ema, $accno, $brnno, $cropname)
-	{ //use for production
-
-		$txtsubject = "แจ้งผลการขี้นทะเบียนนายจ้างประกันสังคม";
-		$txtbody = "&nbsp;&nbsp;&nbsp;สำนักงานประกันสังคม ได้กำหนดเลขที่บัญชีนายจ้างให้ท่านคือ {$accno} สถานประกอบการชื่อ  {$cropname} เมื่อท่านมีการจ้างลูกจ้าง ให้ท่านใช้เลขที่บัญชีนายจ้างตามที่แจ้ง และ ติดต่อขึ้นทะเบียนลูกจ้าง/ผู้ประกันตน ภายใน 30 วันนับจากวันที่เริ่มจ้างงาน  ที่ สปส. ณ ที่ตั้ง สำนักงานใหญ่ของท่าน กรณีมีข้อสงสัยสอบถามรายละเอียดได้ที่สายด่วน 1506 <br>&nbsp;&nbsp;&nbsp;หากยังไม่ดำเนินกิจการหรือไม่มีลูกจ้าง ขอความร่วมมือท่านตอบแบบสำรวจอิเล็กทรอนิกส์ ตามข้อมูลจริง เนื่องจากข้อมูลดังกล่าวจะถูกนำมาใช้ในการวิเคราะห์เพื่อประโยชน์ต่อการคุ้มครองสิทธิที่พึงมีพึงได้ตามกฎหมาย และขอขอบคุณมา ณ โอกาสนี้ : <br> CLICK เพื่อตอบแบบสำรวจ (<a href='https://www.sso.go.th/etp/addressform2.php?emadd={$ema}&et=2'>ตอบแบบสอบถาม อิเล็กทรอนิกส์</a>)";
-		$txtsendform = "สำนักงานประกันสังคม";
-
-		$mailer = new PHPMailer();
-		$mailer->IsSMTP(); // $mailer->Mailer = "mail"; ////$mailer->IsSMTP();
-		$mailer->Host = 'smtp.sso.go.th'; //'smtp.gmail.com'; //'smtp.sso.go.th'
-		$mailer->Port = 25; //587; //25
-		$mailer->SMTPAuth = FALSE;
-		$mailer->From = 'no-reply@sso.go.th'; //'day.jakkrit@gmail.com'; //'no-reply@sso.go.th';
-		$mailer->IsHTML(true);
-		$mailer->FromName = iconv('utf-8', 'tis-620', $txtsendform);
-		$mailer->Body = iconv('utf-8', 'tis-620', $txtbody);
-		$mailer->Subject = iconv('utf-8', 'tis-620', $txtsubject);
-		$mailer->AddAddress($ema); //$ema
-
-
-		if (!$mailer->Send()) {
-			//echo "Message was not sent<br/ >";
-			//echo "Mailer Error: " . $mailer->ErrorInfo;
-			return false;
-		} else {
-			//****** insert data ****************************************
-			$Sendemailcorp = new Sendemailcorp();
-
-			$Sendemailcorp->crop_name = $accno;
-			$Sendemailcorp->crop_email = $ema;
-			$Sendemailcorp->access_code = $brnno;
-			$Sendemailcorp->status = 3;
-			$Sendemailcorp->created = date('Y-m-d H:i:s');
-			$Sendemailcorp->modified = date('Y-m-d H:i:s');
-
-			if ($Sendemailcorp->save()) {
-				//echo CJSON::encode(array('status' => 'success'));
-				//echo preg_replace("/\xEF\xBB\xBF/", "","yes <br>");
-				//echo "Message has been sent";
-				return true;
-			} else {
-				//echo CJSON::encode(array('status' => 'error'));
-				//echo CJSON::encode($Users->getErrors());
-				//echo preg_replace("/\xEF\xBB\xBF/", "","no <br>");
-				return false;
-			}
-			//*********************************************************
-		} //if
-
-	} //function
-
-
-
-	public function instetp($regisnum)
-	{
-		//ดึงข้อมูลที่ต้องการจาก Database***************************************************
-		//ค้นหาข้อมูลจาก Crop_info_temp กับ bran_temp
-		$model = CropinfoTmpTb::model()->findAllByAttributes(array('registernumber' => $regisnum));
-		$countmedel = count($model);
-
-		//echo "{$model->registername}";
-
-		if ($countmedel == 1) {
-			foreach ($model as $rows) {
-				$registername = $rows->registername;
-				$registernumber = $rows->registernumber;
-				$acc_no = $rows->acc_no;
-				$acc_bran = $rows->acc_bran;
-				$registerdate = $rows->registerdate;
-				$crop_remark = $rows->crop_remark;
-				$crop_status = $rows->crop_status;
-
-				//** send email *******
-				$qemail = BranchTmpTb::model()->findByAttributes(array('registernumber' => $registernumber));
-				$corpemail = $qemail->email;
-				$statemail = $qemail->brch_status;
-				$brnremark = $qemail->brch_remark; //ดึงขอมูลสาขาเพิ่มเพื่อส่งให้ etp
-			} //if
-		} //for
-
-		//echo "{$registername}, {$brnremark}";
-
-		//exit;
-
-		$oel_registernumber = $registernumber;
-		$oel_accno = $acc_no;
-		$oel_registername = $registername;
-		$oel_emailaddress = $corpemail;
-		$oel_registerdate = $registerdate;
-		$oel_emailtype = "1";
-		$oel_createby = "wpd";
-		$oel_createdate = date('Y-m-d H:i:s');
-		$oel_updateby = "wpd";
-		$oel_updatedate = date('Y-m-d H:i:s');
-		$oel_remark = $brnremark;
-		$oel_status = $crop_remark;
-		//*************************************************************************
-
-		//call service etp http://127.0.0.1/etp/otp_email_tb/insertemail.php *******
-		// Set the POST data
-		$postdata = json_encode(
-			array(
-				'oel_registernumber' => $oel_registernumber,
-				'oel_accno' => $oel_accno,
-				'oel_registername' => $oel_registername,
-				'oel_emailaddress' => $oel_emailaddress,
-				'oel_registerdate' => $oel_registerdate,
-				'oel_emailtype' => $oel_emailtype,
-				'oel_createby' => $oel_createby,
-				'oel_createdate' => $oel_createdate,
-				'oel_updateby' => $oel_updateby,
-				'oel_updatedate' => $oel_updatedate,
-				'oel_updateby' => $oel_updateby,
-				'oel_updatedate' => $oel_updatedate,
-				'oel_remark' => $oel_remark,
-				'oel_status' => $oel_status
-			)
-		);
-
-		//return $postdata;
-		//echo $postdata;exit;
-
-		//$url = Yii::app()->params['servicepath'] . '/wpdapi/api/cropinfo_temp/create.php';
-		$url = 'https://c2wpdwspro001/etp/otp_email_tb/insertemail.php';
-		//'https://www.sso.go.th/etp/otp_email_tb/insertemail.php';
-
-		$opts = array(
-			"http" => array(
-				"method" => "POST",
-				"header" =>
-				"Content-Type: application/xml; charset=utf-8;\r\n" .
-					"Connection: close\r\n",
-				"ignore_errors" => true,
-				"timeout" => (float)30.0,
-				"content" => $postdata,
-				//'Content-type: application/xwww-form-urlencoded',
-			),
-			"ssl" => array(
-				"verify_peer" => false,
-				"verify_peer_name" => false,
-			),
-		);
-
-		$content = file_get_contents($url, false, stream_context_create($opts)); //เรียกใช้ services
-
-		//return $content;
-
-		$content_jsdc = json_decode($content);
-
-		$msg = $content_jsdc->message;
-
-		return $msg;
-		//echo "{$msg}";
-
-		//**************************************************************************
-	} //function
 
 
 
